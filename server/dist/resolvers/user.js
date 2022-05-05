@@ -16,28 +16,45 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserResolver = void 0;
-const User_1 = require("../entities/User");
-const type_graphql_1 = require("type-graphql");
 const argon2_1 = __importDefault(require("argon2"));
-const constants_1 = require("../constants");
 const sendMail_1 = require("../utility/sendMail");
-let UsernamePasswordInput = class UsernamePasswordInput {
+const type_graphql_1 = require("type-graphql");
+const constants_1 = require("../constants");
+const User_1 = require("../entities/User");
+let RegisterInput = class RegisterInput {
 };
 __decorate([
     (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
-], UsernamePasswordInput.prototype, "username", void 0);
+], RegisterInput.prototype, "username", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
-], UsernamePasswordInput.prototype, "email", void 0);
+], RegisterInput.prototype, "email", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
-], UsernamePasswordInput.prototype, "password", void 0);
-UsernamePasswordInput = __decorate([
+], RegisterInput.prototype, "password", void 0);
+RegisterInput = __decorate([
     (0, type_graphql_1.InputType)()
-], UsernamePasswordInput);
+], RegisterInput);
+let LoginInput = class LoginInput {
+};
+__decorate([
+    (0, type_graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], LoginInput.prototype, "username", void 0);
+__decorate([
+    (0, type_graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], LoginInput.prototype, "email", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(),
+    __metadata("design:type", String)
+], LoginInput.prototype, "password", void 0);
+LoginInput = __decorate([
+    (0, type_graphql_1.InputType)()
+], LoginInput);
 let FieldError = class FieldError {
 };
 __decorate([
@@ -65,7 +82,7 @@ UserResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], UserResponse);
 let UserResolver = class UserResolver {
-    async forgotPassord({ em }, _username) {
+    async forgotPassword({ em }, _username) {
         const user = await em.findOne(User_1.User, { username: _username });
         if (!user) {
             return false;
@@ -107,6 +124,16 @@ let UserResolver = class UserResolver {
                     {
                         field: "username",
                         message: "username is too short",
+                    },
+                ],
+            };
+        }
+        if (options.username.includes("@")) {
+            return {
+                errors: [
+                    {
+                        field: "username",
+                        message: "username cannot contain '@' sign",
                     },
                 ],
             };
@@ -179,7 +206,19 @@ let UserResolver = class UserResolver {
         };
     }
     async login(options, { em, req }) {
-        const user = await em.findOne(User_1.User, { username: options.username });
+        if (!options.email && !options.username) {
+            return {
+                errors: [
+                    {
+                        field: "username",
+                        message: "username or email was not provided",
+                    },
+                ],
+            };
+        }
+        const user = await em.findOne(User_1.User, options.email
+            ? { email: options.email }
+            : { username: options.username });
         if (!user) {
             return {
                 errors: [
@@ -214,7 +253,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
-], UserResolver.prototype, "forgotPassord", null);
+], UserResolver.prototype, "forgotPassword", null);
 __decorate([
     (0, type_graphql_1.Query)(() => User_1.User, { nullable: true }),
     __param(0, (0, type_graphql_1.Ctx)()),
@@ -241,7 +280,7 @@ __decorate([
     __param(0, (0, type_graphql_1.Arg)("options")),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [UsernamePasswordInput, Object]),
+    __metadata("design:paramtypes", [RegisterInput, Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "register", null);
 __decorate([
@@ -249,7 +288,7 @@ __decorate([
     __param(0, (0, type_graphql_1.Arg)("options")),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [UsernamePasswordInput, Object]),
+    __metadata("design:paramtypes", [LoginInput, Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "login", null);
 UserResolver = __decorate([

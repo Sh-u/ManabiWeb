@@ -1,9 +1,13 @@
 import { Box, Button, Flex, Link } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
-import NextLink from 'next/link';
+import NextLink from "next/link";
 import { useRouter } from "next/router";
 import InputField from "../components/InputField";
-import { MeDocument, namedOperations, useLoginMutation } from "../generated/graphql";
+import {
+  MeDocument,
+  namedOperations,
+  useLoginMutation,
+} from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 const Login = () => {
   const [login] = useLoginMutation();
@@ -21,17 +25,27 @@ const Login = () => {
         initialValues={{ username: "", password: "" }}
         onSubmit={async (values, { setErrors }) => {
           const response = await login({
-            variables: { options: values },
-             update(cache, {data}){
-            
+            variables: values.username.includes("@")
+              ? {
+                  options: {
+                    email: values.username,
+                    password: values.password,
+                  },
+                }
+              : { options: values },
+            update(cache, { data }) {
 
-               cache.writeQuery({
-                 query: MeDocument,
-                 data: {
-                   me: data.login.user
-                 }
-               })
-             }
+              if (data.login.errors) {
+                return;
+              }
+              
+              cache.writeQuery({
+                query: MeDocument,
+                data: {
+                  me: data.login.user,
+                },
+              });
+            },
           });
           if (response.data?.login.errors) {
             setErrors(toErrorMap(response.data?.login.errors));
@@ -45,7 +59,7 @@ const Login = () => {
             <InputField
               name="username"
               label="Username"
-              placeholder="username"
+              placeholder="username or email"
             />
             <InputField
               name="password"
@@ -72,7 +86,12 @@ const Login = () => {
       </Formik>
       <Box mt={"20px"}>
         <NextLink href="/register">
-        <Link >Create an account</Link>
+          <Link>Create an account</Link>
+        </NextLink>
+      </Box>
+      <Box mt={"5px"}>
+        <NextLink href="/resetpassword">
+          <Link>Forgot Password?</Link>
         </NextLink>
       </Box>
     </Flex>

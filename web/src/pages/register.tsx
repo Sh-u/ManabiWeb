@@ -35,10 +35,10 @@ const Register = () => {
       mt={"200px"}
     >
       <Formik
-        initialValues={{ username: "", password: "" }}
+        initialValues={{email: "", username: "", password: "" }}
         onSubmit={async (values, { setErrors }) => {
           const response = await register({
-            variables: values,
+            variables: {options: values},
             update(cache, { data }) {
               cache.writeQuery({
                 query: MeDocument,
@@ -49,14 +49,20 @@ const Register = () => {
             },
           });
           if (response.data?.register.errors) {
+            console.log('errors')
             setErrors(toErrorMap(response.data?.register.errors));
-          } else {
+          } else if (response.data.register.user){
             router.push("/");
           }
         }}
       >
         {({ values, handleChange, isSubmitting }) => (
           <Form>
+            <InputField
+              name="email"
+              label="Email"
+              placeholder="email"
+            />
             <InputField
               name="username"
               label="Username"

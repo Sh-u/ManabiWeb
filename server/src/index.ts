@@ -27,7 +27,7 @@ const corsOptions = {
 
 const main = async () => {
   const orm = await MikroORM.init(mikroOrmConfig);
-  await orm.em.nativeDelete(User, {});
+
   await orm.getMigrator().up();
 
   const app = express();

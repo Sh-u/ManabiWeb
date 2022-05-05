@@ -1,5 +1,7 @@
-import { User } from "../entities/User";
-import { MyContext } from "src/types";
+import { UserInputError } from "apollo-server-core";
+import argon2 from "argon2";
+import { MyContext } from "../types";
+import { sendMail } from "../utility/sendMail";
 import {
   Arg,
   Ctx,
@@ -10,21 +12,33 @@ import {
   Query,
   Resolver,
 } from "type-graphql";
-
-import argon2 from "argon2";
 import { COOKIE_NAME } from "../constants";
-import { sendMail } from "../utility/sendMail";
+import { User } from "../entities/User";
 
 @InputType()
-class UsernamePasswordInput {
+class RegisterInput {
   @Field()
   username: string;
 
-    @Field()
-    email: string;
+  @Field()
+  email: string;
   @Field()
   password: string;
 }
+
+
+
+@InputType()
+class LoginInput {
+  @Field({nullable: true})
+  username?: string;
+
+  @Field({nullable: true})
+  email?: string;
+  @Field()
+  password: string;
+}
+
 
 @ObjectType()
 class FieldError {
@@ -47,7 +61,7 @@ class UserResponse {
 @Resolver()
 export class UserResolver {
   @Mutation(() => Boolean)
-  async forgotPassord(
+  async forgotPassword(
     @Ctx() { em }: MyContext,
     @Arg("username") _username: string
   ) {
@@ -55,7 +69,7 @@ export class UserResolver {
 
     if (!user) {
       return false;
-    }   
+    }
 
     await sendMail(user.email, "test", "shu test");
 
@@ -104,7 +118,7 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async register(
-    @Arg("options") options: UsernamePasswordInput,
+    @Arg("options") options: RegisterInput,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     if (options.username.length < 3) {
@@ -118,26 +132,37 @@ export class UserResolver {
       };
     }
 
-    if (options.email.length < 3) {
-        return {
-          errors: [
-            {
-              field: "email",
-              message: "email address is too short",
-            },
-          ],
-        };
-      }
+    if (options.username.includes("@"))   {
+      return {
+        errors: [
+          {
+            field: "username",
+            message: "username cannot contain '@' sign",
+          },
+        ],
+      };
+    }
 
-    if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(options.email)){
-        return {
-            errors: [
-              {
-                field: "email",
-                message: "invalid email address",
-              },
-            ],
-          };
+    if (options.email.length < 3) {
+      return {
+        errors: [
+          {
+            field: "email",
+            message: "email address is too short",
+          },
+        ],
+      };
+    }
+
+    if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(options.email)) {
+      return {
+        errors: [
+          {
+            field: "email",
+            message: "invalid email address",
+          },
+        ],
+      };
     }
 
     if (options.password.length < 3) {
@@ -192,11 +217,30 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async login(
-    @Arg("options") options: UsernamePasswordInput,
+    @Arg("options") options: LoginInput,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
-    const user = await em.findOne(User, { username: options.username });
 
+    if (!options.email && !options.username){
+      return {
+        errors: [
+          {
+            field: "username",
+            message: "username or email was not provided",
+          },
+        ],
+      };
+    }
+
+   
+    const user = await em.findOne(
+      User,
+      options.email
+        ? { email: options.email }
+        : { username: options.username }
+    );
+
+    
     if (!user) {
       return {
         errors: [

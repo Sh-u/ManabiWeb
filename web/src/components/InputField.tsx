@@ -24,7 +24,7 @@ const InputField  = ({label, size: _, ...props} : MyInputProps) => {
       <FormLabel
         htmlFor={field.name}
         textAlign={"center"}
-        placeholder={"username"}
+        placeholder={field.name}
       >
         {label}
       </FormLabel>
