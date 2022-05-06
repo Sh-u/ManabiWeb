@@ -66,7 +66,7 @@ export class UserResolver {
     @Arg("username") _username: string
   ) {
     const user = await em.findOne(User, { username: _username });
-
+    
     if (!user) {
       return false;
     }

@@ -1,28 +1,25 @@
-
+import { ApolloProvider } from "@apollo/client";
 import {
-  ApolloProvider
-} from "@apollo/client";
-import { ChakraProvider, ColorModeProvider } from '@chakra-ui/react';
-import theme from '../theme';
-import { client } from './client';
+  ChakraProvider,
+  ColorModeProvider,
+  useColorMode,
+} from "@chakra-ui/react";
+import theme from "../theme";
+import { client } from "./client";
+import { AppProps } from "next/app";
+import { useCallback, useEffect } from "react";
+import ForceDarkMode from "../utils/forceDarkMode";
 
-
-
-function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps }: AppProps) {
   return (
-  <ApolloProvider client={client}>
-    <ChakraProvider resetCSS theme={theme}>
-      <ColorModeProvider
-        options={{
-          useSystemColorMode: true,
-        }}
-      >
-        <Component {...pageProps} />
-      </ColorModeProvider>
-    </ChakraProvider>
+    <ApolloProvider client={client}>
+      <ChakraProvider resetCSS theme={theme}>
+        <ForceDarkMode>
+          <Component {...pageProps} />
+        </ForceDarkMode>
+      </ChakraProvider>
     </ApolloProvider>
-  )
-  
+  );
 }
 
-export default MyApp
+export default MyApp;

@@ -1,35 +1,46 @@
-import { Box, Flex } from "@chakra-ui/react";
+import { Box, Flex, useColorMode } from "@chakra-ui/react";
+import { useCallback, useEffect } from "react";
 import Navbar from "../components/Navbar";
-import { MeDocument, PostsDocument, PostsQuery, usePostsQuery } from "../generated/graphql";
+import { PostsDocument, PostsQuery } from "../generated/graphql";
 import { client } from "./client";
+const Index = ({ posts }: PostsQuery) => {
+ 
 
-const Index = ({posts}: PostsQuery  ) => {
-
-  
     
 
   return (
-    <>
-    <Navbar />
-    
-    {!posts ? <div>no posts</div> : posts.map((p) => (
-      <Flex key={p._id + 100} alignItems={'center'} justifyContent={'center'}>
-      <Box key={p._id} mt='20px'>{p.title}</Box>  
-      </Flex>
-    ))}
-    </>
-  )
-}
+
+    <Box height="100vh" maxW={'7xl'} mx={'auto'}>
+      <Navbar />
+
+      {!posts ? (
+        <div>no posts</div>
+      ) : (
+        posts.map((p) => (
+          <Flex
+            key={p._id + 100}
+            alignItems={"center"}
+            justifyContent={"center"}
+          >
+            <Box key={p._id} mt="20px">
+              {p.title}
+            </Box>
+          </Flex>
+        ))
+      )}
+    </Box>
+  );
+};
 
 export async function getServerSideProps() {
   const { data } = await client.query({
     query: PostsDocument,
   });
-  
+
   return {
     props: {
-      posts: data.posts
+      posts: data.posts,
     },
   };
 }
- export default Index;
+export default Index;
