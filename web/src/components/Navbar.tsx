@@ -7,6 +7,7 @@ import {
   Link,
   useColorMode,
   useMediaQuery,
+  Image
 } from "@chakra-ui/react";
 import React from "react";
 import {
@@ -14,6 +15,8 @@ import {
   useLogoutMutation,
   useMeQuery,
 } from "../generated/graphql";
+
+import 'font-awesome/css/font-awesome.min.css';
 
 import NextLink from "next/link";
 import { SearchIcon } from "@chakra-ui/icons";
@@ -68,7 +71,7 @@ const Navbar = () => {
       </Flex>
 
       <Box w="lg" display={{ base: "none", md: "block" }}>
-        <Input placeholder="Search" rounded="lg" />
+        <Input type={'text'} placeholder='&#xF002; Search... ' rounded="lg" fontFamily='FontAwesome'/>
       </Box>
 
       <SearchIcon display={{ base: "block", md: "none" }} />
@@ -101,10 +104,14 @@ const Navbar = () => {
         {MeQuery.data?.me?.username ? (
           <Box fontSize={"24px"}>
             <Flex justifyContent="flex-end">
-              <Box mr={"20px"}>{MeQuery.data?.me?.username}</Box>
-
-              <Button
-                variant={"solid "}
+              <Flex  alignItems={'center'} bg='black' rounded={'full'} cursor='pointer' p='1'  _hover={{
+            
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+          }}>
+                <Box ml={"10px"} fontWeight='bold'>{MeQuery.data?.me?.username}</Box>
+                <Image ml={"10px"} src="https://i.imgur.com/1M2viYL.png" w={'40px'} h={'40px'} alt="" rounded={'full'}></Image>
+                <Button ml={"10px"}
+                variant={"unstyled"}
                 isLoading={loading}
                 onClick={async () => {
                   await logout();
@@ -112,6 +119,10 @@ const Navbar = () => {
               >
                 Logout
               </Button>
+              </Flex>
+              
+
+              
             </Flex>
           </Box>
         ) : (

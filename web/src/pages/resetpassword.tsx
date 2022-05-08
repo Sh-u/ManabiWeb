@@ -9,9 +9,9 @@ import { toErrorMap } from '../utils/toErrorMap'
 const resetpassword = () => {
     const [forgotPassword] = useForgotPasswordMutation()
   return (
+    
     <Flex
-    h={"full"}
-    w={'full'}
+    mt={'40vh'}
     justifyContent="center"
     alignItems="center"
     
@@ -44,7 +44,8 @@ const resetpassword = () => {
           <Button
               mt={4}
               mr={'5px'}
-              backgroundColor={'gray.200'}
+              color={'black'}
+              backgroundColor={'gray.400'}
               onClick={() => router.back()}
               type="button"
               _hover={{
@@ -57,6 +58,7 @@ const resetpassword = () => {
             <Button
               mt={4}
               colorScheme="red"
+              color={'black'}
               isLoading={isSubmitting}
               type="submit"
               _hover={{
@@ -72,6 +74,7 @@ const resetpassword = () => {
       )}
     </Formik>
     </Flex>
+    
   )
 }
 
