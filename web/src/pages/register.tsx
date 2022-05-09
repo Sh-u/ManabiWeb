@@ -32,7 +32,7 @@ const Register = () => {
       maxW="full"
       justifyContent="center"
       alignItems="center"
-      mt={"200px"}
+      mt={'300px'}
     >
       <Formik
         initialValues={{email: "", username: "", password: "" }}

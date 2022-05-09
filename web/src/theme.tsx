@@ -1,7 +1,7 @@
 import { extendTheme, IconButtonProps, ThemeConfig } from '@chakra-ui/react'
 import { createBreakpoints, mode } from '@chakra-ui/theme-tools'
 import type { GlobalStyleProps, Styles } from '@chakra-ui/theme-tools';
-
+import "@fontsource/inter";
 const fonts = { mono: `'Menlo', monospace` }
 const light = {
   bg: {
@@ -83,8 +83,9 @@ const config: ThemeConfig = {
 const styles: Styles = {
   global: (props) => ({
     body: {
-      color: mode('gray.600', 'gray.200')(props),
-      bg: mode('white', 'gray.900')(props)
+      fontFamily: "Inter",
+      color: mode('gray.500', 'gray.200')(props),
+      bg: mode('white', 'gray.800')(props)
     }
   })
 };
@@ -94,11 +95,29 @@ const components = {
     // setup light/dark mode component defaults
     baseStyle: (props: GlobalStyleProps) => ({
       color: mode('gray.900', 'gray.200')(props),
-      bg: mode('white', 'gray.900')(props)
-    })
-  },
+      bg: mode('white', 'gray.800')(props),
+      _focus: { boxShadow: 'none' }
+    })  
+  }, 
 
-
+  // Input: {
+  //   baseStyle: (props: GlobalStyleProps) =>  ({
+  //     backgroundColor: mode("gray.100", "gray.700")(props),
+  //     color: mode("gray.400", "gray.200")(props),
+  //     variant: "filled",
+  //     focusBorderColor: "pink.400",
+  //     _placeholder: {
+  //       opacity: 0.7,
+  //       color: mode("gray.900", "gray.200")(props)
+  //     },
+  //     _focus: { 
+  //       bg: mode("gray.200", "gray.600")(props) 
+  //     },
+  //     _hover: { 
+  //       bg: mode("gray.200", "gray.600")(props) 
+  //     },
+  //   })
+  // }
   
 };
 

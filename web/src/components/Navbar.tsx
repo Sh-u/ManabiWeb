@@ -7,7 +7,19 @@ import {
   Link,
   useColorMode,
   useMediaQuery,
-  Image
+  Image,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Fade,
+  useDisclosure,
+  MenuGroup,
+  MenuDivider,
+  InputGroup,
+  Stack,
+  InputLeftElement,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import React from "react";
 import {
@@ -16,15 +28,22 @@ import {
   useMeQuery,
 } from "../generated/graphql";
 
-import 'font-awesome/css/font-awesome.min.css';
+import "font-awesome/css/font-awesome.min.css";
 
 import NextLink from "next/link";
-import { SearchIcon } from "@chakra-ui/icons";
+import {
+  SearchIcon,
+  ChevronDownIcon,
+  SettingsIcon,
+  CloseIcon,
+  Search2Icon,
+} from "@chakra-ui/icons";
 import { FaDiscord, FaGithub } from "react-icons/fa";
 import { ColorModeSwitcher } from "./ColorModeSwitcher";
 import { createBreakpoints, mode } from "@chakra-ui/theme-tools";
 
 const Navbar = () => {
+  const { isOpen, onToggle } = useDisclosure();
   const MeQuery = useMeQuery();
   const { colorMode, toggleColorMode } = useColorMode();
   const [logout, { loading }] = useLogoutMutation({
@@ -42,16 +61,16 @@ const Navbar = () => {
     <Flex
       maxW="7xl"
       mx={"auto"}
-      h={"50px"}
+      h={"72px"}
       alignItems={"center"}
       justifyContent={"space-between"}
-      p={"5px"}
     >
       <Flex alignItems={"center"}>
         <Box
           fontSize={"24px"}
           fontWeight={"600"}
           display={{ base: "none", md: "block" }}
+          color={useColorModeValue("gray.800", "gray.200")}
         >
           <h1>ManabiWeb</h1>
         </Box>
@@ -60,10 +79,11 @@ const Navbar = () => {
           fontSize={"24px"}
           variant={"solid"}
           ml={{ base: "20px", md: "50px" }}
+          color="white"
+          bgGradient="linear(to-l, #7928CA, #FF0080)"
           rounded={"lg"}
           _hover={{
             transform: "scale(1.05)",
-            color: "white",
           }}
         >
           Learn
@@ -71,7 +91,31 @@ const Navbar = () => {
       </Flex>
 
       <Box w="lg" display={{ base: "none", md: "block" }}>
-        <Input type={'text'} placeholder='&#xF002; Search... ' rounded="lg" fontFamily='FontAwesome'/>
+        <InputGroup>
+          <InputLeftElement
+            pointerEvents="none"
+            children={
+              <Search2Icon color={useColorModeValue("gray.600", "gray.200")} />
+            }
+          />
+          <Input
+            type={"text"}
+            placeholder="Search... "
+            size="md"
+            rounded="lg"
+            backgroundColor={useColorModeValue("gray.100", "gray.700")}
+            color={useColorModeValue("gray.400", "gray.200")}
+            variant="filled"
+            boxShadow={useColorModeValue("sm", "none")}
+            focusBorderColor="pink.400"
+            _placeholder={{
+              opacity: 0.7,
+              color: useColorModeValue("gray.900", "gray.200"),
+            }}
+            _focus={{ bg: useColorModeValue("gray.200", "gray.600") }}
+            _hover={{ bg: useColorModeValue("gray.200", "gray.600") }}
+          />
+        </InputGroup>
       </Box>
 
       <SearchIcon display={{ base: "block", md: "none" }} />
@@ -102,27 +146,45 @@ const Navbar = () => {
         <ColorModeSwitcher />
 
         {MeQuery.data?.me?.username ? (
-          <Box fontSize={"24px"}>
+          <Box>
             <Flex justifyContent="flex-end">
-              <Flex  alignItems={'center'} bg='black' rounded={'full'} cursor='pointer' p='1'  _hover={{
-            
-            backgroundColor: 'rgba(0, 0, 0, 0.2)',
-          }}>
-                <Box ml={"10px"} fontWeight='bold'>{MeQuery.data?.me?.username}</Box>
-                <Image ml={"10px"} src="https://i.imgur.com/1M2viYL.png" w={'40px'} h={'40px'} alt="" rounded={'full'}></Image>
-                <Button ml={"10px"}
-                variant={"unstyled"}
-                isLoading={loading}
-                onClick={async () => {
-                  await logout();
-                }}
-              >
-                Logout
-              </Button>
-              </Flex>
-              
+              <Menu>
+                <MenuButton
+                  _hover={{
+                    opacity: "0.8",
+                  }}
+                >
+                  <Image
+                    src="https://i.imgur.com/1M2viYL.png"
+                    w={"40px"}
+                    h={"40px"}
+                    alt=""
+                    rounded={"full"}
+                  />
+                </MenuButton>
 
-              
+                <MenuList>
+                  <MenuGroup title="Profile">
+                    <MenuItem fontWeight={"bold"}>
+                      {MeQuery.data?.me?.username}
+                    </MenuItem>
+                    <MenuItem>Settings </MenuItem>
+                  </MenuGroup>
+                  <MenuDivider />
+                  <MenuItem>
+                    {" "}
+                    <Button
+                      variant={"unstyled"}
+                      isLoading={loading}
+                      onClick={async () => {
+                        await logout();
+                      }}
+                    >
+                      Logout
+                    </Button>
+                  </MenuItem>
+                </MenuList>
+              </Menu>
             </Flex>
           </Box>
         ) : (

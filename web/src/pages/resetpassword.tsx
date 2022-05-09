@@ -11,7 +11,7 @@ const resetpassword = () => {
   return (
     
     <Flex
-    mt={'40vh'}
+    mt={'300px'}
     justifyContent="center"
     alignItems="center"
     

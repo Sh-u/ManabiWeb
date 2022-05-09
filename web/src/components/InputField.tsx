@@ -33,6 +33,7 @@ const InputField  = ({label, size: _, ...props} : MyInputProps) => {
         {...props}
         id={field.name}
         placeholder={props.placeholder}
+        
       />
       {error ? <FormErrorMessage>{error}</FormErrorMessage>  : null}
     </FormControl>

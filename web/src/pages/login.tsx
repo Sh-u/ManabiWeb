@@ -18,7 +18,7 @@ const Login = () => {
       maxW="full"
       justifyContent="center"
       alignItems="center"
-      mt={"200px"}
+      mt={'300px'}
       flexFlow="column"
     >
       <Formik
@@ -67,7 +67,22 @@ const Login = () => {
               placeholder="password"
               type="password"
             />
+            
             <Box display={"flex"} justifyContent="center" alignItems="center">
+            <Button
+              mt={4}
+              mr={'5px'}
+              color={'black'}
+              backgroundColor={'gray.400'}
+              onClick={() => router.back()}
+              type="button"
+              _hover={{
+                transform: "scale(1.05)",
+                color: "white",
+              }}
+            >
+              Back
+            </Button>
               <Button
                 mt={4}
                 colorScheme="messenger"
