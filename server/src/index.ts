@@ -5,11 +5,11 @@ import connectRedis from "connect-redis";
 import "cross-fetch/polyfill";
 import express from "express";
 import session from "express-session";
-import { createClient } from "redis";
+
+import Redis from "ioredis";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import { COOKIE_NAME } from "./constants";
-import { User } from "./entities/User";
 import mikroOrmConfig from "./mikro-orm.config";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
@@ -36,15 +36,15 @@ const main = async () => {
   app.set("Access-Control-Allow-Origin", "https://studio.apollographql.com");
   app.set("Access-Control-Allow-Credentials", true);
 
+  
   const RedisStore = connectRedis(session);
-  const redisClient = createClient({ legacyMode: true });
-  redisClient.connect().catch(console.error);
+  const redis = new Redis();
 
   app.use(
     session({
       name: COOKIE_NAME,
       store: new RedisStore({
-        client: redisClient,
+        client: redis,
         disableTouch: true,
       }),
 
@@ -71,7 +71,7 @@ const main = async () => {
         settings: { "request.credentials": "include" },
       }),
     ],
-    context: ({ req, res }): MyContext => ({ em: orm.em, req, res }),
+    context: ({ req, res }): MyContext => ({ em: orm.em, req, res, redis }),
   });
 
   await apolloServer.start();

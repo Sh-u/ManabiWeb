@@ -14,6 +14,8 @@ import {
 } from "type-graphql";
 import { COOKIE_NAME } from "../constants";
 import { User } from "../entities/User";
+import { v4 } from "uuid";
+
 
 @InputType()
 class RegisterInput {
@@ -62,7 +64,7 @@ class UserResponse {
 export class UserResolver {
   @Mutation(() => Boolean)
   async forgotPassword(
-    @Ctx() { em }: MyContext,
+    @Ctx() { em, redis }: MyContext,
     @Arg("username") _username: string
   ) {
     const user = await em.findOne(User, { username: _username });
@@ -71,7 +73,12 @@ export class UserResolver {
       return false;
     }
 
-    await sendMail(user.email, "test", "shu test");
+    const token = v4();
+
+    await redis.set('forgot-password:' + token, user._id as number, 'EX', 1000 * 60 * 60 * 24)
+
+    const redirect = `<a href="localhost:3000/reset-password/${token}">Reset Password</a>`
+    await sendMail(user.email, 'Manabi: Password Change Request', redirect);
 
     return true;
   }

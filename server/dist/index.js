@@ -10,7 +10,7 @@ const connect_redis_1 = __importDefault(require("connect-redis"));
 require("cross-fetch/polyfill");
 const express_1 = __importDefault(require("express"));
 const express_session_1 = __importDefault(require("express-session"));
-const redis_1 = require("redis");
+const ioredis_1 = __importDefault(require("ioredis"));
 require("reflect-metadata");
 const type_graphql_1 = require("type-graphql");
 const constants_1 = require("./constants");
@@ -34,12 +34,11 @@ const main = async () => {
     app.set("Access-Control-Allow-Origin", "https://studio.apollographql.com");
     app.set("Access-Control-Allow-Credentials", true);
     const RedisStore = (0, connect_redis_1.default)(express_session_1.default);
-    const redisClient = (0, redis_1.createClient)({ legacyMode: true });
-    redisClient.connect().catch(console.error);
+    const redis = new ioredis_1.default();
     app.use((0, express_session_1.default)({
         name: constants_1.COOKIE_NAME,
         store: new RedisStore({
-            client: redisClient,
+            client: redis,
             disableTouch: true,
         }),
         cookie: {
@@ -62,7 +61,7 @@ const main = async () => {
                 settings: { "request.credentials": "include" },
             }),
         ],
-        context: ({ req, res }) => ({ em: orm.em, req, res }),
+        context: ({ req, res }) => ({ em: orm.em, req, res, redis }),
     });
     await apolloServer.start();
     apolloServer.applyMiddleware({ app, cors: corsOptions });

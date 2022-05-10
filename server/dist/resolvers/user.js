@@ -21,6 +21,7 @@ const sendMail_1 = require("../utility/sendMail");
 const type_graphql_1 = require("type-graphql");
 const constants_1 = require("../constants");
 const User_1 = require("../entities/User");
+const uuid_1 = require("uuid");
 let RegisterInput = class RegisterInput {
 };
 __decorate([
@@ -82,12 +83,15 @@ UserResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], UserResponse);
 let UserResolver = class UserResolver {
-    async forgotPassword({ em }, _username) {
+    async forgotPassword({ em, redis }, _username) {
         const user = await em.findOne(User_1.User, { username: _username });
         if (!user) {
             return false;
         }
-        await (0, sendMail_1.sendMail)(user.email, "test", "shu test");
+        const token = (0, uuid_1.v4)();
+        await redis.set('forgot-password:' + token, user._id, 'EX', 1000 * 60 * 60 * 24);
+        const redirect = `<a href="localhost:3000/reset-password/${token}">Reset Password</a>`;
+        await (0, sendMail_1.sendMail)(user.email, 'Manabi: Password Change Request', redirect);
         return true;
     }
     async me({ req, em }) {
