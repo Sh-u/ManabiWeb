@@ -1,9 +1,11 @@
 import { Flex, Box, Button } from '@chakra-ui/react'
 import { Formik, Form } from 'formik'
 import { GetServerSideProps, InferGetServerSidePropsType, NextPage  } from 'next'
-import router from 'next/router'
+import router, { useRouter } from 'next/router'
 import React from 'react'
 import InputField from '../../components/InputField'
+import { MeDocument, useChangePasswordMutation } from '../../generated/graphql'
+import { toErrorMap } from '../../utils/toErrorMap'
 interface MyProps {
   props: {
     token: string
@@ -14,6 +16,9 @@ interface MyProps {
 const ChangePassword: InferGetServerSidePropsType<typeof getServerSideProps> = (props) => {
   console.log(props)
   
+  const [changePassword] = useChangePasswordMutation();
+  const router = useRouter();
+
   return (
     <Flex
     mt={'300px'}
@@ -26,6 +31,31 @@ const ChangePassword: InferGetServerSidePropsType<typeof getServerSideProps> = (
       initialValues={{ newPassword: "" }}
       onSubmit={async (values, { setErrors }) => {
           
+        const respone = await changePassword({
+          variables: {
+            token: props.token,
+            newPassword: values.newPassword
+          },
+          
+          update(cache, {data}){
+            if (data.changePassword.errors) {
+              return;
+            }
+
+              cache.writeQuery({
+              query: MeDocument,
+              data: {
+                me: data.changePassword.user,
+              },
+          })
+        },
+      })
+
+        if (respone.data.changePassword.errors){
+          setErrors(toErrorMap(respone.data.changePassword.errors))
+        }
+
+        router.push("/");
 
       }}
     >
@@ -35,6 +65,7 @@ const ChangePassword: InferGetServerSidePropsType<typeof getServerSideProps> = (
             name="newPassword"
             label="New Password"
             placeholder="password"
+            type='password'
           />
           <Box display={"flex"} justifyContent="center" alignItems="center" >
           <Button
