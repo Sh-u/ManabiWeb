@@ -14,10 +14,11 @@ interface MyProps {
 
 
 const ChangePassword: InferGetServerSidePropsType<typeof getServerSideProps> = (props) => {
-  console.log(props)
+  
   
   const [changePassword] = useChangePasswordMutation();
   const router = useRouter();
+  
 
   return (
     <Flex
@@ -51,11 +52,17 @@ const ChangePassword: InferGetServerSidePropsType<typeof getServerSideProps> = (
         },
       })
 
+      console.log(respone.data.changePassword)
+      
+
         if (respone.data.changePassword.errors){
           setErrors(toErrorMap(respone.data.changePassword.errors))
         }
-
+        else if  (respone.data.changePassword.user){
+          console.log(respone.data.changePassword.user)
         router.push("/");
+        }
+        
 
       }}
     >

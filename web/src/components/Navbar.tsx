@@ -171,17 +171,13 @@ const Navbar = () => {
                     <MenuItem>Settings </MenuItem>
                   </MenuGroup>
                   <MenuDivider />
-                  <MenuItem>
-                    {" "}
-                    <Button
-                      variant={"unstyled"}
-                      isLoading={loading}
-                      onClick={async () => {
-                        await logout();
-                      }}
-                    >
-                      Logout
-                    </Button>
+                  <MenuItem
+                    onClick={async () => {
+                      console.log("logging out");
+                      await logout();
+                    }}
+                  >
+                    Logout
                   </MenuItem>
                 </MenuList>
               </Menu>

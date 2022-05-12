@@ -155,6 +155,11 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string } | null } };
 
+export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename?: 'User', _id: number, username: string }> };
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -350,6 +355,40 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const GetUsersDocument = gql`
+    query GetUsers {
+  getUsers {
+    ...BasicUser
+  }
+}
+    ${BasicUserFragmentDoc}`;
+
+/**
+ * __useGetUsersQuery__
+ *
+ * To run a query within a React component, call `useGetUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUsersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetUsersQuery(baseOptions?: Apollo.QueryHookOptions<GetUsersQuery, GetUsersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetUsersQuery, GetUsersQueryVariables>(GetUsersDocument, options);
+      }
+export function useGetUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUsersQuery, GetUsersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetUsersQuery, GetUsersQueryVariables>(GetUsersDocument, options);
+        }
+export type GetUsersQueryHookResult = ReturnType<typeof useGetUsersQuery>;
+export type GetUsersLazyQueryHookResult = ReturnType<typeof useGetUsersLazyQuery>;
+export type GetUsersQueryResult = Apollo.QueryResult<GetUsersQuery, GetUsersQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -423,6 +462,7 @@ export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
 export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
 export const namedOperations = {
   Query: {
+    GetUsers: 'GetUsers',
     Me: 'Me',
     Posts: 'Posts'
   },

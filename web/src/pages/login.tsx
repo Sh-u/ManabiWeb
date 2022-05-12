@@ -104,7 +104,7 @@ const Login = () => {
         </NextLink>
       </Box>
       <Box mt={"5px"}>
-        <NextLink href="/resetpassword">
+        <NextLink href="/forgotpassword">
           <Link>Forgot Password?</Link>
         </NextLink>
       </Box>

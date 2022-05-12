@@ -1,13 +1,14 @@
 import { Flex, Box, Button } from '@chakra-ui/react'
 import { Formik, Form } from 'formik'
 import router from 'next/router'
-import React from 'react'
+import React, { useState } from 'react'
 import InputField from '../components/InputField'
 import { useForgotPasswordMutation } from '../generated/graphql'
 import { toErrorMap } from '../utils/toErrorMap'
 
-const resetpassword = () => {
+const forgotpassword = () => {
     const [forgotPassword] = useForgotPasswordMutation()
+    const [isSubmitted, setSubmitted] = useState(false)
   return (
     
     <Flex
@@ -19,8 +20,8 @@ const resetpassword = () => {
   >
     <Formik
       initialValues={{ username: "" }}
-      onSubmit={async (values, { setErrors }) => {
-          
+      onSubmit={async (values,{ setErrors }) => {
+        setSubmitted(false)
 
          const response = await forgotPassword({variables: values});
 
@@ -29,7 +30,11 @@ const resetpassword = () => {
             setErrors({
                 username: "user not found"
             })
+
+            return
         }
+
+        setSubmitted(true);
 
       }}
     >
@@ -40,6 +45,7 @@ const resetpassword = () => {
             label="Reset Your Password"
             placeholder="username"
           />
+          {isSubmitted ? <Box mt={'5px'} color='green.300' fontSize='xs' >Instructions were sent to your email</Box> : <></>}
           <Box display={"flex"} justifyContent="center" alignItems="center" >
           <Button
               mt={4}
@@ -53,6 +59,7 @@ const resetpassword = () => {
                 color: "white",
               }}
             >
+              
               Back
             </Button>
             <Button
@@ -70,6 +77,8 @@ const resetpassword = () => {
             </Button>
          
           </Box>
+
+          
         </Form>
       )}
     </Formik>
@@ -78,4 +87,4 @@ const resetpassword = () => {
   )
 }
 
-export default resetpassword
+export default forgotpassword
