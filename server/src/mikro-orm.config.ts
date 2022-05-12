@@ -4,9 +4,10 @@ import {  Options } from "@mikro-orm/core";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import path from 'path'
 import { User } from "./entities/User";
+import { Deck } from "./entities/Deck";
 
 export default {
-    entities: [Post, User],
+    entities: [Post, User, Deck],
     dbName: 'shuddit',
     type: 'postgresql',
     debug: !_prod_,

@@ -15,6 +15,7 @@ require("reflect-metadata");
 const type_graphql_1 = require("type-graphql");
 const constants_1 = require("./constants");
 const mikro_orm_config_1 = __importDefault(require("./mikro-orm.config"));
+const deck_1 = require("./resolvers/deck");
 const hello_1 = require("./resolvers/hello");
 const post_1 = require("./resolvers/post");
 const user_1 = require("./resolvers/user");
@@ -53,7 +54,7 @@ const main = async () => {
     }));
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: await (0, type_graphql_1.buildSchema)({
-            resolvers: [hello_1.HelloResolver, post_1.PostResolver, user_1.UserResolver],
+            resolvers: [hello_1.HelloResolver, post_1.PostResolver, user_1.UserResolver, deck_1.DeckResolver],
             validate: false,
         }),
         plugins: [

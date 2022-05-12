@@ -89,7 +89,7 @@ let UserResolver = class UserResolver {
             return false;
         }
         const token = (0, uuid_1.v4)();
-        await redis.set('forgot-password:' + token, user._id, 'EX', 1000 * 60 * 60 * 24);
+        await redis.set(constants_1.FORGOT_PASSWORD_PREFIX + token, user._id, 'EX', 1000 * 60 * 60 * 24);
         const redirect = `<a href="localhost:3000/reset-password/${token}">Reset Password</a>`;
         await (0, sendMail_1.sendMail)(user.email, 'Manabi: Password Change Request', redirect);
         return true;
@@ -104,6 +104,57 @@ let UserResolver = class UserResolver {
     async getUsers({ em }) {
         const users = await em.find(User_1.User, {});
         return users;
+    }
+    async changePassword(token, newPassword, { req, em, redis }) {
+        if (newPassword.includes('@')) {
+            return {
+                errors: [
+                    {
+                        field: "newPassword",
+                        message: "Password is invalid",
+                    },
+                ],
+            };
+        }
+        if (newPassword.length < 3) {
+            return {
+                errors: [
+                    {
+                        field: "newPassword",
+                        message: "Password is too short",
+                    },
+                ],
+            };
+        }
+        const userId = await redis.get(constants_1.FORGOT_PASSWORD_PREFIX + token);
+        if (!userId) {
+            return {
+                errors: [
+                    {
+                        field: "newPassword",
+                        message: "Something went wrong, please try again later",
+                    },
+                ],
+            };
+        }
+        const user = await em.findOne(User_1.User, { _id: userId });
+        if (!user) {
+            return {
+                errors: [
+                    {
+                        field: "newPassword",
+                        message: "User not found",
+                    },
+                ],
+            };
+        }
+        const hashedPassword = await argon2_1.default.hash(newPassword);
+        user.password = hashedPassword;
+        await em.persistAndFlush(user);
+        req.session.userId = user._id;
+        return {
+            user
+        };
     }
     async logout({ req, res }) {
         if (!req.session.userId) {
@@ -272,6 +323,16 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "getUsers", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => UserResponse),
+    __param(0, (0, type_graphql_1.Arg)("token")),
+    __param(1, (0, type_graphql_1.Arg)("newPassword")),
+    __param(2, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String,
+        String, Object]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "changePassword", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
     __param(0, (0, type_graphql_1.Ctx)()),

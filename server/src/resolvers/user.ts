@@ -12,7 +12,7 @@ import {
   Query,
   Resolver,
 } from "type-graphql";
-import { COOKIE_NAME } from "../constants";
+import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
 import { User } from "../entities/User";
 import { v4 } from "uuid";
 
@@ -73,9 +73,10 @@ export class UserResolver {
       return false;
     }
 
+    
     const token = v4();
 
-    await redis.set('forgot-password:' + token, user._id as number, 'EX', 1000 * 60 * 60 * 24)
+    await redis.set(FORGOT_PASSWORD_PREFIX + token, user._id as number, 'EX', 1000 * 60 * 60 * 24)
 
     const redirect = `<a href="localhost:3000/reset-password/${token}">Reset Password</a>`
     await sendMail(user.email, 'Manabi: Password Change Request', redirect);
@@ -99,6 +100,74 @@ export class UserResolver {
     const users = await em.find(User, {});
     return users;
   }
+
+  @Mutation(() => UserResponse)
+  async changePassword(
+    @Arg("token") token: String,
+    @Arg("newPassword")newPassword: String,
+    @Ctx() {req, em, redis }: MyContext) : Promise<UserResponse> {
+
+      if (newPassword.includes('@')){
+        return {
+          errors: [
+            {
+              field: "newPassword",
+              message: "Password is invalid",
+            },
+          ],
+      }
+    }
+
+      if (newPassword.length < 3) {
+        return {
+          errors: [
+            {
+              field: "newPassword",
+              message: "Password is too short",
+            },
+          ],
+        };
+      }
+      
+      
+      const userId = await redis.get(FORGOT_PASSWORD_PREFIX+token);
+
+      if (!userId){
+        
+        return {
+          errors: [
+            {
+              field: "newPassword",
+              message: "Something went wrong, please try again later",
+            },
+          ],
+        };
+      }
+
+      const user = await em.findOne(User, {_id: userId})
+     
+      if (!user){
+        return {
+          errors: [
+            {
+              field: "newPassword",
+              message: "User not found",
+            },
+          ],
+        };
+      }
+
+      const hashedPassword = await argon2.hash(newPassword as string);
+      user.password = hashedPassword;
+
+      await em.persistAndFlush(user)
+    
+      req.session.userId = user._id;
+      return {
+        user
+      };
+  
+}
 
   @Mutation(() => Boolean)
   async logout(@Ctx() { req, res }: MyContext): Promise<Boolean> {

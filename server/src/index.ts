@@ -11,6 +11,7 @@ import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import { COOKIE_NAME } from "./constants";
 import mikroOrmConfig from "./mikro-orm.config";
+import { DeckResolver } from "./resolvers/deck";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
@@ -62,7 +63,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, PostResolver, UserResolver],
+      resolvers: [HelloResolver, PostResolver, UserResolver, DeckResolver],
       validate: false,
     }),
 
