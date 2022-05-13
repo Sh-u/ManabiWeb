@@ -1,0 +1,6 @@
+mutation CreateDeck($title: String!){
+    createDeck(title: $title){
+        title,
+        createdAt
+    }
+}

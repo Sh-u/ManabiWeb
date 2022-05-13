@@ -1,0 +1,12 @@
+query GetMyDecks{
+ getMyDecks {
+     decks {
+      title,
+      createdAt,
+     posts {
+        title
+     }
+    }
+     errors
+    }
+}

@@ -74,6 +74,7 @@ export class UserResolver {
     }
 
     
+    
     const token = v4();
 
     await redis.set(FORGOT_PASSWORD_PREFIX + token, user._id as number, 'EX', 1000 * 60 * 60 * 24)
@@ -86,7 +87,8 @@ export class UserResolver {
 
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req, em }: MyContext) {
-    if (!req.session.userId) {
+    if (!req.session.userId) {  
+      console.log('QUERY: no session userID')
       return null;
     }
 

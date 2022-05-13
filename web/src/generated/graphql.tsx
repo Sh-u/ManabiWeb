@@ -15,6 +15,21 @@ export type Scalars = {
   Float: number;
 };
 
+export type Deck = {
+  __typename?: 'Deck';
+  _id: Scalars['Int'];
+  createdAt: Scalars['String'];
+  posts: Array<Post>;
+  title: Scalars['String'];
+  updatedAt: Scalars['String'];
+};
+
+export type DeckResponse = {
+  __typename?: 'DeckResponse';
+  decks?: Maybe<Array<Deck>>;
+  errors?: Maybe<Scalars['String']>;
+};
+
 export type FieldError = {
   __typename?: 'FieldError';
   field: Scalars['String'];
@@ -30,12 +45,15 @@ export type LoginInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: UserResponse;
+  createDeck: Deck;
   createPost: Post;
   forgotPassword: Scalars['Boolean'];
   login: UserResponse;
   logout: Scalars['Boolean'];
   register: UserResponse;
+  removeDeck: Scalars['Boolean'];
   removePost: Scalars['Boolean'];
+  updateDeckTitle?: Maybe<Deck>;
   updatePostTitle?: Maybe<Post>;
 };
 
@@ -43,6 +61,11 @@ export type Mutation = {
 export type MutationChangePasswordArgs = {
   newPassword: Scalars['String'];
   token: Scalars['String'];
+};
+
+
+export type MutationCreateDeckArgs = {
+  title: Scalars['String'];
 };
 
 
@@ -66,8 +89,19 @@ export type MutationRegisterArgs = {
 };
 
 
+export type MutationRemoveDeckArgs = {
+  _id: Scalars['Float'];
+};
+
+
 export type MutationRemovePostArgs = {
   _id: Scalars['Float'];
+};
+
+
+export type MutationUpdateDeckTitleArgs = {
+  _id: Scalars['Float'];
+  title?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -86,11 +120,19 @@ export type Post = {
 
 export type Query = {
   __typename?: 'Query';
+  findDeck?: Maybe<Deck>;
+  getAllDecks: Array<Deck>;
+  getMyDecks: DeckResponse;
   getUsers: Array<User>;
   hello: Scalars['String'];
   me?: Maybe<User>;
   post?: Maybe<Post>;
   posts: Array<Post>;
+};
+
+
+export type QueryFindDeckArgs = {
+  _id: Scalars['Int'];
 };
 
 
@@ -154,6 +196,18 @@ export type RegisterMutationVariables = Exact<{
 
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string } | null } };
+
+export type CreateDeckMutationVariables = Exact<{
+  title: Scalars['String'];
+}>;
+
+
+export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'Deck', title: string, createdAt: string } };
+
+export type GetMyDecksQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetMyDecksQuery = { __typename?: 'Query', getMyDecks: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', title: string, createdAt: string, posts: Array<{ __typename?: 'Post', title: string }> }> | null } };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -355,6 +409,81 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const CreateDeckDocument = gql`
+    mutation CreateDeck($title: String!) {
+  createDeck(title: $title) {
+    title
+    createdAt
+  }
+}
+    `;
+export type CreateDeckMutationFn = Apollo.MutationFunction<CreateDeckMutation, CreateDeckMutationVariables>;
+
+/**
+ * __useCreateDeckMutation__
+ *
+ * To run a mutation, you first call `useCreateDeckMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateDeckMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createDeckMutation, { data, loading, error }] = useCreateDeckMutation({
+ *   variables: {
+ *      title: // value for 'title'
+ *   },
+ * });
+ */
+export function useCreateDeckMutation(baseOptions?: Apollo.MutationHookOptions<CreateDeckMutation, CreateDeckMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateDeckMutation, CreateDeckMutationVariables>(CreateDeckDocument, options);
+      }
+export type CreateDeckMutationHookResult = ReturnType<typeof useCreateDeckMutation>;
+export type CreateDeckMutationResult = Apollo.MutationResult<CreateDeckMutation>;
+export type CreateDeckMutationOptions = Apollo.BaseMutationOptions<CreateDeckMutation, CreateDeckMutationVariables>;
+export const GetMyDecksDocument = gql`
+    query GetMyDecks {
+  getMyDecks {
+    decks {
+      title
+      createdAt
+      posts {
+        title
+      }
+    }
+    errors
+  }
+}
+    `;
+
+/**
+ * __useGetMyDecksQuery__
+ *
+ * To run a query within a React component, call `useGetMyDecksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetMyDecksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetMyDecksQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetMyDecksQuery(baseOptions?: Apollo.QueryHookOptions<GetMyDecksQuery, GetMyDecksQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetMyDecksQuery, GetMyDecksQueryVariables>(GetMyDecksDocument, options);
+      }
+export function useGetMyDecksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMyDecksQuery, GetMyDecksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetMyDecksQuery, GetMyDecksQueryVariables>(GetMyDecksDocument, options);
+        }
+export type GetMyDecksQueryHookResult = ReturnType<typeof useGetMyDecksQuery>;
+export type GetMyDecksLazyQueryHookResult = ReturnType<typeof useGetMyDecksLazyQuery>;
+export type GetMyDecksQueryResult = Apollo.QueryResult<GetMyDecksQuery, GetMyDecksQueryVariables>;
 export const GetUsersDocument = gql`
     query GetUsers {
   getUsers {
@@ -462,6 +591,7 @@ export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
 export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
 export const namedOperations = {
   Query: {
+    GetMyDecks: 'GetMyDecks',
     GetUsers: 'GetUsers',
     Me: 'Me',
     Posts: 'Posts'
@@ -471,7 +601,8 @@ export const namedOperations = {
     ForgotPassword: 'ForgotPassword',
     Login: 'Login',
     Logout: 'Logout',
-    Register: 'Register'
+    Register: 'Register',
+    CreateDeck: 'CreateDeck'
   },
   Fragment: {
     BasicUser: 'BasicUser'

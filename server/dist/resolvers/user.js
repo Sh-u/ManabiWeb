@@ -96,6 +96,7 @@ let UserResolver = class UserResolver {
     }
     async me({ req, em }) {
         if (!req.session.userId) {
+            console.log('QUERY: no session userID');
             return null;
         }
         const user = await em.findOne(User_1.User, { _id: req.session.userId });
