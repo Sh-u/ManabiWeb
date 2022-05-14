@@ -87,8 +87,10 @@ export class UserResolver {
 
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req, em }: MyContext) {
+
+    console.log(req.session)
     if (!req.session.userId) {  
-      console.log('QUERY: no session userID')
+      
       return null;
     }
 

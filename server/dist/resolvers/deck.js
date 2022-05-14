@@ -47,6 +47,12 @@ let DeckResolver = class DeckResolver {
                 errors: "No decks found",
             };
         }
+        if (decks.length < 1) {
+            return {
+                errors: "Looks like you have no decks created...",
+            };
+        }
+        console.log('success');
         return {
             decks
         };

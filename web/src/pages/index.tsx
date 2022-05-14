@@ -1,73 +1,43 @@
-import { Box, Flex, useColorMode } from "@chakra-ui/react";
-import { useCallback, useEffect } from "react";
+import { Box, Button, Flex } from "@chakra-ui/react";
 import Navbar from "../components/Navbar";
 import {
-  MeDocument,
-  PostsDocument,
-  PostsQuery,
-  namedOperations,
-  BasicUserFragment,
-  useMeQuery,
-  GetMyDecksDocument,
-  GetMyDecksQuery,
-  MeQuery,
-  DeckResponse,
-  usePostsQuery,
-  MeQueryResult,
+  useGetMyDecksQuery
 } from "../generated/graphql";
-import { client } from "./client";
+import {FaPlusCircle} from 'react-icons/fa'
+import { useState } from "react";
+import Post from "../components/Post";
 const Index = () => {
+ 
+  const [showPost, setShowPost] = useState(false)
+  const decksQuery = useGetMyDecksQuery();
 
- const me = useMeQuery();
+
+  if (decksQuery.data) {
+    console.log(decksQuery.data);
+  }
 
   return (
+    
     <Box height="100vh" maxW={"7xl"} mx={"auto"}>
+      
       <Navbar />
-
-    {me.data ? <Box>yes</Box> : <Box>no</Box>}
+      {decksQuery.data?.getMyDecks?.decks ? (
+        <Box>{decksQuery.data?.getMyDecks?.decks[0].title}</Box>
+      ) : (
+        <Flex alignItems={'center'} justifyContent={'center'} mt={'5'} flexDirection={'column'}>
+        <Box>{decksQuery.data?.getMyDecks?.errors}</Box>
+        <Flex alignItems={'center'} justifyContent={'center'} mt={'3'} cursor={'pointer'} onClick={() => setShowPost(true)}>
+          <Box>Create new deck: </Box>
+          <Box ml={'3'}><FaPlusCircle/></Box>
+          
+        </Flex>
+        </Flex>
+      )}
+      {showPost ? <Post/> : null}
     </Box>
   );
 };
 
-// export async function getServerSideProps() {
 
-
-//     const {data} = await client.query({
-//       query: MeDocument,
-//     });
-
-//   console.log(data)
-//   return {
-//     props: {
-//       me: data
-//     }
-//   }
-
-  // const currentUser: MeQuery = meQuery.data;
-
-  // console.log(meQuery);
-  // if (!currentUser) {
-  //   console.log("not loggend in");
-  //   return {
-  //     props: {},
-  //   };
-  // }
-
-  // const decksQuery = await client.query({
-  //   query: GetMyDecksDocument,
-  // });
-
-  // const myDecks: DeckResponse = decksQuery.data.getMyDecks;
-
-  // if (myDecks.errors) {
-  //   return {
-  //     props: {},
-  //   };
-  // }
-
-  // return {
-  //   props: {},
-  // };
-// }
 
 export default Index;

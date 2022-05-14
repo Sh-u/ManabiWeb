@@ -8,7 +8,7 @@ import theme from "../theme";
 import { client } from "./client";
 import { AppProps } from "next/app";
 import { useCallback, useEffect } from "react";
-import ForceDarkMode from "../utils/forceDarkMode";
+import ForceDarkMode from "../utils/ForceDarkMode";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (

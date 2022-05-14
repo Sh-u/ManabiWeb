@@ -45,12 +45,13 @@ import { createBreakpoints, mode } from "@chakra-ui/theme-tools";
 const Navbar = () => {
   const { isOpen, onToggle } = useDisclosure();
   const MeQuery = useMeQuery();
+ 
   const { colorMode, toggleColorMode } = useColorMode();
   const [logout, { loading }] = useLogoutMutation({
     update(cache, { data }) {
       cache.writeQuery({
         query: MeDocument,
-        data: {
+        data: { 
           me: null,
         },
       });
