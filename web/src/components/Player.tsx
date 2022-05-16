@@ -7,6 +7,7 @@ export type myInput = {
 };
 
 const Player = ({ url }: myInput) => {
+
   const [playing, toggle] = useAudio(url);
 
   console.log(playing);
@@ -15,7 +16,7 @@ const Player = ({ url }: myInput) => {
       
         <Button
           onClick={() => {
-            toggle;
+            toggle();
             console.log(playing);
           }}
         >

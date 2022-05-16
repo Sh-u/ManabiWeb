@@ -20,6 +20,7 @@ import {
   Stack,
   InputLeftElement,
   useColorModeValue,
+  Avatar,
 } from "@chakra-ui/react";
 import React from "react";
 import {
@@ -84,10 +85,10 @@ const Navbar = () => {
           bgGradient="linear(to-l, #7928CA, #FF0080)"
           rounded={"lg"}
           _hover={{
-            transform: "scale(1.05)",
+            transform: "scale(1.03)",
           }}
         >
-          Learn
+         Learn
         </Button>
       </Flex>
 
@@ -155,12 +156,13 @@ const Navbar = () => {
                     opacity: "0.8",
                   }}
                 >
-                  <Image
+                  <Avatar
                     src="https://i.imgur.com/1M2viYL.png"
                     w={"40px"}
                     h={"40px"}
-                    alt=""
-                    rounded={"full"}
+                   
+                    
+                    name='User'
                   />
                 </MenuButton>
 

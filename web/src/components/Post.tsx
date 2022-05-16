@@ -93,10 +93,47 @@ const Post = () => {
                     alignItems={"center"}
                     justifyContent={"center"}
                   >
+                    <Player
+                      url={
+                        "https://sounds.soundofgothic.pl/assets/gsounds/INFO_BAU_2_WICHTIGEPERSONEN_15_00.WAV"
+                      }
+                    />
+                    <Text ml="5"> Dictionary audio</Text>
+                  </Flex>
+                  <Flex
+                    cursor={"pointer"}
+                    mt="5"
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                  >
+                    <Player
+                      url={
+                        "https://sounds.soundofgothic.pl/assets/gsounds/INFO_BAU_2_WICHTIGEPERSONEN_15_00.WAV"
+                      }
+                    />
+
+                    <Text ml="5"> Your audio</Text>
+                  </Flex>
+
+                  <Flex
+                    cursor={"pointer"}
+                    mt="155"
+                    alignItems={"center"}
+                    justifyContent={"center"}
                     
-                      <Player url={"https://sounds.soundofgothic.pl/assets/gsounds/INFO_BAU_2_WICHTIGEPERSONEN_15_00.WAV"} />
+                  >
+                    <Button
+                    variant={'solid'}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
                     
-                    <Text ml={"5"}>Play sound</Text>
+                    ml='5'
+                    variant={'solid'}
+                    >
+                      Save
+                    </Button>
                   </Flex>
                 </Flex>
               </Form>

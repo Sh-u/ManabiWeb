@@ -2,11 +2,15 @@ import { useState, useEffect } from "react";
 
 
 
-const useAudio = (url : string ) : (Boolean | (() => void))[] => {
+const useAudio = (url : string ): [Boolean, () => void] => {
     const [audio] = useState(new Audio(url));
     const [playing, setPlaying] = useState(false);
   
-    const toggle = () => setPlaying(!playing);
+    console.log(playing)
+    const toggle = () => {
+      console.log('toggle')
+      setPlaying(!playing);
+    }
   
     useEffect(() => {
         playing ? audio.play() : audio.pause();
@@ -20,7 +24,7 @@ const useAudio = (url : string ) : (Boolean | (() => void))[] => {
         audio.removeEventListener('ended', () => setPlaying(false));
       };
     }, []);
-  
+ 
     return [playing, toggle];
   };
 

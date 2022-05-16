@@ -29,7 +29,7 @@ const InputField  = ({label, size: _, ...props} : MyInputProps) => {
         {label}
       </FormLabel>
       <Input
-        textAlign={'top'}
+        
         {...field}
         {...props}
         id={field.name}
