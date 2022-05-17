@@ -31,19 +31,15 @@ const Index = () => {
             mt={"3"}
             cursor={"pointer"}
             onClick={() => setShowPost(true)}
-            transition={'ease-in-out'}
+            transition={"ease-in-out"}
             transitionDuration="100ms"
             _hover={{
               textDecoration: "underline",
-              textUnderlinePosition: "under"
+              textUnderlinePosition: "under",
             }}
           >
-            <Box
-              
-            >
-              Create new deck:{" "}
-            </Box>
-            <Box ml={"3"} >
+            <Box>Create new deck: </Box>
+            <Box ml={"3"}>
               <FaPlusCircle />
             </Box>
           </Flex>

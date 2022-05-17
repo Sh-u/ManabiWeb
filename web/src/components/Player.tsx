@@ -17,7 +17,7 @@ const Player = ({ url }: myInput) => {
         <Button
           onClick={() => {
             toggle();
-            console.log(playing);
+            
           }}
         >
           {playing ? "Pause" : "Play"}

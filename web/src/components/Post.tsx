@@ -1,46 +1,37 @@
-import { Box, Button, Flex, Text, Textarea } from "@chakra-ui/react";
+import { Box, Button, Flex, Image, Text, Textarea } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
-import React, { useEffect, useState } from "react";
-import InputField from "./InputField";
-import Head from "next/head";
-import { createUploadWidget } from "cloudinary-react";
-import CloudinaryContext from "cloudinary-react";
-import TransformImage from "./Image";
+import React, { useState } from "react";
+import Dropzone from "./Dropzone";
 import Player from "./Player";
-import { myInput } from "./Player";
-import { FaPlay } from "react-icons/fa";
-
-type myWindow = {
-  cloudinary: any;
-} & Window &
-  typeof globalThis;
+import { CloseIcon } from "@chakra-ui/icons";
 
 const Post = () => {
-  const [imagePublicId, setImagePublicId] = useState("");
-  const [alt, setAlt] = useState("");
-  const [crop, setCrop] = useState("scale");
-  const [height, setHeight] = useState(200);
-  const [width, setWidth] = useState(500);
+  const [image, setImage] = useState({ url: null, image: null });
+  const [audio, setAudio] = useState({url: null})
 
-  const openWidget = () => {
-    // create the widget
-    const window2 = window as myWindow;
-    const widget = window2.cloudinary.createUploadWidget(
-      {
-        cloudName: "dwsawrlky",
-        uploadPreset: "xhi5wezq",
-      },
-      (error, result) => {
-        if (
-          result.event === "success" &&
-          result.info.resource_type === "image"
-        ) {
-          console.log(result.info);
-          setImagePublicId(result.info.public_id);
-        }
-      }
-    );
-    widget.open(); // open up the widget after creation
+  const handleImageState = (image, url) => {
+    setImage({ url, image });
+
+  };
+
+  const handleAudioState = ( url) => {
+    setAudio({ url });
+  };
+
+  const renderExitIcon = () => {
+    return <CloseIcon w={50} h={50} />;
+  };
+  const uploadToServer = async (event) => {
+    const body = new FormData();
+    console.log(`body: `, body);
+
+    body.append("file", image);
+    console.log(`body2: `, body);
+
+    const response = await fetch("../pages/api/uploads", {
+      method: "POST",
+      body,
+    });
   };
 
   return (
@@ -50,7 +41,7 @@ const Post = () => {
         alignItems={"flex-start"}
         justifyContent={"flex-start"}
         bg="gray.700"
-        h={"2xl"}
+        h={"3xl"}
         ml="300px"
         mr="300px"
         mt="5"
@@ -71,19 +62,32 @@ const Post = () => {
                   justifyContent={"center "}
                   flexDirection={"column"}
                 >
-                  <Button mt="5" onClick={() => openWidget()}>
-                    Upload Image
-                  </Button>
                   <Box mt="5">
-                    {imagePublicId ? (
-                      <TransformImage
-                        crop={crop}
-                        image={imagePublicId}
-                        width={width}
-                        height={height}
-                      />
+                    <Box>
+                      <Dropzone imageState={handleImageState}/>
+                    </Box>
+                    {image?.url ? (
+                      <Flex mt='5'>
+                        <Image
+                          src={image.url}
+                          onMouseEnter={() => renderExitIcon()}
+                          _hover={{
+                            opacity: "0.5",
+                          }}
+                        />
+                        <CloseIcon
+                          margin={"auto"}
+                          h={"10"}
+                          w={"10"}
+                          position="absolute"
+                          transform={"auto"}
+                          p="2"
+                          cursor={"pointer"}
+                          onClick={() => setImage(null)}
+                        />
+                      </Flex>
                     ) : (
-                      <Box mt="5">Image will appear here</Box>
+                      <></>
                     )}
                   </Box>
 
@@ -106,12 +110,6 @@ const Post = () => {
                     alignItems={"center"}
                     justifyContent={"center"}
                   >
-                    <Player
-                      url={
-                        "https://sounds.soundofgothic.pl/assets/gsounds/INFO_BAU_2_WICHTIGEPERSONEN_15_00.WAV"
-                      }
-                    />
-
                     <Text ml="5"> Your audio</Text>
                   </Flex>
 
@@ -120,18 +118,9 @@ const Post = () => {
                     mt="155"
                     alignItems={"center"}
                     justifyContent={"center"}
-                    
                   >
-                    <Button
-                    variant={'solid'}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                    
-                    ml='5'
-                    variant={'solid'}
-                    >
+                    <Button variant={"solid"}>Cancel</Button>
+                    <Button ml="5" variant={"solid"}>
                       Save
                     </Button>
                   </Flex>
