@@ -34,7 +34,6 @@ let DeckResolver = class DeckResolver {
         return em.find(Deck_1.Deck, {});
     }
     async getMyDecks({ req, em }) {
-        console.log(req.session.userId);
         const user = await em.findOne(User_1.User, { _id: req.session.userId });
         if (!user) {
             return {
@@ -52,7 +51,12 @@ let DeckResolver = class DeckResolver {
                 errors: "Looks like you have no decks created...",
             };
         }
-        console.log('success');
+        if (!decks[0].posts) {
+            return {
+                errors: "Looks like you have no posts in the deck  created...",
+            };
+        }
+        console.log('success getting decks');
         return {
             decks
         };
@@ -62,9 +66,27 @@ let DeckResolver = class DeckResolver {
     }
     async createDeck(title, { em, req }) {
         const user = await em.findOne(User_1.User, { _id: req.session.userId });
+        if (title.length < 4 || title.length > 30) {
+            return {
+                errors: "Invalid title length",
+            };
+        }
+        if (!user) {
+            return {
+                errors: "Cannot Create Deck: USER NOT FOUND",
+            };
+        }
         const deck = await em.create(Deck_1.Deck, { title, author: user });
-        await em.persistAndFlush(deck);
-        return deck;
+        try {
+            await em.persistAndFlush(deck);
+        }
+        catch (err) {
+            console.log(err);
+        }
+        console.log(deck);
+        return {
+            decks: [deck]
+        };
     }
     async updateDeckTitle(_id, title, { em }) {
         const deck = await em.findOne(Deck_1.Deck, { _id });
@@ -107,7 +129,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DeckResolver.prototype, "findDeck", null);
 __decorate([
-    (0, type_graphql_1.Mutation)(() => Deck_1.Deck),
+    (0, type_graphql_1.Mutation)(() => DeckResponse),
     __param(0, (0, type_graphql_1.Arg)("title")),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),

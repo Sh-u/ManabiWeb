@@ -73,5 +73,4 @@ const main = async () => {
 main().catch((err) => {
     console.error(err);
 });
-console.log("lole");
 //# sourceMappingURL=index.js.map

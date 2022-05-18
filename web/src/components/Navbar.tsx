@@ -1,58 +1,45 @@
+import { Search2Icon, SearchIcon } from "@chakra-ui/icons";
 import {
+  Avatar,
   Box,
   Button,
   Flex,
   IconButton,
   Input,
+  InputGroup,
+  InputLeftElement,
   Link,
-  useColorMode,
-  useMediaQuery,
-  Image,
   Menu,
   MenuButton,
+  MenuDivider,
+  MenuGroup,
   MenuItem,
   MenuList,
-  Fade,
-  useDisclosure,
-  MenuGroup,
-  MenuDivider,
-  InputGroup,
-  Stack,
-  InputLeftElement,
+  useColorMode,
   useColorModeValue,
-  Avatar,
+  useDisclosure,
 } from "@chakra-ui/react";
+import "font-awesome/css/font-awesome.min.css";
+import NextLink from "next/link";
 import React from "react";
+import { FaDiscord, FaGithub } from "react-icons/fa";
 import {
   MeDocument,
   useLogoutMutation,
   useMeQuery,
 } from "../generated/graphql";
-
-import "font-awesome/css/font-awesome.min.css";
-
-import NextLink from "next/link";
-import {
-  SearchIcon,
-  ChevronDownIcon,
-  SettingsIcon,
-  CloseIcon,
-  Search2Icon,
-} from "@chakra-ui/icons";
-import { FaDiscord, FaGithub } from "react-icons/fa";
 import { ColorModeSwitcher } from "./ColorModeSwitcher";
-import { createBreakpoints, mode } from "@chakra-ui/theme-tools";
 
 const Navbar = () => {
   const { isOpen, onToggle } = useDisclosure();
   const MeQuery = useMeQuery();
- 
+
   const { colorMode, toggleColorMode } = useColorMode();
   const [logout, { loading }] = useLogoutMutation({
     update(cache, { data }) {
       cache.writeQuery({
         query: MeDocument,
-        data: { 
+        data: {
           me: null,
         },
       });
@@ -88,7 +75,7 @@ const Navbar = () => {
             transform: "scale(1.03)",
           }}
         >
-         Learn
+          Learn
         </Button>
       </Flex>
 
@@ -160,9 +147,7 @@ const Navbar = () => {
                     src="https://i.imgur.com/1M2viYL.png"
                     w={"40px"}
                     h={"40px"}
-                   
-                    
-                    name='User'
+                    name="User"
                   />
                 </MenuButton>
 

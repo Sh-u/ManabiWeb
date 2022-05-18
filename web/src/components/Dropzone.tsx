@@ -5,7 +5,7 @@ import { AiFillFileAdd } from "react-icons/ai";
 
 const regex = /'.jpg'|'.png'/
 
-const Dropzone = ({imageState: handleImageState}) => {
+const Dropzone = ({imageState: handleImageState, audioState: handleAudioState}) => {
   const onDrop = useCallback((acceptedFiles) => {
     console.log(acceptedFiles);
 
@@ -25,6 +25,8 @@ const Dropzone = ({imageState: handleImageState}) => {
         }
         if (isAudio(item.name)){
             console.log('match audio')
+            handleAudioState(URL.createObjectURL(item))
+            break;
         }
     }
 

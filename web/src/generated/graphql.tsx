@@ -45,7 +45,7 @@ export type LoginInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: UserResponse;
-  createDeck: Deck;
+  createDeck: DeckResponse;
   createPost: Post;
   forgotPassword: Scalars['Boolean'];
   login: UserResponse;
@@ -202,7 +202,7 @@ export type CreateDeckMutationVariables = Exact<{
 }>;
 
 
-export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'Deck', title: string, createdAt: string } };
+export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, posts: Array<{ __typename?: 'Post', createdAt: string, title: string }> }> | null } };
 
 export type GetMyDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -412,8 +412,15 @@ export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutatio
 export const CreateDeckDocument = gql`
     mutation CreateDeck($title: String!) {
   createDeck(title: $title) {
-    title
-    createdAt
+    decks {
+      createdAt
+      posts {
+        createdAt
+        title
+      }
+      title
+    }
+    errors
   }
 }
     `;

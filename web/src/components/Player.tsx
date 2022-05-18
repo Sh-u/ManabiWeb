@@ -10,7 +10,7 @@ const Player = ({ url }: myInput) => {
 
   const [playing, toggle] = useAudio(url);
 
-  console.log(playing);
+
   return (
     <Box>
       

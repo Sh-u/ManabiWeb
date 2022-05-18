@@ -95,7 +95,6 @@ let UserResolver = class UserResolver {
         return true;
     }
     async me({ req, em }) {
-        console.log(req.session);
         if (!req.session.userId) {
             return null;
         }

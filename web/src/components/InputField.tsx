@@ -11,12 +11,14 @@ type MyInputProps = InputHTMLAttributes< HTMLInputElement> & {
   name: string;
   label: string;
   type?: string;
+
  
 };
 
 const InputField  = ({label, size: _, ...props} : MyInputProps) => {
   const [field, { error }] = useField(props);
 
+  console.log(error)
 
 
   return (
@@ -29,7 +31,7 @@ const InputField  = ({label, size: _, ...props} : MyInputProps) => {
         {label}
       </FormLabel>
       <Input
-        
+
         {...field}
         {...props}
         id={field.name}

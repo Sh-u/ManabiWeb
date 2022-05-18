@@ -1,4 +1,12 @@
-import { Box, Button, Flex, Image, Text, Textarea } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Image,
+  Text,
+  Textarea,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import React, { useState } from "react";
 import Dropzone from "./Dropzone";
@@ -7,14 +15,21 @@ import { CloseIcon } from "@chakra-ui/icons";
 
 const Post = () => {
   const [image, setImage] = useState({ url: null, image: null });
-  const [audio, setAudio] = useState({url: null})
+  const [audio, setAudio] = useState({ url: null });
+
+  const [showDeleteIcon, setshowDeleteIcon] = useState(false);
+  const handleDeleteClick = () => {
+    if (!audio.url) {
+      return;
+    }
+    setshowDeleteIcon(!showDeleteIcon);
+  };
 
   const handleImageState = (image, url) => {
     setImage({ url, image });
-
   };
 
-  const handleAudioState = ( url) => {
+  const handleAudioState = (url) => {
     setAudio({ url });
   };
 
@@ -40,13 +55,12 @@ const Post = () => {
         width={"auto"}
         alignItems={"flex-start"}
         justifyContent={"flex-start"}
-        bg="gray.700"
-        h={"3xl"}
+        bg={useColorModeValue("gray.600", "gray.700")}
+        minH="lg"
         ml="300px"
         mr="300px"
         mt="5"
         rounded={"lg"}
-        wrap="wrap"
       >
         <Formik
           initialValues={{ username: "", password: "" }}
@@ -59,16 +73,24 @@ const Post = () => {
                 <Textarea placeholder="Word" resize={"vertical"} mt="5" />
                 <Flex
                   alignItems={"center"}
-                  justifyContent={"center "}
+                  justifyContent={"center"}
                   flexDirection={"column"}
                 >
                   <Box mt="5">
                     <Box>
-                      <Dropzone imageState={handleImageState}/>
+                      <Dropzone
+                        imageState={handleImageState}
+                        audioState={handleAudioState}
+                      />
                     </Box>
                     {image?.url ? (
-                      <Flex mt='5'>
+                      <Flex
+                        mt="5"
+                        alignItems={"center"}
+                        justifyContent="center"
+                      >
                         <Image
+                          maxH={"lg"}
                           src={image.url}
                           onMouseEnter={() => renderExitIcon()}
                           _hover={{
@@ -79,10 +101,14 @@ const Post = () => {
                           margin={"auto"}
                           h={"10"}
                           w={"10"}
+                         
                           position="absolute"
-                          transform={"auto"}
+                          
                           p="2"
                           cursor={"pointer"}
+                          _hover={{
+                            color: "red.500",
+                          }}
                           onClick={() => setImage(null)}
                         />
                       </Flex>
@@ -110,12 +136,31 @@ const Post = () => {
                     alignItems={"center"}
                     justifyContent={"center"}
                   >
-                    <Text ml="5"> Your audio</Text>
+                    {audio?.url ? <Player url={audio.url} /> : <></>}
+                    <Box onClick={handleDeleteClick}>
+                      {showDeleteIcon ? (
+                        <Flex alignItems={"center"} justifyContent="center">
+                          <Text ml="5"> Your audio</Text>
+                          <CloseIcon
+                            h={"7"}
+                            w={"7"}
+                            transform={"auto"}
+                            p="2"
+                            cursor={"pointer"}
+                            _hover={{
+                              color: "red.500",
+                            }}
+                            onClick={() => setAudio(null)}
+                          />
+                        </Flex>
+                      ) : (
+                        <></>
+                      )}
+                    </Box>
                   </Flex>
-
                   <Flex
                     cursor={"pointer"}
-                    mt="155"
+                    mt="10"
                     alignItems={"center"}
                     justifyContent={"center"}
                   >

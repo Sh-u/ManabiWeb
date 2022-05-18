@@ -31,7 +31,7 @@ export class DeckResolver {
   @Query(() => DeckResponse)
   async getMyDecks(@Ctx() { req, em }: MyContext): Promise<DeckResponse> {
 
-    console.log(req.session.userId)
+  
 
     const user = await em.findOne(User, { _id: req.session.userId });
 
@@ -56,7 +56,13 @@ export class DeckResolver {
       };
     }
 
-    console.log('success')
+    if (!decks[0].posts){
+      return {
+        errors: "Looks like you have no posts in the deck  created...",
+      };
+    }
+
+    console.log('success getting decks')
     return {
       decks
     };
@@ -70,16 +76,37 @@ export class DeckResolver {
     return em.findOne(Deck, { _id });
   }
 
-  @Mutation(() => Deck)
+  @Mutation(() => DeckResponse)
   async createDeck(
     @Arg("title") title: string,
     @Ctx() { em, req }: MyContext
-  ): Promise<Deck> {
+  ): Promise<DeckResponse> {
     const user = await em.findOne(User, { _id: req.session.userId });
 
+    if (title.length < 4 || title.length > 30){
+      return {
+        errors: "Invalid title length",
+      };
+    }
+
+    if (!user) {
+      return {
+        errors: "Cannot Create Deck: USER NOT FOUND",
+      };
+    }
+
     const deck = await em.create(Deck, { title, author: user });
-    await em.persistAndFlush(deck);
-    return deck;
+    try {
+      await em.persistAndFlush(deck);
+    } catch (err){
+      console.log(err)
+    }
+   
+
+    console.log(deck)
+    return {
+      decks: [deck]
+    };
   }
 
   @Mutation(() => Deck, { nullable: true })
