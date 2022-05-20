@@ -10,6 +10,7 @@ import Redis from "ioredis";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import { COOKIE_NAME } from "./constants";
+import { Deck } from "./entities/Deck";
 import mikroOrmConfig from "./mikro-orm.config";
 import { DeckResolver } from "./resolvers/deck";
 import { HelloResolver } from "./resolvers/hello";
@@ -29,6 +30,7 @@ const corsOptions = {
 const main = async () => {
   const orm = await MikroORM.init(mikroOrmConfig);
 
+  // orm.em.nativeDelete(Deck, {})
   await orm.getMigrator().up();
 
   const app = express();

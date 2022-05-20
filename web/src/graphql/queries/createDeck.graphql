@@ -1,10 +1,19 @@
-mutation CreateDeck($title: String!){
-    createDeck(title: $title){
-        decks {
-        createdAt,
-        posts { createdAt, title },
+mutation CreateDeck($title: String!) {
+  createDeck(title: $title) {
+    decks {
+      createdAt
+      posts {
+        createdAt
         title
-    },
+        _id
+      }
+      title
+      author {
+        _id
+        username
+      }
+      _id
+    }
     errors
   }
 }

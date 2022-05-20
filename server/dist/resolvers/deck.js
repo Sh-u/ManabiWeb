@@ -51,11 +51,6 @@ let DeckResolver = class DeckResolver {
                 errors: "Looks like you have no decks created...",
             };
         }
-        if (!decks[0].posts) {
-            return {
-                errors: "Looks like you have no posts in the deck  created...",
-            };
-        }
         console.log('success getting decks');
         return {
             decks
@@ -83,7 +78,6 @@ let DeckResolver = class DeckResolver {
         catch (err) {
             console.log(err);
         }
-        console.log(deck);
         return {
             decks: [deck]
         };

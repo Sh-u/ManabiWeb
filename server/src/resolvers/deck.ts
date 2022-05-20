@@ -11,9 +11,11 @@ import {
 } from "type-graphql";
 import { Deck } from "../entities/Deck";
 import { User } from "../entities/User";
+import { PrimaryKey } from "@mikro-orm/core/decorators/PrimaryKey";
 
 @ObjectType()
 class DeckResponse {
+
   @Field(() => String, { nullable: true })
   errors?: String;
 
@@ -39,6 +41,8 @@ export class DeckResolver {
     if (!user) {
       return {
         errors: "user not found",
+
+        
       };
     }
 
@@ -56,11 +60,7 @@ export class DeckResolver {
       };
     }
 
-    if (!decks[0].posts){
-      return {
-        errors: "Looks like you have no posts in the deck  created...",
-      };
-    }
+    
 
     console.log('success getting decks')
     return {
@@ -103,7 +103,7 @@ export class DeckResolver {
     }
    
 
-    console.log(deck)
+   
     return {
       decks: [deck]
     };

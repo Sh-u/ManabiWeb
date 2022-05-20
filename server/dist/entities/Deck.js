@@ -26,6 +26,7 @@ __decorate([
     __metadata("design:type", String)
 ], Deck.prototype, "title", void 0);
 __decorate([
+    (0, type_graphql_1.Field)(() => User_1.User),
     (0, core_1.ManyToOne)(),
     __metadata("design:type", User_1.User)
 ], Deck.prototype, "author", void 0);
@@ -35,7 +36,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Deck.prototype, "_id", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => [Post_1.Post]),
+    (0, type_graphql_1.Field)(() => [Post_1.Post], { nullable: true }),
     (0, core_1.Property)({ nullable: true }),
     __metadata("design:type", Array)
 ], Deck.prototype, "posts", void 0);

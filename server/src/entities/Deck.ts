@@ -12,7 +12,7 @@ export class Deck {
     @Property({type: 'text'})
     title!: string;
 
-
+    @Field(() => User)
     @ManyToOne()
     author!: User;
 
@@ -21,7 +21,7 @@ export class Deck {
     @PrimaryKey()
     _id: Number;
 
-    @Field(() => [Post])
+    @Field(() => [Post], {nullable: true})
     @Property({nullable: true})
     posts: Post[];
 

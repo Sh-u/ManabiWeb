@@ -18,8 +18,9 @@ export type Scalars = {
 export type Deck = {
   __typename?: 'Deck';
   _id: Scalars['Int'];
+  author: User;
   createdAt: Scalars['String'];
-  posts: Array<Post>;
+  posts?: Maybe<Array<Post>>;
   title: Scalars['String'];
   updatedAt: Scalars['String'];
 };
@@ -202,12 +203,12 @@ export type CreateDeckMutationVariables = Exact<{
 }>;
 
 
-export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, posts: Array<{ __typename?: 'Post', createdAt: string, title: string }> }> | null } };
+export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, posts?: Array<{ __typename?: 'Post', createdAt: string, title: string, _id: number }> | null, author: { __typename?: 'User', _id: number, username: string } }> | null } };
 
 export type GetMyDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMyDecksQuery = { __typename?: 'Query', getMyDecks: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', title: string, createdAt: string, posts: Array<{ __typename?: 'Post', title: string }> }> | null } };
+export type GetMyDecksQuery = { __typename?: 'Query', getMyDecks: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, posts?: Array<{ __typename?: 'Post', createdAt: string, title: string, _id: number }> | null, author: { __typename?: 'User', _id: number, username: string } }> | null } };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -417,8 +418,14 @@ export const CreateDeckDocument = gql`
       posts {
         createdAt
         title
+        _id
       }
       title
+      author {
+        _id
+        username
+      }
+      _id
     }
     errors
   }
@@ -454,11 +461,18 @@ export const GetMyDecksDocument = gql`
     query GetMyDecks {
   getMyDecks {
     decks {
-      title
       createdAt
       posts {
+        createdAt
         title
+        _id
       }
+      title
+      author {
+        _id
+        username
+      }
+      _id
     }
     errors
   }

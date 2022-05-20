@@ -1,12 +1,20 @@
-query GetMyDecks{
- getMyDecks {
-     decks {
-      title,
-      createdAt,
-     posts {
+query GetMyDecks {
+  getMyDecks {
+    decks {
+      createdAt
+      posts {
+        createdAt
         title
-     }
+        _id
+      }
+      title
+      author {
+        _id
+        username
+      }
+      _id
     }
-     errors
-    }
+
+    errors
+  }
 }

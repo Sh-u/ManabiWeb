@@ -20,6 +20,8 @@ import {
 } from "@chakra-ui/react";
 import Navbar from "../components/Navbar";
 import {
+  GetMyDecksDocument,
+  GetMyDecksQuery,
   useCreateDeckMutation,
   useGetMyDecksQuery,
   useMeQuery,
@@ -50,11 +52,7 @@ const Index = () => {
     onOpen();
   };
 
-  console.log(decksQuery)
 
-  if (decksQuery.data) {
-    console.log(decksQuery.data);
-  }
 
   return (
     <Box height="100vh" maxW={"7xl"} mx={"auto"}>
@@ -62,10 +60,10 @@ const Index = () => {
       {decksQuery.data?.getMyDecks?.decks ? (
         <Box>
           {decksQuery.data?.getMyDecks?.decks.map((deck) => (
-            <Box>
-              <Text> {deck.title}</Text>
-              <Text>yes</Text>
-            </Box>
+            <Text textAlign={"center"} key={deck.createdAt}>
+           
+              {deck.title}
+            </Text>
           ))}
         </Box>
       ) : (
@@ -105,16 +103,63 @@ const Index = () => {
                 <Formik
                   initialValues={{ title: "" }}
                   onSubmit={async (values, { setErrors }) => {
+               
+                    const response = await createDeck({
+                      variables: values,
+                      update(cache, { data }) {
+                        if (data.createDeck.errors) {
+                          console.log('error updating cache =>  INDEX.tsx')
+                          return;
+                        }
 
-                    console.log(values);
-                    const response = await createDeck({ variables: values });
-                    console.log(response)
+                        const {getMyDecks}: GetMyDecksQuery = cache.readQuery({
+                          query: GetMyDecksDocument
+                        })
+
+                        console.log(`my decks `, getMyDecks)
+                        console.log(`mutation data decks`, data.createDeck)
+
+                        if (!getMyDecks.decks){
+                          cache.writeQuery({
+                            query: GetMyDecksDocument,
+                            data: {
+                              getMyDecks: {
+                                decks: [
+                                  ...data.createDeck.decks,
+                                ],
+                                errors: data.createDeck.errors
+                              },
+                             
+                            }
+                          })
+                        }
+
+                        cache.writeQuery({
+                          query: GetMyDecksDocument,
+                          data: {
+                            getMyDecks: {
+                              decks: [
+                                ...data.createDeck.decks,
+                                ...getMyDecks.decks,
+                              ],
+                              errors: data.createDeck.errors
+                            },
+                           
+                          }
+                        })
+                        
+                        
+                      },
+                    });
+
                     if (response.data?.createDeck?.errors) {
                       setErrors({ title: response.data?.createDeck?.errors });
+                    } else if (response.data?.createDeck) {
+                      onClose();
                     }
                   }}
                 >
-                  {(values,  isSubmitting, ) => (
+                  {(values, isSubmitting) => (
                     <Form>
                       <ModalHeader>Create New Deck</ModalHeader>
                       <ModalCloseButton />
@@ -130,7 +175,11 @@ const Index = () => {
                                 placeholder="New deck title"
                                 ref={initialRef}
                               />
-                              {form.errors ? <FormErrorMessage>{form.errors.title}</FormErrorMessage>  : null}
+                              {form.errors ? (
+                                <FormErrorMessage>
+                                  {form.errors.title}
+                                </FormErrorMessage>
+                              ) : null}
                               <Checkbox mt={"5"} defaultChecked>
                                 Japanese Template
                               </Checkbox>
@@ -140,7 +189,12 @@ const Index = () => {
                       </ModalBody>
 
                       <ModalFooter>
-                        <Button colorScheme="blue" mr={3} type="submit" isLoading={isSubmitting}>
+                        <Button
+                          colorScheme="blue"
+                          mr={3}
+                          type="submit"
+                          isLoading={isSubmitting}
+                        >
                           Save
                         </Button>
                         <Button onClick={onClose}>Cancel</Button>
