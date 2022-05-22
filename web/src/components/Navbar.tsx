@@ -8,6 +8,8 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  InputRightElement,
+  Kbd,
   Link,
   Menu,
   MenuButton,
@@ -24,6 +26,7 @@ import NextLink from "next/link";
 import React from "react";
 import { FaDiscord, FaGithub } from "react-icons/fa";
 import {
+  GetMyDecksDocument,
   MeDocument,
   useLogoutMutation,
   useMeQuery,
@@ -44,6 +47,12 @@ const Navbar = () => {
         },
       });
     },
+
+    refetchQueries: [
+      {
+        query: GetMyDecksDocument,
+      },
+    ],
   });
 
   return (
@@ -61,7 +70,9 @@ const Navbar = () => {
           display={{ base: "none", md: "block" }}
           color={useColorModeValue("gray.800", "gray.200")}
         >
-          <h1>ManabiWeb</h1>
+          <NextLink href="/">
+            <Link fontSize={"xl"} style={{ textDecoration: 'none' }}> ManabiWeb</Link>
+          </NextLink>
         </Box>
 
         <Button
@@ -72,10 +83,13 @@ const Navbar = () => {
           bgGradient="linear(to-l, #7928CA, #FF0080)"
           rounded={"lg"}
           _hover={{
-            transform: "scale(1.03)",
+            transitionDuration: '100ms',
+            transform: 'scale(1.1 )'
           }}
         >
-          Learn
+          <NextLink href="/learn">
+            <Link style={{ textDecoration: 'none' }}> Learn</Link>
+          </NextLink>
         </Button>
       </Flex>
 
@@ -104,13 +118,15 @@ const Navbar = () => {
             _focus={{ bg: useColorModeValue("gray.200", "gray.600") }}
             _hover={{ bg: useColorModeValue("gray.200", "gray.600") }}
           />
+          <InputRightElement mr='3' children={<Kbd>Ctrl+K</Kbd>}/>
+        
         </InputGroup>
       </Box>
 
       <SearchIcon display={{ base: "block", md: "none" }} />
 
       <Flex justifyContent={"flex-end"} alignItems="center">
-        <Link href="https://discord.gg/e4zbyzPbcD">
+        <Link href="https://discord.gg/e4zbyzPbcD" isExternal>
           <IconButton
             variant="ghost"
             size="md"
@@ -121,7 +137,7 @@ const Navbar = () => {
             <FaDiscord />
           </IconButton>
         </Link>
-        <Link href="https://github.com/Sh-u/ManabiWeb">
+        <Link href="https://github.com/Sh-u/ManabiWeb" isExternal>
           <IconButton
             variant="ghost"
             size="md"

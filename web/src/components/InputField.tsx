@@ -18,7 +18,7 @@ type MyInputProps = InputHTMLAttributes< HTMLInputElement> & {
 const InputField  = ({label, size: _, ...props} : MyInputProps) => {
   const [field, { error }] = useField(props);
 
-  console.log(error)
+
 
 
   return (

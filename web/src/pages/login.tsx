@@ -4,14 +4,18 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import InputField from "../components/InputField";
 import {
+  GetMyDecksDocument,
   MeDocument,
   namedOperations,
+  useGetMyDecksLazyQuery,
+  useGetMyDecksQuery,
   useLoginMutation,
 } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 const Login = () => {
   const [login] = useLoginMutation();
   const router = useRouter();
+  const {refetch} = useGetMyDecksQuery();
   return (
     <Flex
       h={"full"}
@@ -44,11 +48,20 @@ const Login = () => {
                   me: data.login.user,
                 },
               });
+
+
+
             },
+            refetchQueries: [
+              {
+                query: GetMyDecksDocument,
+              }     
+            ]
           });
           if (response.data?.login.errors) {
             setErrors(toErrorMap(response.data?.login.errors));
           } else if (response.data?.login.user) {
+          
             router.push("/");
           }
         }}
@@ -83,6 +96,7 @@ const Login = () => {
                 Back
               </Button>
               <Button
+              
                 mt={4}
                 colorScheme="messenger"
                 isLoading={isSubmitting}

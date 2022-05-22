@@ -5,7 +5,7 @@ function ForceDarkMode(props: { children: JSX.Element }) {
     const { colorMode, toggleColorMode } = useColorMode();
   
     useEffect(() => {
-        console.log('effect')
+
       if (colorMode === "light") {
         toggleColorMode();
       }

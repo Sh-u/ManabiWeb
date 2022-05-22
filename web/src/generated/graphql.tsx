@@ -172,6 +172,13 @@ export type ChangePasswordMutationVariables = Exact<{
 
 export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string } | null } };
 
+export type CreateDeckMutationVariables = Exact<{
+  title: Scalars['String'];
+}>;
+
+
+export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, posts?: Array<{ __typename?: 'Post', createdAt: string, title: string, _id: number }> | null, author: { __typename?: 'User', _id: number, username: string } }> | null } };
+
 export type ForgotPasswordMutationVariables = Exact<{
   username: Scalars['String'];
 }>;
@@ -197,13 +204,6 @@ export type RegisterMutationVariables = Exact<{
 
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string } | null } };
-
-export type CreateDeckMutationVariables = Exact<{
-  title: Scalars['String'];
-}>;
-
-
-export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, posts?: Array<{ __typename?: 'Post', createdAt: string, title: string, _id: number }> | null, author: { __typename?: 'User', _id: number, username: string } }> | null } };
 
 export type GetMyDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -271,6 +271,53 @@ export function useChangePasswordMutation(baseOptions?: Apollo.MutationHookOptio
 export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
+export const CreateDeckDocument = gql`
+    mutation CreateDeck($title: String!) {
+  createDeck(title: $title) {
+    decks {
+      createdAt
+      posts {
+        createdAt
+        title
+        _id
+      }
+      title
+      author {
+        _id
+        username
+      }
+      _id
+    }
+    errors
+  }
+}
+    `;
+export type CreateDeckMutationFn = Apollo.MutationFunction<CreateDeckMutation, CreateDeckMutationVariables>;
+
+/**
+ * __useCreateDeckMutation__
+ *
+ * To run a mutation, you first call `useCreateDeckMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateDeckMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createDeckMutation, { data, loading, error }] = useCreateDeckMutation({
+ *   variables: {
+ *      title: // value for 'title'
+ *   },
+ * });
+ */
+export function useCreateDeckMutation(baseOptions?: Apollo.MutationHookOptions<CreateDeckMutation, CreateDeckMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateDeckMutation, CreateDeckMutationVariables>(CreateDeckDocument, options);
+      }
+export type CreateDeckMutationHookResult = ReturnType<typeof useCreateDeckMutation>;
+export type CreateDeckMutationResult = Apollo.MutationResult<CreateDeckMutation>;
+export type CreateDeckMutationOptions = Apollo.BaseMutationOptions<CreateDeckMutation, CreateDeckMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($username: String!) {
   forgotPassword(username: $username)
@@ -410,53 +457,6 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
-export const CreateDeckDocument = gql`
-    mutation CreateDeck($title: String!) {
-  createDeck(title: $title) {
-    decks {
-      createdAt
-      posts {
-        createdAt
-        title
-        _id
-      }
-      title
-      author {
-        _id
-        username
-      }
-      _id
-    }
-    errors
-  }
-}
-    `;
-export type CreateDeckMutationFn = Apollo.MutationFunction<CreateDeckMutation, CreateDeckMutationVariables>;
-
-/**
- * __useCreateDeckMutation__
- *
- * To run a mutation, you first call `useCreateDeckMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateDeckMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createDeckMutation, { data, loading, error }] = useCreateDeckMutation({
- *   variables: {
- *      title: // value for 'title'
- *   },
- * });
- */
-export function useCreateDeckMutation(baseOptions?: Apollo.MutationHookOptions<CreateDeckMutation, CreateDeckMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateDeckMutation, CreateDeckMutationVariables>(CreateDeckDocument, options);
-      }
-export type CreateDeckMutationHookResult = ReturnType<typeof useCreateDeckMutation>;
-export type CreateDeckMutationResult = Apollo.MutationResult<CreateDeckMutation>;
-export type CreateDeckMutationOptions = Apollo.BaseMutationOptions<CreateDeckMutation, CreateDeckMutationVariables>;
 export const GetMyDecksDocument = gql`
     query GetMyDecks {
   getMyDecks {
@@ -619,11 +619,11 @@ export const namedOperations = {
   },
   Mutation: {
     ChangePassword: 'ChangePassword',
+    CreateDeck: 'CreateDeck',
     ForgotPassword: 'ForgotPassword',
     Login: 'Login',
     Logout: 'Logout',
-    Register: 'Register',
-    CreateDeck: 'CreateDeck'
+    Register: 'Register'
   },
   Fragment: {
     BasicUser: 'BasicUser'
