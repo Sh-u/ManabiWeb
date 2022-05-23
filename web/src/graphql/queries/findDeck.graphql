@@ -1,0 +1,17 @@
+query FindDeck($_id: Int!) {
+  findDeck(_id: $_id) {
+    _id
+    author {
+      _id
+      username
+    }
+    createdAt
+    posts {
+      _id
+      title
+      createdAt
+    }
+    title
+    updatedAt
+  }
+}

@@ -56,8 +56,16 @@ let DeckResolver = class DeckResolver {
             decks
         };
     }
-    findDeck(_id, { em }) {
-        return em.findOne(Deck_1.Deck, { _id });
+    async findDeck(_id, { em }) {
+        const deck = await em.findOne(Deck_1.Deck, { _id });
+        if (!deck) {
+            return null;
+        }
+        const user = await em.findOne(User_1.User, { _id: deck === null || deck === void 0 ? void 0 : deck.author._id });
+        if (!user) {
+            console.log('no user');
+        }
+        return deck;
     }
     async createDeck(title, { em, req }) {
         const user = await em.findOne(User_1.User, { _id: req.session.userId });

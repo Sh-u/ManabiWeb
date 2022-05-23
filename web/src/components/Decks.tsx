@@ -22,7 +22,11 @@ import router from "next/router";
 import React, { useState } from "react";
 import { FaPlusCircle } from "react-icons/fa";
 import { useRecoilState } from "recoil";
-import { showDeckBodyState } from "../atoms/showDeckBodyState";
+import { currentDeckBodyInfoState } from "../atoms/currentDeckBodyInfoState";
+import {
+  showDeckBodyState,
+
+} from "../atoms/showDeckBodyState";
 import {
   GetMyDecksQuery,
   GetMyDecksDocument,
@@ -33,8 +37,13 @@ import {
 import Post from "./Post";
 
 const Decks = () => {
-  const [showDeckCreation, setShowDeckCreation] = useState(false);
-  const [showDeckBody, setShowDeckBody] = useRecoilState<boolean>(showDeckBodyState);
+  const [showDeckBody, setShowDeckBody] =
+    useRecoilState<boolean>(showDeckBodyState);
+
+  const [currentDeckBodyInfo, setCurrentDeckBodyInfo] = useRecoilState<
+    number | undefined
+  >(currentDeckBodyInfoState);
+
   const decksQuery = useGetMyDecksQuery();
   const meQuery = useMeQuery();
   const [createDeck] = useCreateDeckMutation();
@@ -50,23 +59,30 @@ const Decks = () => {
     }
     onOpen();
   };
-
+  console.log(`my decks `, decksQuery?.data?.getMyDecks?.decks);
   return (
     <Box>
       {decksQuery.data?.getMyDecks?.decks ? (
         <Box>
           {decksQuery.data?.getMyDecks?.decks.map((deck) => (
-              <Flex flexDir={'column'} alignItems='center'>
-            <Button
-            onClick={() => setShowDeckBody(!showDeckBody)}
-            mt='5'
-              cursor={"pointer"}
-              textAlign={"center"}
-              key={deck.createdAt}
-              maxW='10%'
+            <Flex
+              flexDir={"column"}
+              alignItems="center"
+              key={deck.createdAt + 500}
             >
-              {deck.title}
-            </Button>
+              <Button
+                onClick={() => {
+                  setShowDeckBody(!showDeckBody);
+                  setCurrentDeckBodyInfo(deck._id);
+                }}
+                mt="5"
+                cursor={"pointer"}
+                textAlign={"center"}
+                maxW="10%"
+                key={deck.createdAt + 100}
+              >
+                <Text key={deck.createdAt}> {deck.title}</Text>
+              </Button>
             </Flex>
           ))}
         </Box>
@@ -209,7 +225,7 @@ const Decks = () => {
           )}
         </Flex>
       </Flex>
-      {showDeckCreation ? <Post /> : null}
+      
     </Box>
   );
 };

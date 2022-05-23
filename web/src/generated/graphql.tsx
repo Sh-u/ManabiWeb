@@ -205,6 +205,13 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string } | null } };
 
+export type FindDeckQueryVariables = Exact<{
+  _id: Scalars['Int'];
+}>;
+
+
+export type FindDeckQuery = { __typename?: 'Query', findDeck?: { __typename?: 'Deck', _id: number, createdAt: string, title: string, updatedAt: string, author: { __typename?: 'User', _id: number, username: string }, posts?: Array<{ __typename?: 'Post', _id: number, title: string, createdAt: string }> | null } | null };
+
 export type GetMyDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -457,6 +464,53 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const FindDeckDocument = gql`
+    query FindDeck($_id: Int!) {
+  findDeck(_id: $_id) {
+    _id
+    author {
+      _id
+      username
+    }
+    createdAt
+    posts {
+      _id
+      title
+      createdAt
+    }
+    title
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useFindDeckQuery__
+ *
+ * To run a query within a React component, call `useFindDeckQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindDeckQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindDeckQuery({
+ *   variables: {
+ *      _id: // value for '_id'
+ *   },
+ * });
+ */
+export function useFindDeckQuery(baseOptions: Apollo.QueryHookOptions<FindDeckQuery, FindDeckQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindDeckQuery, FindDeckQueryVariables>(FindDeckDocument, options);
+      }
+export function useFindDeckLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindDeckQuery, FindDeckQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindDeckQuery, FindDeckQueryVariables>(FindDeckDocument, options);
+        }
+export type FindDeckQueryHookResult = ReturnType<typeof useFindDeckQuery>;
+export type FindDeckLazyQueryHookResult = ReturnType<typeof useFindDeckLazyQuery>;
+export type FindDeckQueryResult = Apollo.QueryResult<FindDeckQuery, FindDeckQueryVariables>;
 export const GetMyDecksDocument = gql`
     query GetMyDecks {
   getMyDecks {
@@ -612,6 +666,7 @@ export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
 export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
 export const namedOperations = {
   Query: {
+    FindDeck: 'FindDeck',
     GetMyDecks: 'GetMyDecks',
     GetUsers: 'GetUsers',
     Me: 'Me',

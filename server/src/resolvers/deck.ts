@@ -69,11 +69,28 @@ export class DeckResolver {
   }
 
   @Query(() => Deck, { nullable: true })
-  findDeck(
+  async findDeck(
     @Arg("_id", () => Int) _id: number,
     @Ctx() { em }: MyContext
   ): Promise<Deck | null> {
-    return em.findOne(Deck, { _id });
+   
+
+
+
+    const deck = await em.findOne(Deck, { _id });
+
+    if (!deck){
+      return null;
+    }
+    
+    const user = await em.findOne(User, { _id: deck?.author._id });
+
+  
+    if (!user){
+      console.log('no user')
+    }
+ 
+    return deck;
   }
 
   @Mutation(() => DeckResponse)

@@ -21,7 +21,6 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import "font-awesome/css/font-awesome.min.css";
 import NextLink from "next/link";
 import React from "react";
 import { FaDiscord, FaGithub } from "react-icons/fa";

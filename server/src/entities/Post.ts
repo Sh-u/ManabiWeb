@@ -4,7 +4,7 @@ import { Field, Int, ObjectType } from "type-graphql";
 @ObjectType()
 @Entity()
 export class Post {
-    [OptionalProps]?: 'createdAt' | 'updatedAt' | '_id'
+    [OptionalProps]?: 'createdAt' | 'updatedAt' | '_id' | 'image' | 'audio'
 
     @Field(() => String)
     @Property({type: 'text'})
@@ -13,6 +13,14 @@ export class Post {
     @Field(() => Int)
     @PrimaryKey()
     _id: Number;
+
+    @Field(() => String,  {nullable: true})
+    @Property({type: 'text', nullable: true}, )
+    image?: string;
+
+    @Field(() => String, {nullable: true})
+    @Property({type: 'text', nullable: true})
+    audio?: string;
 
     @Field(() => String)
     @Property({type: 'date'})

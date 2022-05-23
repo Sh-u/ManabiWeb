@@ -29,6 +29,16 @@ __decorate([
     __metadata("design:type", Number)
 ], Post.prototype, "_id", void 0);
 __decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    (0, core_1.Property)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Post.prototype, "image", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    (0, core_1.Property)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Post.prototype, "audio", void 0);
+__decorate([
     (0, type_graphql_1.Field)(() => String),
     (0, core_1.Property)({ type: 'date' }),
     __metadata("design:type", Date)
