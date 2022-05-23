@@ -24,18 +24,18 @@ const Post = () => {
   const [image, setImage] = useState({ url: null, image: null });
   const [audio, setAudio] = useState({ url: null });
   const [showDeleteIcon, setshowDeleteIcon] = useState(false);
-  const [showCreatePost, setShowCreatePost] = useRecoilState(showCreatePostState);
+  const [showCreatePost, setShowCreatePost] =
+    useRecoilState(showCreatePostState);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
-    console.log('post effect')
-    if (!showCreatePost){
-      
+    console.log("post effect");
+    if (!showCreatePost) {
       return;
     }
     onOpen();
-  }, [showCreatePost] )
+  }, [showCreatePost]);
 
   const handleDeleteClick = () => {
     if (!audio.url) {
@@ -59,7 +59,7 @@ const Post = () => {
     const body = new FormData();
     console.log(`body: `, body);
 
-   // body.append("file", image);
+    // body.append("file", image);
     console.log(`body2: `, body);
 
     const response = await fetch("../pages/api/uploads", {
@@ -71,22 +71,20 @@ const Post = () => {
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay/>
-        <ModalContent  width={"auto"}>
+        <ModalOverlay />
+        <ModalContent width={"auto"}>
           <Flex
             width={"auto"}
             alignItems={"flex-start"}
             justifyContent={"flex-start"}
             bg={useColorModeValue("gray.600", "gray.700")}
             minH="lg"
-        
             mt="5"
             rounded={"lg"}
           >
             <Formik
               initialValues={{ username: "", password: "" }}
               onSubmit={async (values, { setErrors }) => {
-
                 
               }}
             >
@@ -186,10 +184,15 @@ const Post = () => {
                         alignItems={"center"}
                         justifyContent={"center"}
                       >
-                        <Button variant={"solid"} onClick={() => {
-                          setShowCreatePost(false)
-                          onClose();
-                        }}>Cancel</Button>
+                        <Button
+                          variant={"solid"}
+                          onClick={() => {
+                            setShowCreatePost(false);
+                            onClose();
+                          }}
+                        >
+                          Cancel
+                        </Button>
                         <Button ml="5" variant={"solid"}>
                           Save
                         </Button>

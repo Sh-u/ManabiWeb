@@ -22,6 +22,8 @@ const Learn = () => {
   if (!meQuery.data.me) {
     router.push('/')
   }
+
+  
   return (
     <Box height="100vh" maxW={"7xl"} mx={"auto"}>
       <Navbar />
