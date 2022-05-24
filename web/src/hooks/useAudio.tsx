@@ -6,9 +6,9 @@ const useAudio = (url : string ): [Boolean, () => void] => {
     const [audio] = useState(new Audio(url));
     const [playing, setPlaying] = useState(false);
   
-    console.log(playing)
+
     const toggle = () => {
-      console.log('toggle')
+ 
       setPlaying(!playing);
     }
   

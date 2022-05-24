@@ -11,24 +11,42 @@ export const config = {
 };
 
 export default async (req, res) => {
-  const data = new Promise((reso, rej) => {
+  const data = new Promise((resolve, reject) => {
     const form = new IncomingForm();
 
-    console.log(`api form: `, form);
+    // console.log(`api form: `, form);
 
     form.parse(req, (err, fields, files) => {
       if (err) {
-        return rej(err);
+        return reject(err);
       }
-      console.log(fields, files);
-      console.log(files.file.filepath);
+       console.log(`fields: `, fields);
+      // console.log(files.file.filepath);
 
-      let oldPath = files.file.filepath;
-      let newPath = `./public/uploads/${files.file.originalFilename}`;
-      mv(oldPath, newPath, function(err){
+      let oldPathAudio;
+      let oldPathImage;
 
-      })
-      res.status(200).json({fields, files})
+      let newPathAudio;
+      let newPathImage;
+
+      if (files.audioFile){
+        oldPathAudio = files.audioFile.filepath;
+        newPathAudio = `./public/uploads/${files.audioFile.originalFilename}`;
+        mv(oldPathAudio, newPathAudio, function(err){
+
+        })
+      }
+      if (files.imageFile){
+        oldPathImage = files.imageFile.filepath;
+        newPathImage = `./public/uploads/${files.imageFile.originalFilename}`;
+        mv(oldPathImage, newPathImage, function(err){
+
+        })
+      }
+   
+      
+     return res.status(200).json({fields, files})
+     
     });
   });
 };

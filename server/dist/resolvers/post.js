@@ -15,6 +15,41 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostResolver = void 0;
 const Post_1 = require("../entities/Post");
 const type_graphql_1 = require("type-graphql");
+const Deck_1 = require("../entities/Deck");
+let PostInput = class PostInput {
+};
+__decorate([
+    (0, type_graphql_1.Field)(() => String),
+    __metadata("design:type", String)
+], PostInput.prototype, "sentence", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => String),
+    __metadata("design:type", String)
+], PostInput.prototype, "word", void 0);
+__decorate([
+    (0, type_graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], PostInput.prototype, "dictionaryAudio", void 0);
+__decorate([
+    (0, type_graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], PostInput.prototype, "userAudio", void 0);
+PostInput = __decorate([
+    (0, type_graphql_1.InputType)()
+], PostInput);
+let PostResponse = class PostResponse {
+};
+__decorate([
+    (0, type_graphql_1.Field)(() => String),
+    __metadata("design:type", String)
+], PostResponse.prototype, "error", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => Post_1.Post),
+    __metadata("design:type", Post_1.Post)
+], PostResponse.prototype, "post", void 0);
+PostResponse = __decorate([
+    (0, type_graphql_1.ObjectType)()
+], PostResponse);
 let PostResolver = class PostResolver {
     async posts({ em }) {
         return em.find(Post_1.Post, {});
@@ -22,17 +57,36 @@ let PostResolver = class PostResolver {
     post(_id, { em }) {
         return em.findOne(Post_1.Post, { _id });
     }
-    async createPost(title, { em }) {
-        const post = em.create(Post_1.Post, { title });
+    async createPost(options, deckId, { em }) {
+        const post = await em.create(Post_1.Post, {
+            sentence: options.sentence,
+            word: options.word,
+            dictionaryAudio: options.dictionaryAudio,
+            userAudio: options.userAudio
+        });
+        const currentDeck = await em.findOne(Deck_1.Deck, { _id: deckId });
+        if (!post || !currentDeck) {
+            return {
+                error: "Couldn't create Post"
+            };
+        }
         await em.persistAndFlush(post);
-        return post;
+        let postsAmount = currentDeck.posts.length;
+        if (!postsAmount) {
+            return {
+                error: "Couldn't get post amount"
+            };
+        }
+        currentDeck.posts[postsAmount] = post;
+        return {
+            post
+        };
     }
-    async updatePostTitle(_id, title, { em }) {
+    async updatePostTitle(_id, { em }) {
         const post = await em.findOne(Post_1.Post, { _id });
         if (!post) {
             return null;
         }
-        post.title = title;
         await em.persistAndFlush(post);
         return post;
     }
@@ -61,20 +115,20 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "post", null);
 __decorate([
-    (0, type_graphql_1.Mutation)(() => Post_1.Post),
-    __param(0, (0, type_graphql_1.Arg)("title")),
-    __param(1, (0, type_graphql_1.Ctx)()),
+    (0, type_graphql_1.Mutation)(() => PostResponse),
+    __param(0, (0, type_graphql_1.Arg)("options")),
+    __param(1, (0, type_graphql_1.Arg)("deckId")),
+    __param(2, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [PostInput, Number, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "createPost", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Post_1.Post, { nullable: true }),
     __param(0, (0, type_graphql_1.Arg)("_id")),
-    __param(1, (0, type_graphql_1.Arg)("title", () => String, { nullable: true })),
-    __param(2, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, Object]),
+    __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "updatePostTitle", null);
 __decorate([

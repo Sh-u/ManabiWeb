@@ -22,7 +22,7 @@ import { showCreatePostState } from "../atoms/showCreatePostState";
 
 const Post = () => {
   const [image, setImage] = useState({ url: null, image: null });
-  const [audio, setAudio] = useState({ url: null });
+  const [audio, setAudio] = useState({ url: null, audio: null });
   const [showDeleteIcon, setshowDeleteIcon] = useState(false);
   const [showCreatePost, setShowCreatePost] =
     useRecoilState(showCreatePostState);
@@ -48,8 +48,8 @@ const Post = () => {
     setImage({ url, image });
   };
 
-  const handleAudioState = (url) => {
-    setAudio({ url });
+  const handleAudioState = (audio, url) => {
+    setAudio({ url, audio });
   };
 
   const renderExitIcon = () => {
@@ -58,14 +58,21 @@ const Post = () => {
   const uploadToServer = async (event) => {
     const body = new FormData();
     console.log(`body: `, body);
+    if (image.image) {
+      body.append("imageFile", image.image);
+    }
+    if (audio.audio) {
+      body.append("audioFile", audio.audio);
+    }
 
-    // body.append("file", image);
-    console.log(`body2: `, body);
+    console.log(`body2: `, body.get("audioFile"));
 
-    const response = await fetch("../pages/api/uploads", {
+    const response = await fetch("/api/uploads", {
       method: "POST",
       body,
     });
+
+    console.log(`response: `, response);
   };
 
   return (
@@ -84,9 +91,7 @@ const Post = () => {
           >
             <Formik
               initialValues={{ username: "", password: "" }}
-              onSubmit={async (values, { setErrors }) => {
-                
-              }}
+              onSubmit={async (values, { setErrors }) => {}}
             >
               {({ values, handleChange, isSubmitting }) => (
                 <Box width={"full"} p="5">
@@ -138,7 +143,6 @@ const Post = () => {
                       </Box>
 
                       <Flex
-                        cursor={"pointer"}
                         mt="5"
                         alignItems={"center"}
                         justifyContent={"center"}
@@ -151,32 +155,30 @@ const Post = () => {
                         <Text ml="5"> Dictionary audio</Text>
                       </Flex>
                       <Flex
-                        cursor={"pointer"}
                         mt="5"
                         alignItems={"center"}
                         justifyContent={"center"}
                       >
-                        {audio?.url ? <Player url={audio.url} /> : <></>}
-                        <Box onClick={handleDeleteClick}>
-                          {showDeleteIcon ? (
-                            <Flex alignItems={"center"} justifyContent="center">
-                              <Text ml="5"> Your audio</Text>
-                              <CloseIcon
-                                h={"7"}
-                                w={"7"}
-                                transform={"auto"}
-                                p="2"
-                                cursor={"pointer"}
-                                _hover={{
-                                  color: "red.500",
-                                }}
-                                onClick={() => setAudio(null)}
-                              />
-                            </Flex>
-                          ) : (
-                            <></>
-                          )}
-                        </Box>
+                        {audio?.url ? (
+                          <Flex alignItems={"center"} justifyContent="center">
+                            <Player url={audio.url} />
+                            <Text ml="5"> Your audio</Text>
+                            <CloseIcon
+                            ml="2"
+                              h={"7"}
+                              w={"7"}
+                              transform={"auto"}
+                              p="2"
+                              cursor={"pointer"}
+                              _hover={{
+                                color: "red.500",
+                              }}
+                              onClick={() => setAudio(null)}
+                            />
+                          </Flex>
+                        ) : (
+                          <></>
+                        )}
                       </Flex>
                       <Flex
                         cursor={"pointer"}
@@ -193,7 +195,11 @@ const Post = () => {
                         >
                           Cancel
                         </Button>
-                        <Button ml="5" variant={"solid"}>
+                        <Button
+                          ml="5"
+                          variant={"solid"}
+                          onClick={uploadToServer}
+                        >
                           Save
                         </Button>
                       </Flex>

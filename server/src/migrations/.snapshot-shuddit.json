@@ -196,8 +196,17 @@
           "nullable": false,
           "mappedType": "integer"
         },
-        "title": {
-          "name": "title",
+        "sentence": {
+          "name": "sentence",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "word": {
+          "name": "word",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,
@@ -214,8 +223,17 @@
           "nullable": true,
           "mappedType": "text"
         },
-        "audio": {
-          "name": "audio",
+        "dictionary_audio": {
+          "name": "dictionary_audio",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "user_audio": {
+          "name": "user_audio",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,

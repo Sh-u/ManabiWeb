@@ -4,7 +4,6 @@ mutation CreateDeck($title: String!) {
       createdAt
       posts {
         createdAt
-        title
         _id
       }
       title

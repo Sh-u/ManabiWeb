@@ -4,7 +4,6 @@ query GetMyDecks {
       createdAt
       posts {
         createdAt
-        title
         _id
       }
       title

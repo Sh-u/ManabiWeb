@@ -22,7 +22,12 @@ __decorate([
     (0, type_graphql_1.Field)(() => String),
     (0, core_1.Property)({ type: 'text' }),
     __metadata("design:type", String)
-], Post.prototype, "title", void 0);
+], Post.prototype, "sentence", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => String),
+    (0, core_1.Property)({ type: 'text' }),
+    __metadata("design:type", String)
+], Post.prototype, "word", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => type_graphql_1.Int),
     (0, core_1.PrimaryKey)(),
@@ -37,7 +42,12 @@ __decorate([
     (0, type_graphql_1.Field)(() => String, { nullable: true }),
     (0, core_1.Property)({ type: 'text', nullable: true }),
     __metadata("design:type", String)
-], Post.prototype, "audio", void 0);
+], Post.prototype, "dictionaryAudio", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    (0, core_1.Property)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Post.prototype, "userAudio", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
     (0, core_1.Property)({ type: 'date' }),

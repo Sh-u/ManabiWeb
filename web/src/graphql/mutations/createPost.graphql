@@ -1,0 +1,11 @@
+mutation CreatePost($options: PostInput!){
+    createPost(options: $options){
+        sentence,
+        word,
+        _id,
+        dictionaryAudio,
+        userAudio,
+        createdAt,
+        updatedAt
+    }
+}

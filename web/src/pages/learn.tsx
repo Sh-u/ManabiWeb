@@ -1,6 +1,6 @@
 import { Box } from "@chakra-ui/react";
-import router from "next/router";
-import React from "react";
+import {useRouter} from "next/router";
+import React, { useEffect } from "react";
 import { useRecoilValue } from "recoil";
 import { showCreatePostState } from "../atoms/showCreatePostState";
 import { showDeckBodyState } from "../atoms/showDeckBodyState";
@@ -14,14 +14,19 @@ const Learn = () => {
   const showBodyState = useRecoilValue(showDeckBodyState);
 
   const showCreatePost = useRecoilValue(showCreatePostState);
+  const router = useRouter();
+
+  const { data, loading } = useMeQuery();
 
 
-  const meQuery = useMeQuery();
 
+  useEffect(() => {
 
-  if (!meQuery.data.me) {
-    router.push('/')
+    if (!loading && !data.me) {
+      router.push('/')
+      
   }
+  }, [loading])
 
   
   return (

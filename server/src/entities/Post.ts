@@ -4,11 +4,15 @@ import { Field, Int, ObjectType } from "type-graphql";
 @ObjectType()
 @Entity()
 export class Post {
-    [OptionalProps]?: 'createdAt' | 'updatedAt' | '_id' | 'image' | 'audio'
+    [OptionalProps]?: 'createdAt' | 'updatedAt' | '_id' | 'image' | 'dictionaryAudio' | 'userAudio'
 
     @Field(() => String)
     @Property({type: 'text'})
-    title!: string;
+    sentence!: string;
+
+    @Field(() => String)
+    @Property({type: 'text'})
+    word!: string;
 
     @Field(() => Int)
     @PrimaryKey()
@@ -20,7 +24,11 @@ export class Post {
 
     @Field(() => String, {nullable: true})
     @Property({type: 'text', nullable: true})
-    audio?: string;
+    dictionaryAudio?: string;
+
+    @Field(() => String, {nullable: true})
+    @Property({type: 'text', nullable: true})
+    userAudio?: string;
 
     @Field(() => String)
     @Property({type: 'date'})

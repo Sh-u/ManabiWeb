@@ -1,8 +1,9 @@
 query Posts{
   posts {
     _id,
+    sentence,
+    word
     createdAt,
-    title,
     updatedAt
   }
 }

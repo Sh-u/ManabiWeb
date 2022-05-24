@@ -24,8 +24,8 @@ const Dropzone = ({imageState: handleImageState, audioState: handleAudioState}) 
             break;
         }
         if (isAudio(item.name)){
-            console.log('match audio')
-            handleAudioState(URL.createObjectURL(item))
+            console.log('match audio', item)
+            handleAudioState(item, URL.createObjectURL(item))
             break;
         }
     }

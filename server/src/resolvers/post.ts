@@ -1,9 +1,34 @@
 import { Post } from "../entities/Post";
 import { MyContext } from "../types";
-import { Arg, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Ctx, Field, InputType, Int, Mutation, ObjectType, Query, Resolver } from "type-graphql";
+import { Deck } from "../entities/Deck";
+import { workerData } from "worker_threads";
+
+@InputType()
+class PostInput {
+  @Field(() => String)
+  sentence!: string;
+
+  @Field(() => String)
+  word!: string;
+
+  @Field({nullable: true})
+  dictionaryAudio?: string;
+
+  @Field({nullable: true})
+  userAudio?: string;
+  
+}
 
 
+@ObjectType()
+class PostResponse {
+  @Field(() => String)
+  error?: string;
 
+  @Field(() => Post)
+  post?: Post;
+}
   
 
 @Resolver()
@@ -22,20 +47,47 @@ export class PostResolver {
     return em.findOne(Post, { _id });
   }
 
-  @Mutation(() => Post)
+  @Mutation(() => PostResponse)
   async createPost(
-    @Arg("title") title: string,
+    @Arg("options") options: PostInput,
+    @Arg("deckId") deckId: number,
     @Ctx() { em }: MyContext
-  ): Promise<Post> {
-    const post = em.create(Post, { title });
+  ): Promise<PostResponse> {
+
+    const post = await em.create(Post, {
+       sentence: options.sentence,
+       word: options.word,
+       dictionaryAudio: options.dictionaryAudio,
+       userAudio: options.userAudio
+      });
+
+    const currentDeck = await em.findOne(Deck, {_id: deckId})
+
+    if (!post || !currentDeck){
+      return {
+        error: "Couldn't create Post"
+      }
+    }
+
     await em.persistAndFlush(post);
-    return post;
+
+    let postsAmount = currentDeck.posts.length;
+
+    if (!postsAmount){
+      return {
+        error: "Couldn't get post amount"
+      }
+    }
+    currentDeck.posts[postsAmount] = post;
+
+    return {
+      post
+    }
   }
 
   @Mutation(() => Post, { nullable: true })
   async updatePostTitle(
     @Arg("_id") _id: number,
-    @Arg("title", () => String, { nullable: true }) title: string,
     @Ctx() { em }: MyContext
   ): Promise<Post | null> {
     const post = await em.findOne(Post, { _id });
@@ -43,7 +95,7 @@ export class PostResolver {
       return null;
     }
 
-    post.title = title;
+    // post.title = title;
     await em.persistAndFlush(post);
 
     return post;
