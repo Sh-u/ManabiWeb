@@ -58,19 +58,30 @@ let PostResolver = class PostResolver {
         return em.findOne(Post_1.Post, { _id });
     }
     async createPost(options, deckId, { em }) {
+        const currentDeck = await em.findOne(Deck_1.Deck, { _id: deckId });
+        if (!currentDeck) {
+            return {
+                error: "Couldn't find a current deck in Post/Resolver"
+            };
+        }
         const post = await em.create(Post_1.Post, {
             sentence: options.sentence,
             word: options.word,
             dictionaryAudio: options.dictionaryAudio,
-            userAudio: options.userAudio
+            userAudio: options.userAudio,
+            deck: currentDeck
         });
-        const currentDeck = await em.findOne(Deck_1.Deck, { _id: deckId });
-        if (!post || !currentDeck) {
+        if (!post) {
             return {
                 error: "Couldn't create Post"
             };
         }
         await em.persistAndFlush(post);
+        if (!currentDeck.posts) {
+            return {
+                error: "There are no posts in this"
+            };
+        }
         let postsAmount = currentDeck.posts.length;
         if (!postsAmount) {
             return {

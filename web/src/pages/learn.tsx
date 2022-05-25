@@ -26,7 +26,7 @@ const Learn = () => {
       router.push('/')
       
   }
-  }, [loading])
+  }, [loading, data?.me])
 
   
   return (

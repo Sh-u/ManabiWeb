@@ -1,11 +1,15 @@
-mutation CreatePost($options: PostInput!){
-    createPost(options: $options){
-        sentence,
-        word,
-        _id,
-        dictionaryAudio,
-        userAudio,
-        createdAt,
-        updatedAt
+mutation CreatePost($deckId: Float!, $options: PostInput!) {
+  createPost(deckId: $deckId, options: $options) {
+    error,
+    post {
+      _id,
+      sentence,
+      word,
+      image,
+      dictionaryAudio,
+      userAudio,
+      createdAt,
+      updatedAt
     }
+  }
 }

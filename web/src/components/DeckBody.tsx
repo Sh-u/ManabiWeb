@@ -1,5 +1,5 @@
 import { Box, Text, Container, Flex, Wrap, Button } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { currentDeckBodyInfoState } from "../atoms/currentDeckBodyInfoState";
 import { showCreatePostState } from "../atoms/showCreatePostState";
@@ -14,11 +14,16 @@ const DeckBody = () => {
   const [showDeckBody, setShowDeckBody] =
     useRecoilState<boolean>(showDeckBodyState);
 
-  const findDeck = useFindDeckQuery({
+  const {data, error, loading} = useFindDeckQuery({
     variables: {
       _id: currentDeck,
     },
   });
+
+  useEffect(() => {
+console.log('find deck: ', data?.findDeck)
+console.log('find deck error: ', error)
+  }, [loading])
 
   return (
     <Flex
@@ -51,7 +56,7 @@ const DeckBody = () => {
           </Button>
         </Flex>
         <Flex align="center" justify={"center"} mt="5">
-          <Text fontSize={"3xl"}>{findDeck.data?.findDeck?.title}</Text>
+          <Text fontSize={"3xl"}>{data?.findDeck?.decks[0]?.title}</Text>
         </Flex>
       </Flex>
       <Flex minH="80%">

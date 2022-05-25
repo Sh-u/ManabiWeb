@@ -1,12 +1,8 @@
 mutation CreateDeck($title: String!) {
   createDeck(title: $title) {
     decks {
-      createdAt
-      posts {
-        createdAt
-        _id
-      }
-      title
+      createdAt,
+      title,
       author {
         _id
         username

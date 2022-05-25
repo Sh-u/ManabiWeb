@@ -1,3 +1,4 @@
+import { ChevronDownIcon, SettingsIcon, DeleteIcon } from "@chakra-ui/icons";
 import {
   Text,
   Box,
@@ -16,17 +17,19 @@ import {
   ModalFooter,
   Button,
   useDisclosure,
+  Icon,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 import router from "next/router";
-import React, { useState } from "react";
-import { FaPlusCircle } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { FaPlusCircle, FaPen, FaShare } from "react-icons/fa";
 import { useRecoilState } from "recoil";
 import { currentDeckBodyInfoState } from "../atoms/currentDeckBodyInfoState";
-import {
-  showDeckBodyState,
-
-} from "../atoms/showDeckBodyState";
+import { showDeckBodyState } from "../atoms/showDeckBodyState";
 import {
   GetMyDecksQuery,
   GetMyDecksDocument,
@@ -34,6 +37,7 @@ import {
   useGetMyDecksQuery,
   useMeQuery,
 } from "../generated/graphql";
+import { DeckButton } from "./DeckButton";
 import Post from "./Post";
 
 const Decks = () => {
@@ -44,7 +48,7 @@ const Decks = () => {
     number | undefined
   >(currentDeckBodyInfoState);
 
-  const decksQuery = useGetMyDecksQuery();
+  const { data: decksData, loading, error } = useGetMyDecksQuery();
   const meQuery = useMeQuery();
   const [createDeck] = useCreateDeckMutation();
 
@@ -59,35 +63,29 @@ const Decks = () => {
     }
     onOpen();
   };
-  console.log(`my decks `, decksQuery?.data?.getMyDecks?.decks);
+
+  const handleShowDeckBody = () => {
+    setShowDeckBody(!showDeckBody);
+  }
+  const handleShowCurrentDeckInfo = (deckId) => {
+    setCurrentDeckBodyInfo(deckId);
+  }
+
+  useEffect(() => {
+    console.log("error", error);
+    console.log(loading, `decks data effect: `, decksData);
+  }, [loading]);
+  // console.log(`my decks `, decksData?.getMyDecks?.decks);
   return (
     <Box>
-      {decksQuery.data?.getMyDecks?.decks ? (
+      {decksData?.getMyDecks?.decks ? (
         <Box>
-          {decksQuery.data?.getMyDecks?.decks.map((deck) => (
-            <Flex
-              flexDir={"column"}
-              alignItems="center"
-              key={deck.createdAt + 500}
-            >
-              <Button
-                onClick={() => {
-                  setShowDeckBody(!showDeckBody);
-                  setCurrentDeckBodyInfo(deck._id);
-                }}
-                mt="5"
-                cursor={"pointer"}
-                textAlign={"center"}
-                maxW="10%"
-                key={deck.createdAt + 100}
-              >
-                <Text key={deck.createdAt}> {deck.title}</Text>
-              </Button>
-            </Flex>
+          {decksData?.getMyDecks?.decks.map((deck) => (
+           <DeckButton handleShowDeckBody={handleShowDeckBody} handleShowCurrentDeckInfo={handleShowCurrentDeckInfo} deck={deck} key={deck.createdAt+14}/>
           ))}
         </Box>
       ) : (
-        <Box>{decksQuery.data?.getMyDecks?.errors}</Box>
+        <Box>{loading ? loading : decksData?.getMyDecks?.errors}</Box>
       )}
       <Flex
         alignItems={"center"}
@@ -130,6 +128,7 @@ const Decks = () => {
                           console.log("error updating cache =>  INDEX.tsx");
                           return;
                         }
+                        console.log("data", data);
 
                         const { getMyDecks }: GetMyDecksQuery = cache.readQuery(
                           {
@@ -137,7 +136,6 @@ const Decks = () => {
                           }
                         );
 
-                        // console.log(`my decks `, getMyDecks);
                         // console.log(`mutation data decks`, data.createDeck);
 
                         if (!getMyDecks.decks) {
@@ -225,7 +223,6 @@ const Decks = () => {
           )}
         </Flex>
       </Flex>
-      
     </Box>
   );
 };

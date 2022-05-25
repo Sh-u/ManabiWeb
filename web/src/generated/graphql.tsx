@@ -20,7 +20,7 @@ export type Deck = {
   _id: Scalars['Int'];
   author: User;
   createdAt: Scalars['String'];
-  posts?: Maybe<Array<Post>>;
+  posts?: Maybe<Post>;
   title: Scalars['String'];
   updatedAt: Scalars['String'];
 };
@@ -47,7 +47,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   changePassword: UserResponse;
   createDeck: DeckResponse;
-  createPost: Post;
+  createPost: PostResponse;
   forgotPassword: Scalars['Boolean'];
   login: UserResponse;
   logout: Scalars['Boolean'];
@@ -71,7 +71,8 @@ export type MutationCreateDeckArgs = {
 
 
 export type MutationCreatePostArgs = {
-  title: Scalars['String'];
+  deckId: Scalars['Float'];
+  options: PostInput;
 };
 
 
@@ -108,20 +109,37 @@ export type MutationUpdateDeckTitleArgs = {
 
 export type MutationUpdatePostTitleArgs = {
   _id: Scalars['Float'];
-  title?: InputMaybe<Scalars['String']>;
 };
 
 export type Post = {
   __typename?: 'Post';
   _id: Scalars['Int'];
   createdAt: Scalars['String'];
-  title: Scalars['String'];
+  deck: Deck;
+  dictionaryAudio?: Maybe<Scalars['String']>;
+  image?: Maybe<Scalars['String']>;
+  sentence: Scalars['String'];
   updatedAt: Scalars['String'];
+  userAudio?: Maybe<Scalars['String']>;
+  word: Scalars['String'];
+};
+
+export type PostInput = {
+  dictionaryAudio?: InputMaybe<Scalars['String']>;
+  sentence: Scalars['String'];
+  userAudio?: InputMaybe<Scalars['String']>;
+  word: Scalars['String'];
+};
+
+export type PostResponse = {
+  __typename?: 'PostResponse';
+  error: Scalars['String'];
+  post: Post;
 };
 
 export type Query = {
   __typename?: 'Query';
-  findDeck?: Maybe<Deck>;
+  findDeck: DeckResponse;
   getAllDecks: Array<Deck>;
   getMyDecks: DeckResponse;
   getUsers: Array<User>;
@@ -151,6 +169,7 @@ export type User = {
   __typename?: 'User';
   _id: Scalars['Int'];
   createdAt: Scalars['String'];
+  decks: Deck;
   email: Scalars['String'];
   updatedAt: Scalars['String'];
   username: Scalars['String'];
@@ -177,7 +196,15 @@ export type CreateDeckMutationVariables = Exact<{
 }>;
 
 
-export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, posts?: Array<{ __typename?: 'Post', createdAt: string, title: string, _id: number }> | null, author: { __typename?: 'User', _id: number, username: string } }> | null } };
+export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, author: { __typename?: 'User', _id: number, username: string } }> | null } };
+
+export type CreatePostMutationVariables = Exact<{
+  deckId: Scalars['Float'];
+  options: PostInput;
+}>;
+
+
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'PostResponse', error: string, post: { __typename?: 'Post', _id: number, sentence: string, word: string, image?: string | null, dictionaryAudio?: string | null, userAudio?: string | null, createdAt: string, updatedAt: string } } };
 
 export type ForgotPasswordMutationVariables = Exact<{
   username: Scalars['String'];
@@ -210,12 +237,12 @@ export type FindDeckQueryVariables = Exact<{
 }>;
 
 
-export type FindDeckQuery = { __typename?: 'Query', findDeck?: { __typename?: 'Deck', _id: number, createdAt: string, title: string, updatedAt: string, author: { __typename?: 'User', _id: number, username: string }, posts?: Array<{ __typename?: 'Post', _id: number, title: string, createdAt: string }> | null } | null };
+export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, author: { __typename?: 'User', _id: number, username: string }, posts?: { __typename?: 'Post', _id: number } | null }> | null } };
 
 export type GetMyDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMyDecksQuery = { __typename?: 'Query', getMyDecks: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, posts?: Array<{ __typename?: 'Post', createdAt: string, title: string, _id: number }> | null, author: { __typename?: 'User', _id: number, username: string } }> | null } };
+export type GetMyDecksQuery = { __typename?: 'Query', getMyDecks: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, author: { __typename?: 'User', _id: number, username: string } }> | null } };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -230,7 +257,7 @@ export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', _id: n
 export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', _id: number, createdAt: string, title: string, updatedAt: string }> };
+export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', _id: number, sentence: string, word: string, createdAt: string, updatedAt: string }> };
 
 export const BasicUserFragmentDoc = gql`
     fragment BasicUser on User {
@@ -283,11 +310,6 @@ export const CreateDeckDocument = gql`
   createDeck(title: $title) {
     decks {
       createdAt
-      posts {
-        createdAt
-        title
-        _id
-      }
       title
       author {
         _id
@@ -325,6 +347,50 @@ export function useCreateDeckMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreateDeckMutationHookResult = ReturnType<typeof useCreateDeckMutation>;
 export type CreateDeckMutationResult = Apollo.MutationResult<CreateDeckMutation>;
 export type CreateDeckMutationOptions = Apollo.BaseMutationOptions<CreateDeckMutation, CreateDeckMutationVariables>;
+export const CreatePostDocument = gql`
+    mutation CreatePost($deckId: Float!, $options: PostInput!) {
+  createPost(deckId: $deckId, options: $options) {
+    error
+    post {
+      _id
+      sentence
+      word
+      image
+      dictionaryAudio
+      userAudio
+      createdAt
+      updatedAt
+    }
+  }
+}
+    `;
+export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
+
+/**
+ * __useCreatePostMutation__
+ *
+ * To run a mutation, you first call `useCreatePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
+ *   variables: {
+ *      deckId: // value for 'deckId'
+ *      options: // value for 'options'
+ *   },
+ * });
+ */
+export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<CreatePostMutation, CreatePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument, options);
+      }
+export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
+export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
+export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($username: String!) {
   forgotPassword(username: $username)
@@ -467,19 +533,19 @@ export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutatio
 export const FindDeckDocument = gql`
     query FindDeck($_id: Int!) {
   findDeck(_id: $_id) {
-    _id
-    author {
+    decks {
       _id
-      username
-    }
-    createdAt
-    posts {
-      _id
+      author {
+        _id
+        username
+      }
+      posts {
+        _id
+      }
       title
       createdAt
+      updatedAt
     }
-    title
-    updatedAt
   }
 }
     `;
@@ -516,11 +582,6 @@ export const GetMyDecksDocument = gql`
   getMyDecks {
     decks {
       createdAt
-      posts {
-        createdAt
-        title
-        _id
-      }
       title
       author {
         _id
@@ -631,8 +692,9 @@ export const PostsDocument = gql`
     query Posts {
   posts {
     _id
+    sentence
+    word
     createdAt
-    title
     updatedAt
   }
 }
@@ -675,6 +737,7 @@ export const namedOperations = {
   Mutation: {
     ChangePassword: 'ChangePassword',
     CreateDeck: 'CreateDeck',
+    CreatePost: 'CreatePost',
     ForgotPassword: 'ForgotPassword',
     Login: 'Login',
     Logout: 'Logout',

@@ -1,4 +1,3 @@
-import { MyContext } from "../types";
 import {
   Arg,
   Ctx,
@@ -11,11 +10,10 @@ import {
 } from "type-graphql";
 import { Deck } from "../entities/Deck";
 import { User } from "../entities/User";
-import { PrimaryKey } from "@mikro-orm/core/decorators/PrimaryKey";
+import { MyContext } from "../types";
 
 @ObjectType()
 class DeckResponse {
-
   @Field(() => String, { nullable: true })
   errors?: String;
 
@@ -32,17 +30,11 @@ export class DeckResolver {
 
   @Query(() => DeckResponse)
   async getMyDecks(@Ctx() { req, em }: MyContext): Promise<DeckResponse> {
-
-  
-
     const user = await em.findOne(User, { _id: req.session.userId });
 
-    
     if (!user) {
       return {
         errors: "user not found",
-
-        
       };
     }
 
@@ -54,43 +46,42 @@ export class DeckResolver {
       };
     }
 
-    if (decks.length < 1){
+    if (decks.length < 1) {
       return {
         errors: "Looks like you have no decks created...",
       };
     }
 
-    
-
-    console.log('success getting decks')
+    console.log("success getting decks");
     return {
-      decks
+      decks,
     };
   }
 
-  @Query(() => Deck, { nullable: true })
+  @Query(() => DeckResponse)
   async findDeck(
     @Arg("_id", () => Int) _id: number,
     @Ctx() { em }: MyContext
-  ): Promise<Deck | null> {
-   
-
-
-
+  ): Promise<DeckResponse> {
     const deck = await em.findOne(Deck, { _id });
 
-    if (!deck){
-      return null;
+    if (!deck) {
+      return {
+        errors: "Couldn't find the deck you searched for",
+      };
     }
-    
+
     const user = await em.findOne(User, { _id: deck?.author._id });
 
-  
-    if (!user){
-      console.log('no user')
+    if (!user) {
+      return {
+        errors: "Couldn't find the user owning this deck",
+      };
     }
- 
-    return deck;
+
+    return {
+      decks: [deck],
+    };
   }
 
   @Mutation(() => DeckResponse)
@@ -100,7 +91,7 @@ export class DeckResolver {
   ): Promise<DeckResponse> {
     const user = await em.findOne(User, { _id: req.session.userId });
 
-    if (title.length < 4 || title.length > 30){
+    if (title.length < 4 || title.length > 30) {
       return {
         errors: "Invalid title length",
       };
@@ -115,14 +106,12 @@ export class DeckResolver {
     const deck = await em.create(Deck, { title, author: user });
     try {
       await em.persistAndFlush(deck);
-    } catch (err){
-      console.log(err)
+    } catch (err) {
+      console.log(err);
     }
-   
 
-   
     return {
-      decks: [deck]
+      decks: [deck],
     };
   }
 

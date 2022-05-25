@@ -126,15 +126,6 @@
           "nullable": false,
           "mappedType": "integer"
         },
-        "posts": {
-          "name": "posts",
-          "type": "text[]",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "mappedType": "array"
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz(0)",
@@ -203,6 +194,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
+          "default": "''",
           "mappedType": "text"
         },
         "word": {
@@ -212,6 +204,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
+          "default": "''",
           "mappedType": "text"
         },
         "image": {
@@ -240,6 +233,15 @@
           "primary": false,
           "nullable": true,
           "mappedType": "text"
+        },
+        "deck__id": {
+          "name": "deck__id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
         },
         "created_at": {
           "name": "created_at",
@@ -276,7 +278,20 @@
         }
       ],
       "checks": [],
-      "foreignKeys": {}
+      "foreignKeys": {
+        "post_deck__id_foreign": {
+          "constraintName": "post_deck__id_foreign",
+          "columnNames": [
+            "deck__id"
+          ],
+          "localTableName": "public.post",
+          "referencedColumnNames": [
+            "_id"
+          ],
+          "referencedTableName": "public.deck",
+          "updateRule": "cascade"
+        }
+      }
     }
   ]
 }

@@ -16,13 +16,14 @@ const Post_1 = require("./Post");
 const User_1 = require("./User");
 let Deck = class Deck {
     constructor() {
+        this.posts = new core_1.Collection(this);
         this.createdAt = new Date();
         this.updatedAt = new Date();
     }
 };
 __decorate([
     (0, type_graphql_1.Field)(() => String),
-    (0, core_1.Property)({ type: 'text' }),
+    (0, core_1.Property)({ type: "text" }),
     __metadata("design:type", String)
 ], Deck.prototype, "title", void 0);
 __decorate([
@@ -36,18 +37,18 @@ __decorate([
     __metadata("design:type", Number)
 ], Deck.prototype, "_id", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => [Post_1.Post], { nullable: true }),
-    (0, core_1.Property)({ nullable: true }),
-    __metadata("design:type", Array)
+    (0, type_graphql_1.Field)(() => [Post_1.Post]),
+    (0, core_1.OneToMany)(() => Post_1.Post, (post) => post.deck),
+    __metadata("design:type", core_1.Collection)
 ], Deck.prototype, "posts", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
-    (0, core_1.Property)({ type: 'date' }),
+    (0, core_1.Property)({ type: "date" }),
     __metadata("design:type", Date)
 ], Deck.prototype, "createdAt", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
-    (0, core_1.Property)({ type: 'date', onUpdate: () => new Date() }),
+    (0, core_1.Property)({ type: "date", onUpdate: () => new Date() }),
     __metadata("design:type", Date)
 ], Deck.prototype, "updatedAt", void 0);
 Deck = __decorate([

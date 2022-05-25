@@ -51,21 +51,27 @@ let DeckResolver = class DeckResolver {
                 errors: "Looks like you have no decks created...",
             };
         }
-        console.log('success getting decks');
+        console.log("success getting decks");
         return {
-            decks
+            decks,
         };
     }
     async findDeck(_id, { em }) {
         const deck = await em.findOne(Deck_1.Deck, { _id });
         if (!deck) {
-            return null;
+            return {
+                errors: "Couldn't find the deck you searched for",
+            };
         }
         const user = await em.findOne(User_1.User, { _id: deck === null || deck === void 0 ? void 0 : deck.author._id });
         if (!user) {
-            console.log('no user');
+            return {
+                errors: "Couldn't find the user owning this deck",
+            };
         }
-        return deck;
+        return {
+            decks: [deck],
+        };
     }
     async createDeck(title, { em, req }) {
         const user = await em.findOne(User_1.User, { _id: req.session.userId });
@@ -87,7 +93,7 @@ let DeckResolver = class DeckResolver {
             console.log(err);
         }
         return {
-            decks: [deck]
+            decks: [deck],
         };
     }
     async updateDeckTitle(_id, title, { em }) {
@@ -123,7 +129,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DeckResolver.prototype, "getMyDecks", null);
 __decorate([
-    (0, type_graphql_1.Query)(() => Deck_1.Deck, { nullable: true }),
+    (0, type_graphql_1.Query)(() => DeckResponse),
     __param(0, (0, type_graphql_1.Arg)("_id", () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),

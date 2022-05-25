@@ -54,22 +54,36 @@ export class PostResolver {
     @Ctx() { em }: MyContext
   ): Promise<PostResponse> {
 
-    const post = await em.create(Post, {
-       sentence: options.sentence,
-       word: options.word,
-       dictionaryAudio: options.dictionaryAudio,
-       userAudio: options.userAudio
-      });
+   
 
     const currentDeck = await em.findOne(Deck, {_id: deckId})
 
-    if (!post || !currentDeck){
+    if (!currentDeck){
+      return {
+        error: "Couldn't find a current deck in Post/Resolver"
+      }
+    }
+    const post = await em.create(Post, {
+      sentence: options.sentence,
+      word: options.word,
+      dictionaryAudio: options.dictionaryAudio,
+      userAudio: options.userAudio,
+      deck: currentDeck
+     });
+
+    if (!post){
       return {
         error: "Couldn't create Post"
       }
     }
 
     await em.persistAndFlush(post);
+    
+    if (!currentDeck.posts){
+      return {
+        error: "There are no posts in this"
+      }
+    }
 
     let postsAmount = currentDeck.posts.length;
 

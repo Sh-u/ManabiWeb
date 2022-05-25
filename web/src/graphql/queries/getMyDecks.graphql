@@ -2,10 +2,7 @@ query GetMyDecks {
   getMyDecks {
     decks {
       createdAt
-      posts {
-        createdAt
-        _id
-      }
+      
       title
       author {
         _id
