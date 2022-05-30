@@ -96,7 +96,10 @@ let DeckResolver = class DeckResolver {
             decks: [deck],
         };
     }
-    async updateDeckTitle(_id, title, { em }) {
+    async renameDeck(_id, title, { em }) {
+        if (title.length < 3) {
+            return null;
+        }
         const deck = await em.findOne(Deck_1.Deck, { _id });
         if (!deck) {
             return null;
@@ -147,12 +150,12 @@ __decorate([
 __decorate([
     (0, type_graphql_1.Mutation)(() => Deck_1.Deck, { nullable: true }),
     __param(0, (0, type_graphql_1.Arg)("_id")),
-    __param(1, (0, type_graphql_1.Arg)("title", () => String, { nullable: true })),
+    __param(1, (0, type_graphql_1.Arg)("title", () => String)),
     __param(2, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, String, Object]),
     __metadata("design:returntype", Promise)
-], DeckResolver.prototype, "updateDeckTitle", null);
+], DeckResolver.prototype, "renameDeck", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
     __param(0, (0, type_graphql_1.Arg)("_id")),

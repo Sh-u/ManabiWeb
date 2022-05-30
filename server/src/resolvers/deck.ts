@@ -116,13 +116,18 @@ export class DeckResolver {
   }
 
   @Mutation(() => Deck, { nullable: true })
-  async updateDeckTitle(
+  async renameDeck(
     @Arg("_id") _id: number,
-    @Arg("title", () => String, { nullable: true }) title: string,
+    @Arg("title", () => String) title: string,
     @Ctx() { em }: MyContext
   ): Promise<Deck | null> {
+
+    if (title.length < 3){
+      return null;
+    }
     const deck = await em.findOne(Deck, { _id });
     if (!deck) {
+      
       return null;
     }
 

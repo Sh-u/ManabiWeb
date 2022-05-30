@@ -1,0 +1,5 @@
+mutation RenameDeck($_id: Float!, $title: String!) {
+    renameDeck(_id: $_id, title: $title){
+        title
+    }
+}

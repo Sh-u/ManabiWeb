@@ -20,7 +20,7 @@ export type Deck = {
   _id: Scalars['Int'];
   author: User;
   createdAt: Scalars['String'];
-  posts?: Maybe<Post>;
+  posts: Array<Post>;
   title: Scalars['String'];
   updatedAt: Scalars['String'];
 };
@@ -54,7 +54,7 @@ export type Mutation = {
   register: UserResponse;
   removeDeck: Scalars['Boolean'];
   removePost: Scalars['Boolean'];
-  updateDeckTitle?: Maybe<Deck>;
+  renameDeck?: Maybe<Deck>;
   updatePostTitle?: Maybe<Post>;
 };
 
@@ -101,9 +101,9 @@ export type MutationRemovePostArgs = {
 };
 
 
-export type MutationUpdateDeckTitleArgs = {
+export type MutationRenameDeckArgs = {
   _id: Scalars['Float'];
-  title?: InputMaybe<Scalars['String']>;
+  title: Scalars['String'];
 };
 
 
@@ -232,12 +232,20 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string } | null } };
 
+export type RenameDeckMutationVariables = Exact<{
+  _id: Scalars['Float'];
+  title: Scalars['String'];
+}>;
+
+
+export type RenameDeckMutation = { __typename?: 'Mutation', renameDeck?: { __typename?: 'Deck', title: string } | null };
+
 export type FindDeckQueryVariables = Exact<{
   _id: Scalars['Int'];
 }>;
 
 
-export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, author: { __typename?: 'User', _id: number, username: string }, posts?: { __typename?: 'Post', _id: number } | null }> | null } };
+export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, author: { __typename?: 'User', _id: number, username: string }, posts: Array<{ __typename?: 'Post', _id: number }> }> | null } };
 
 export type GetMyDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -530,6 +538,40 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const RenameDeckDocument = gql`
+    mutation RenameDeck($_id: Float!, $title: String!) {
+  renameDeck(_id: $_id, title: $title) {
+    title
+  }
+}
+    `;
+export type RenameDeckMutationFn = Apollo.MutationFunction<RenameDeckMutation, RenameDeckMutationVariables>;
+
+/**
+ * __useRenameDeckMutation__
+ *
+ * To run a mutation, you first call `useRenameDeckMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRenameDeckMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [renameDeckMutation, { data, loading, error }] = useRenameDeckMutation({
+ *   variables: {
+ *      _id: // value for '_id'
+ *      title: // value for 'title'
+ *   },
+ * });
+ */
+export function useRenameDeckMutation(baseOptions?: Apollo.MutationHookOptions<RenameDeckMutation, RenameDeckMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RenameDeckMutation, RenameDeckMutationVariables>(RenameDeckDocument, options);
+      }
+export type RenameDeckMutationHookResult = ReturnType<typeof useRenameDeckMutation>;
+export type RenameDeckMutationResult = Apollo.MutationResult<RenameDeckMutation>;
+export type RenameDeckMutationOptions = Apollo.BaseMutationOptions<RenameDeckMutation, RenameDeckMutationVariables>;
 export const FindDeckDocument = gql`
     query FindDeck($_id: Int!) {
   findDeck(_id: $_id) {
@@ -741,7 +783,8 @@ export const namedOperations = {
     ForgotPassword: 'ForgotPassword',
     Login: 'Login',
     Logout: 'Logout',
-    Register: 'Register'
+    Register: 'Register',
+    RenameDeck: 'RenameDeck'
   },
   Fragment: {
     BasicUser: 'BasicUser'
