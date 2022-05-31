@@ -1,6 +1,13 @@
 import { DeleteIcon, SettingsIcon } from "@chakra-ui/icons";
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
   Button,
+  ButtonGroup,
   Flex,
   FormControl,
   FormErrorMessage,
@@ -17,16 +24,26 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverFooter,
+  PopoverHeader,
+  PopoverTrigger,
   Text,
   useDisclosure,
-  useToast
+  useToast,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { FaPen, FaShare } from "react-icons/fa";
 import {
   GetMyDecksDocument,
-  useRenameDeckMutation
+  GetMyDecksQuery,
+  useDeleteDeckMutation,
+  useRenameDeckMutation,
 } from "../generated/graphql";
 
 interface renameDeckProps {
@@ -47,7 +64,6 @@ const RenameModal = ({
   const toast = useToast();
 
   useEffect(() => {
-    console.log(isOpen);
     if (!isOpen) {
       onOpen();
     }
@@ -83,7 +99,6 @@ const RenameModal = ({
               if (response.errors) {
                 console.log(response.errors);
               } else if (response?.data?.renameDeck) {
-                console.log("success");
                 onClose();
                 setShowModal(!showModal);
                 toast({
@@ -155,10 +170,41 @@ export const DeckButton = ({
   handleShowCurrentDeckInfo,
 }) => {
   const [showModal, setShowModal] = useState(false);
-  console.log(`showmodal `, showModal);
+  const [removePopOver, setRemovePopOver] = useState(true);
+  const [deleteDeck] = useDeleteDeckMutation();
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const cancelRef = React.useRef()
+  const handleRemoveDeck = (currentDeckID: number) => {
+    const response = deleteDeck({
+      variables: {
+        _id: currentDeckID,
+      },
+      update(cache) {
+        if (!response) {
+          console.log("here");
+          return;
+        }
 
+        const { getMyDecks }: GetMyDecksQuery = cache.readQuery({
+          query: GetMyDecksDocument,
+        });
+
+        cache.writeQuery({
+          query: GetMyDecksDocument,
+          data: {
+            getMyDecks: {
+              decks: getMyDecks.decks.filter(
+                (deck) => deck._id !== currentDeckID
+              ),
+              errors: null,
+            },
+          },
+        });
+      },
+    });
+  };
   return (
-    <Flex flexDir={"column"} alignItems="center" key={deck.createdAt + 500}>
+    <Flex flexDir={"column"} alignItems="center" key={deck._id}>
       <Flex mt="5" align="center" justify={"center"}>
         <Button
           onClick={() => {
@@ -168,7 +214,6 @@ export const DeckButton = ({
           cursor={"pointer"}
           textAlign={"center"}
           maxW="full"
-          key={deck.createdAt + 100}
         >
           <Text>{deck.title}</Text>
         </Button>
@@ -180,9 +225,12 @@ export const DeckButton = ({
               Rename
             </MenuItem>
             <MenuItem icon={<FaShare />}>Share</MenuItem>
-            <MenuItem icon={<DeleteIcon />}>Delete</MenuItem>
+          
+            <MenuItem icon={<DeleteIcon />} onClick={() => onOpen()}>Delete</MenuItem>
+            
           </MenuList>
         </Menu>
+        
       </Flex>
       {showModal ? (
         <RenameModal
@@ -191,6 +239,36 @@ export const DeckButton = ({
           showModal={showModal}
         />
       ) : null}
+      {isOpen ? (
+         <AlertDialog
+         isOpen={isOpen}
+         leastDestructiveRef={cancelRef}
+         onClose={onClose}
+       >
+         <AlertDialogOverlay>
+           <AlertDialogContent>
+             <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+               Delete Deck
+             </AlertDialogHeader>
+ 
+             <AlertDialogBody>
+               Are you sure? You can't undo this action afterwards.
+             </AlertDialogBody>
+ 
+             <AlertDialogFooter>
+               <Button ref={cancelRef} onClick={onClose}>
+                 Cancel
+               </Button>
+               <Button colorScheme='red' onClick={() => {
+                 handleRemoveDeck(deck._id)
+                 onClose()}} ml={3}>
+                 Delete
+               </Button>
+             </AlertDialogFooter>
+           </AlertDialogContent>
+         </AlertDialogOverlay>
+       </AlertDialog>
+        ) : null}
     </Flex>
   );
 };

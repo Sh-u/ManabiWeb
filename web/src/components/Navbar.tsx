@@ -26,6 +26,7 @@ import React from "react";
 import { FaDiscord, FaGithub } from "react-icons/fa";
 import {
   GetMyDecksDocument,
+  GetMyDecksQuery,
   MeDocument,
   useLogoutMutation,
   useMeQuery,
@@ -45,13 +46,17 @@ const Navbar = () => {
           me: null,
         },
       });
-    },
 
-    refetchQueries: [
-      {
+      cache.writeQuery({
         query: GetMyDecksDocument,
-      },
-    ],
+        data: {
+          getMyDecks: {
+            decks: undefined,
+            errors: null,
+          },
+        },
+      });
+    },
   });
 
   return (
@@ -70,7 +75,10 @@ const Navbar = () => {
           color={useColorModeValue("gray.800", "gray.200")}
         >
           <NextLink href="/">
-            <Link fontSize={"xl"} style={{ textDecoration: 'none' }}> ManabiWeb</Link>
+            <Link fontSize={"xl"} style={{ textDecoration: "none" }}>
+              {" "}
+              ManabiWeb
+            </Link>
           </NextLink>
         </Box>
 
@@ -82,12 +90,12 @@ const Navbar = () => {
           bgGradient="linear(to-l, #7928CA, #FF0080)"
           rounded={"lg"}
           _hover={{
-            transitionDuration: '100ms',
-            transform: 'scale(1.1 )'
+            transitionDuration: "100ms",
+            transform: "scale(1.1 )",
           }}
         >
           <NextLink href="/learn">
-            <Link style={{ textDecoration: 'none' }}> Learn</Link>
+            <Link style={{ textDecoration: "none" }}> Learn</Link>
           </NextLink>
         </Button>
       </Flex>
@@ -117,8 +125,7 @@ const Navbar = () => {
             _focus={{ bg: useColorModeValue("gray.200", "gray.600") }}
             _hover={{ bg: useColorModeValue("gray.200", "gray.600") }}
           />
-          <InputRightElement mr='3' children={<Kbd>Ctrl+K</Kbd>}/>
-        
+          <InputRightElement mr="3" children={<Kbd>Ctrl+K</Kbd>} />
         </InputGroup>
       </Box>
 

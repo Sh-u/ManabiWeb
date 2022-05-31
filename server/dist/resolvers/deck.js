@@ -108,7 +108,7 @@ let DeckResolver = class DeckResolver {
         await em.persistAndFlush(deck);
         return deck;
     }
-    async removeDeck(_id, { em }) {
+    async deleteDeck(_id, { em }) {
         const deck = await em.findOne(Deck_1.Deck, { _id });
         if (!deck) {
             return false;
@@ -163,7 +163,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
-], DeckResolver.prototype, "removeDeck", null);
+], DeckResolver.prototype, "deleteDeck", null);
 DeckResolver = __decorate([
     (0, type_graphql_1.Resolver)()
 ], DeckResolver);

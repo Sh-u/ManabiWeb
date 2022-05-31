@@ -138,7 +138,7 @@ export class DeckResolver {
   }
 
   @Mutation(() => Boolean)
-  async removeDeck(
+  async deleteDeck(
     @Arg("_id") _id: number,
     @Ctx() { em }: MyContext
   ): Promise<Boolean> {
@@ -146,6 +146,7 @@ export class DeckResolver {
     if (!deck) {
       return false;
     }
+    
     await em.removeAndFlush(deck);
 
     return true;

@@ -1,0 +1,5 @@
+mutation DeleteDeck($_id: Float!){
+    deleteDeck(_id: $_id)
+
+    
+}

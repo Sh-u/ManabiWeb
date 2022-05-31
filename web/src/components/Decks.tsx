@@ -48,6 +48,7 @@ const Decks = () => {
     number | undefined
   >(currentDeckBodyInfoState);
 
+
   const { data: decksData, loading, error } = useGetMyDecksQuery();
   const meQuery = useMeQuery();
   const [createDeck] = useCreateDeckMutation();
@@ -71,21 +72,30 @@ const Decks = () => {
     setCurrentDeckBodyInfo(deckId);
   }
 
-  useEffect(() => {
-    console.log("error", error);
-    console.log(loading, `decks data effect: `, decksData);
-  }, [loading]);
-  // console.log(`my decks `, decksData?.getMyDecks?.decks);
+
+
+  let decks = decksData?.getMyDecks?.decks;
+  let orderedDecks = undefined;
+  
+  if (decks){
+    orderedDecks = [...decks]?.sort((a,b) => (a._id > b._id) ? 1 : -1);
+  }
+  console.log(orderedDecks)   
+
   return (
     <Box>
-      {decksData?.getMyDecks?.decks ? (
+      {decks ? (
         <Box>
-          {decksData?.getMyDecks?.decks.map((deck) => (
-           <DeckButton handleShowDeckBody={handleShowDeckBody} handleShowCurrentDeckInfo={handleShowCurrentDeckInfo} deck={deck} key={deck.createdAt+14}/>
-          ))}
+          {
+          
+          orderedDecks?.map((deck) => (
+           <DeckButton handleShowDeckBody={handleShowDeckBody} handleShowCurrentDeckInfo={handleShowCurrentDeckInfo} deck={deck} key={deck._id}/>
+          
+          ))
+          }
         </Box>
       ) : (
-        <Box>{loading ? loading : decksData?.getMyDecks?.errors}</Box>
+        <Box textAlign={'center'}>{loading ? loading : decksData?.getMyDecks?.errors}</Box>
       )}
       <Flex
         alignItems={"center"}

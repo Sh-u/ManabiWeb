@@ -48,11 +48,11 @@ export type Mutation = {
   changePassword: UserResponse;
   createDeck: DeckResponse;
   createPost: PostResponse;
+  deleteDeck: Scalars['Boolean'];
   forgotPassword: Scalars['Boolean'];
   login: UserResponse;
   logout: Scalars['Boolean'];
   register: UserResponse;
-  removeDeck: Scalars['Boolean'];
   removePost: Scalars['Boolean'];
   renameDeck?: Maybe<Deck>;
   updatePostTitle?: Maybe<Post>;
@@ -76,6 +76,11 @@ export type MutationCreatePostArgs = {
 };
 
 
+export type MutationDeleteDeckArgs = {
+  _id: Scalars['Float'];
+};
+
+
 export type MutationForgotPasswordArgs = {
   username: Scalars['String'];
 };
@@ -88,11 +93,6 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   options: RegisterInput;
-};
-
-
-export type MutationRemoveDeckArgs = {
-  _id: Scalars['Float'];
 };
 
 
@@ -205,6 +205,13 @@ export type CreatePostMutationVariables = Exact<{
 
 
 export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'PostResponse', error: string, post: { __typename?: 'Post', _id: number, sentence: string, word: string, image?: string | null, dictionaryAudio?: string | null, userAudio?: string | null, createdAt: string, updatedAt: string } } };
+
+export type DeleteDeckMutationVariables = Exact<{
+  _id: Scalars['Float'];
+}>;
+
+
+export type DeleteDeckMutation = { __typename?: 'Mutation', deleteDeck: boolean };
 
 export type ForgotPasswordMutationVariables = Exact<{
   username: Scalars['String'];
@@ -399,6 +406,37 @@ export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
 export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
 export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export const DeleteDeckDocument = gql`
+    mutation DeleteDeck($_id: Float!) {
+  deleteDeck(_id: $_id)
+}
+    `;
+export type DeleteDeckMutationFn = Apollo.MutationFunction<DeleteDeckMutation, DeleteDeckMutationVariables>;
+
+/**
+ * __useDeleteDeckMutation__
+ *
+ * To run a mutation, you first call `useDeleteDeckMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteDeckMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteDeckMutation, { data, loading, error }] = useDeleteDeckMutation({
+ *   variables: {
+ *      _id: // value for '_id'
+ *   },
+ * });
+ */
+export function useDeleteDeckMutation(baseOptions?: Apollo.MutationHookOptions<DeleteDeckMutation, DeleteDeckMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteDeckMutation, DeleteDeckMutationVariables>(DeleteDeckDocument, options);
+      }
+export type DeleteDeckMutationHookResult = ReturnType<typeof useDeleteDeckMutation>;
+export type DeleteDeckMutationResult = Apollo.MutationResult<DeleteDeckMutation>;
+export type DeleteDeckMutationOptions = Apollo.BaseMutationOptions<DeleteDeckMutation, DeleteDeckMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($username: String!) {
   forgotPassword(username: $username)
@@ -780,6 +818,7 @@ export const namedOperations = {
     ChangePassword: 'ChangePassword',
     CreateDeck: 'CreateDeck',
     CreatePost: 'CreatePost',
+    DeleteDeck: 'DeleteDeck',
     ForgotPassword: 'ForgotPassword',
     Login: 'Login',
     Logout: 'Logout',
