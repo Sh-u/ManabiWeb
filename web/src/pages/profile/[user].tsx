@@ -19,8 +19,9 @@ export const getServerSideProps: GetServerSideProps = async ({query}) => {
       });
 
 console.log(data)
-    const inputedUser = query.user;
+console.log('query', query)
 
+      const inputedUser = query.username;
     if (data.username !== inputedUser){
         return {
             notFound: true

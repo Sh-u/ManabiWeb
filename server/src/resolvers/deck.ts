@@ -25,8 +25,11 @@ class DeckResponse {
 export class DeckResolver {
   @Query(() => [Deck])
   async getAllDecks(@Ctx() { em }: MyContext): Promise<Deck[]> {
-    return em.find(Deck, {});
+    return await em.find(Deck, {});
   }
+
+
+
 
   @Query(() => DeckResponse)
   async getMyDecks(@Ctx() { req, em }: MyContext): Promise<DeckResponse> {

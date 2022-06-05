@@ -31,7 +31,7 @@ DeckResponse = __decorate([
 ], DeckResponse);
 let DeckResolver = class DeckResolver {
     async getAllDecks({ em }) {
-        return em.find(Deck_1.Deck, {});
+        return await em.find(Deck_1.Deck, {});
     }
     async getMyDecks({ req, em }) {
         const user = await em.findOne(User_1.User, { _id: req.session.userId });

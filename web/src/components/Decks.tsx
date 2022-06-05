@@ -75,6 +75,7 @@ const Decks = () => {
 
 
   let decks = decksData?.getMyDecks?.decks;
+  
   let orderedDecks = undefined;
   
   if (decks){

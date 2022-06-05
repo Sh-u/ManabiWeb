@@ -254,6 +254,11 @@ export type FindDeckQueryVariables = Exact<{
 
 export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, author: { __typename?: 'User', _id: number, username: string }, posts: Array<{ __typename?: 'Post', _id: number }> }> | null } };
 
+export type GetAllDecksQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllDecksQuery = { __typename?: 'Query', getAllDecks: Array<{ __typename?: 'Deck', _id: number, posts: Array<{ __typename?: 'Post', _id: number }> }> };
+
 export type GetMyDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -657,6 +662,43 @@ export function useFindDeckLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<F
 export type FindDeckQueryHookResult = ReturnType<typeof useFindDeckQuery>;
 export type FindDeckLazyQueryHookResult = ReturnType<typeof useFindDeckLazyQuery>;
 export type FindDeckQueryResult = Apollo.QueryResult<FindDeckQuery, FindDeckQueryVariables>;
+export const GetAllDecksDocument = gql`
+    query GetAllDecks {
+  getAllDecks {
+    _id
+    posts {
+      _id
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetAllDecksQuery__
+ *
+ * To run a query within a React component, call `useGetAllDecksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllDecksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllDecksQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAllDecksQuery(baseOptions?: Apollo.QueryHookOptions<GetAllDecksQuery, GetAllDecksQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAllDecksQuery, GetAllDecksQueryVariables>(GetAllDecksDocument, options);
+      }
+export function useGetAllDecksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllDecksQuery, GetAllDecksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAllDecksQuery, GetAllDecksQueryVariables>(GetAllDecksDocument, options);
+        }
+export type GetAllDecksQueryHookResult = ReturnType<typeof useGetAllDecksQuery>;
+export type GetAllDecksLazyQueryHookResult = ReturnType<typeof useGetAllDecksLazyQuery>;
+export type GetAllDecksQueryResult = Apollo.QueryResult<GetAllDecksQuery, GetAllDecksQueryVariables>;
 export const GetMyDecksDocument = gql`
     query GetMyDecks {
   getMyDecks {
@@ -809,6 +851,7 @@ export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariable
 export const namedOperations = {
   Query: {
     FindDeck: 'FindDeck',
+    GetAllDecks: 'GetAllDecks',
     GetMyDecks: 'GetMyDecks',
     GetUsers: 'GetUsers',
     Me: 'Me',
