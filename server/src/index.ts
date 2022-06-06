@@ -7,6 +7,7 @@ import express from "express";
 import session from "express-session";
 
 import Redis from "ioredis";
+import { emit } from "process";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import { COOKIE_NAME } from "./constants";
@@ -32,6 +33,8 @@ const corsOptions = {
 const main = async () => {
   const orm = await MikroORM.init(mikroOrmConfig);
 
+
+  
   await orm.getMigrator().up();
 
   const app = express();

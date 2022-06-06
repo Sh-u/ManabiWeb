@@ -2,7 +2,7 @@ query FindDeck($_id: Int!) {
   findDeck(_id: $_id) {
     decks {
       _id,
-      author {
+      user {
         _id,
         username
       },
@@ -12,7 +12,10 @@ query FindDeck($_id: Int!) {
       },
       title,
       createdAt,
-      updatedAt
+      updatedAt,
+      subscribers {
+        _id
+      }
     }
   }
 }

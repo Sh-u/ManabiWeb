@@ -40,7 +40,7 @@ let DeckResolver = class DeckResolver {
                 errors: "user not found",
             };
         }
-        const decks = await em.find(Deck_1.Deck, { author: user });
+        const decks = await em.find(Deck_1.Deck, { user: user });
         if (!decks) {
             return {
                 errors: "No decks found",
@@ -63,7 +63,7 @@ let DeckResolver = class DeckResolver {
                 errors: "Couldn't find the deck you searched for",
             };
         }
-        const user = await em.findOne(User_1.User, { _id: deck === null || deck === void 0 ? void 0 : deck.author._id });
+        const user = await em.findOne(User_1.User, { _id: deck === null || deck === void 0 ? void 0 : deck.user._id });
         if (!user) {
             return {
                 errors: "Couldn't find the user owning this deck",
@@ -85,7 +85,31 @@ let DeckResolver = class DeckResolver {
                 errors: "Cannot Create Deck: USER NOT FOUND",
             };
         }
-        const deck = await em.create(Deck_1.Deck, { title, author: user });
+        const deck = await em.create(Deck_1.Deck, { title, user: user });
+        try {
+            await em.persistAndFlush(deck);
+        }
+        catch (err) {
+            console.log(err);
+        }
+        return {
+            decks: [deck],
+        };
+    }
+    async subscribeToDeck(deckId, { em, req }) {
+        const user = await em.findOne(User_1.User, { _id: req.session.userId });
+        if (!user) {
+            return {
+                errors: "Cannot subscribe to deck: User not found",
+            };
+        }
+        const deck = await em.findOne(Deck_1.Deck, { _id: deckId });
+        if (!deck) {
+            return {
+                errors: "Cannot subscribe to deck: Deck not found",
+            };
+        }
+        deck.subscribers.add(user);
         try {
             await em.persistAndFlush(deck);
         }
@@ -147,6 +171,14 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], DeckResolver.prototype, "createDeck", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => DeckResponse),
+    __param(0, (0, type_graphql_1.Arg)("deckId")),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", Promise)
+], DeckResolver.prototype, "subscribeToDeck", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Deck_1.Deck, { nullable: true }),
     __param(0, (0, type_graphql_1.Arg)("_id")),

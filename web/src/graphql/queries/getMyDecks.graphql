@@ -4,7 +4,7 @@ query GetMyDecks {
       createdAt
       
       title
-      author {
+      user {
         _id
         username
       }

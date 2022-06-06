@@ -4,5 +4,8 @@ query GetAllDecks{
     posts {
       _id
     }
+    subscribers {
+      _id
+    }
   }
 }

@@ -18,17 +18,23 @@ export type Scalars = {
 export type Deck = {
   __typename?: 'Deck';
   _id: Scalars['Int'];
-  author: User;
   createdAt: Scalars['String'];
   posts: Array<Post>;
+  subscribers: Array<DeckSubscriber>;
   title: Scalars['String'];
   updatedAt: Scalars['String'];
+  user: User;
 };
 
 export type DeckResponse = {
   __typename?: 'DeckResponse';
   decks?: Maybe<Array<Deck>>;
   errors?: Maybe<Scalars['String']>;
+};
+
+export type DeckSubscriber = {
+  __typename?: 'DeckSubscriber';
+  _id: Scalars['Int'];
 };
 
 export type FieldError = {
@@ -55,6 +61,7 @@ export type Mutation = {
   register: UserResponse;
   removePost: Scalars['Boolean'];
   renameDeck?: Maybe<Deck>;
+  subscribeToDeck: DeckResponse;
   updatePostTitle?: Maybe<Post>;
 };
 
@@ -104,6 +111,11 @@ export type MutationRemovePostArgs = {
 export type MutationRenameDeckArgs = {
   _id: Scalars['Float'];
   title: Scalars['String'];
+};
+
+
+export type MutationSubscribeToDeckArgs = {
+  deckId: Scalars['Float'];
 };
 
 
@@ -169,7 +181,7 @@ export type User = {
   __typename?: 'User';
   _id: Scalars['Int'];
   createdAt: Scalars['String'];
-  decks: Deck;
+  decks: Array<Deck>;
   email: Scalars['String'];
   updatedAt: Scalars['String'];
   username: Scalars['String'];
@@ -181,7 +193,7 @@ export type UserResponse = {
   user?: Maybe<User>;
 };
 
-export type BasicUserFragment = { __typename?: 'User', _id: number, username: string };
+export type BasicUserFragment = { __typename?: 'User', _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> };
 
 export type ChangePasswordMutationVariables = Exact<{
   token: Scalars['String'];
@@ -189,14 +201,14 @@ export type ChangePasswordMutationVariables = Exact<{
 }>;
 
 
-export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string } | null } };
+export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
 
 export type CreateDeckMutationVariables = Exact<{
   title: Scalars['String'];
 }>;
 
 
-export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, author: { __typename?: 'User', _id: number, username: string } }> | null } };
+export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, user: { __typename?: 'User', _id: number, username: string } }> | null } };
 
 export type CreatePostMutationVariables = Exact<{
   deckId: Scalars['Float'];
@@ -225,7 +237,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string } | null } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -237,7 +249,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string } | null } };
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
 
 export type RenameDeckMutationVariables = Exact<{
   _id: Scalars['Float'];
@@ -247,32 +259,39 @@ export type RenameDeckMutationVariables = Exact<{
 
 export type RenameDeckMutation = { __typename?: 'Mutation', renameDeck?: { __typename?: 'Deck', title: string } | null };
 
+export type SubscribeToDeckMutationVariables = Exact<{
+  deckId: Scalars['Float'];
+}>;
+
+
+export type SubscribeToDeckMutation = { __typename?: 'Mutation', subscribeToDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', _id: number, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
+
 export type FindDeckQueryVariables = Exact<{
   _id: Scalars['Int'];
 }>;
 
 
-export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, author: { __typename?: 'User', _id: number, username: string }, posts: Array<{ __typename?: 'Post', _id: number }> }> | null } };
+export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, user: { __typename?: 'User', _id: number, username: string }, posts: Array<{ __typename?: 'Post', _id: number }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
 
 export type GetAllDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAllDecksQuery = { __typename?: 'Query', getAllDecks: Array<{ __typename?: 'Deck', _id: number, posts: Array<{ __typename?: 'Post', _id: number }> }> };
+export type GetAllDecksQuery = { __typename?: 'Query', getAllDecks: Array<{ __typename?: 'Deck', _id: number, posts: Array<{ __typename?: 'Post', _id: number }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> };
 
 export type GetMyDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMyDecksQuery = { __typename?: 'Query', getMyDecks: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, author: { __typename?: 'User', _id: number, username: string } }> | null } };
+export type GetMyDecksQuery = { __typename?: 'Query', getMyDecks: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, user: { __typename?: 'User', _id: number, username: string } }> | null } };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename?: 'User', _id: number, username: string }> };
+export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename?: 'User', _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> }> };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', _id: number, username: string } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null };
 
 export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -283,6 +302,11 @@ export const BasicUserFragmentDoc = gql`
     fragment BasicUser on User {
   _id
   username
+  decks {
+    _id
+    title
+    createdAt
+  }
 }
     `;
 export const ChangePasswordDocument = gql`
@@ -331,7 +355,7 @@ export const CreateDeckDocument = gql`
     decks {
       createdAt
       title
-      author {
+      user {
         _id
         username
       }
@@ -615,12 +639,51 @@ export function useRenameDeckMutation(baseOptions?: Apollo.MutationHookOptions<R
 export type RenameDeckMutationHookResult = ReturnType<typeof useRenameDeckMutation>;
 export type RenameDeckMutationResult = Apollo.MutationResult<RenameDeckMutation>;
 export type RenameDeckMutationOptions = Apollo.BaseMutationOptions<RenameDeckMutation, RenameDeckMutationVariables>;
+export const SubscribeToDeckDocument = gql`
+    mutation SubscribeToDeck($deckId: Float!) {
+  subscribeToDeck(deckId: $deckId) {
+    decks {
+      _id
+      subscribers {
+        _id
+      }
+    }
+    errors
+  }
+}
+    `;
+export type SubscribeToDeckMutationFn = Apollo.MutationFunction<SubscribeToDeckMutation, SubscribeToDeckMutationVariables>;
+
+/**
+ * __useSubscribeToDeckMutation__
+ *
+ * To run a mutation, you first call `useSubscribeToDeckMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToDeckMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [subscribeToDeckMutation, { data, loading, error }] = useSubscribeToDeckMutation({
+ *   variables: {
+ *      deckId: // value for 'deckId'
+ *   },
+ * });
+ */
+export function useSubscribeToDeckMutation(baseOptions?: Apollo.MutationHookOptions<SubscribeToDeckMutation, SubscribeToDeckMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SubscribeToDeckMutation, SubscribeToDeckMutationVariables>(SubscribeToDeckDocument, options);
+      }
+export type SubscribeToDeckMutationHookResult = ReturnType<typeof useSubscribeToDeckMutation>;
+export type SubscribeToDeckMutationResult = Apollo.MutationResult<SubscribeToDeckMutation>;
+export type SubscribeToDeckMutationOptions = Apollo.BaseMutationOptions<SubscribeToDeckMutation, SubscribeToDeckMutationVariables>;
 export const FindDeckDocument = gql`
     query FindDeck($_id: Int!) {
   findDeck(_id: $_id) {
     decks {
       _id
-      author {
+      user {
         _id
         username
       }
@@ -630,6 +693,9 @@ export const FindDeckDocument = gql`
       title
       createdAt
       updatedAt
+      subscribers {
+        _id
+      }
     }
   }
 }
@@ -669,6 +735,9 @@ export const GetAllDecksDocument = gql`
     posts {
       _id
     }
+    subscribers {
+      _id
+    }
   }
 }
     `;
@@ -705,7 +774,7 @@ export const GetMyDecksDocument = gql`
     decks {
       createdAt
       title
-      author {
+      user {
         _id
         username
       }
@@ -866,7 +935,8 @@ export const namedOperations = {
     Login: 'Login',
     Logout: 'Logout',
     Register: 'Register',
-    RenameDeck: 'RenameDeck'
+    RenameDeck: 'RenameDeck',
+    SubscribeToDeck: 'SubscribeToDeck'
   },
   Fragment: {
     BasicUser: 'BasicUser'

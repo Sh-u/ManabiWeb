@@ -1,5 +1,9 @@
 fragment BasicUser on User {
-    _id,
-    username
-
+  _id
+  username
+  decks {
+    _id
+    title
+    createdAt
+  }
 }

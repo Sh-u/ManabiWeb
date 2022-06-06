@@ -12,10 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Deck = void 0;
 const core_1 = require("@mikro-orm/core");
 const type_graphql_1 = require("type-graphql");
+const DeckSubscriber_1 = require("./DeckSubscriber");
 const Post_1 = require("./Post");
 const User_1 = require("./User");
 let Deck = class Deck {
     constructor() {
+        this.subscribers = new core_1.Collection(this);
         this.posts = new core_1.Collection(this);
         this.createdAt = new Date();
         this.updatedAt = new Date();
@@ -28,9 +30,14 @@ __decorate([
 ], Deck.prototype, "title", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => User_1.User),
-    (0, core_1.ManyToOne)(),
+    (0, core_1.ManyToOne)(() => User_1.User),
     __metadata("design:type", User_1.User)
-], Deck.prototype, "author", void 0);
+], Deck.prototype, "user", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => [DeckSubscriber_1.DeckSubscriber]),
+    (0, core_1.ManyToMany)({ entity: () => User_1.User, pivotEntity: () => DeckSubscriber_1.DeckSubscriber }),
+    __metadata("design:type", Object)
+], Deck.prototype, "subscribers", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => type_graphql_1.Int),
     (0, core_1.PrimaryKey)(),

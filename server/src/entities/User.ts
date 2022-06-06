@@ -12,8 +12,8 @@ export class User {
   @PrimaryKey()
   _id: Number;
 
-  @Field(() => Deck)
-  @OneToMany(() => Deck, (deck) => deck.author)
+  @Field(() => [Deck])
+  @OneToMany(() => Deck, (deck) => deck.user)
   decks = new Collection<Deck>(this);
 
   @Field(() => String)

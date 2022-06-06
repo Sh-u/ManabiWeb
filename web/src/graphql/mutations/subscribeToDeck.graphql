@@ -1,0 +1,11 @@
+mutation SubscribeToDeck($deckId: Float!){
+  subscribeToDeck(deckId: $deckId) {
+    decks {
+      _id,
+      subscribers {
+        _id
+      }
+    },
+    errors
+  }
+} 

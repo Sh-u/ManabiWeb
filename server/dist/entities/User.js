@@ -26,8 +26,8 @@ __decorate([
     __metadata("design:type", Number)
 ], User.prototype, "_id", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => Deck_1.Deck),
-    (0, core_1.OneToMany)(() => Deck_1.Deck, (deck) => deck.author),
+    (0, type_graphql_1.Field)(() => [Deck_1.Deck]),
+    (0, core_1.OneToMany)(() => Deck_1.Deck, (deck) => deck.user),
     __metadata("design:type", Object)
 ], User.prototype, "decks", void 0);
 __decorate([

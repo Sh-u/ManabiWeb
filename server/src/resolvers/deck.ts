@@ -41,7 +41,7 @@ export class DeckResolver {
       };
     }
 
-    const decks = await em.find(Deck, { author: user });
+    const decks = await em.find(Deck, { user: user });
 
     if (!decks) {
       return {
@@ -74,7 +74,7 @@ export class DeckResolver {
       };
     }
 
-    const user = await em.findOne(User, { _id: deck?.author._id });
+    const user = await em.findOne(User, { _id: deck?.user._id });
 
     if (!user) {
       return {
@@ -105,8 +105,43 @@ export class DeckResolver {
         errors: "Cannot Create Deck: USER NOT FOUND",
       };
     }
+    
 
-    const deck = await em.create(Deck, { title, author: user });
+    const deck = await em.create(Deck, { title, user: user });
+    try {
+      await em.persistAndFlush(deck);
+    } catch (err) {
+      console.log(err);
+    }
+
+    return {
+      decks: [deck],
+    };
+  }
+
+  @Mutation(() => DeckResponse)
+  async subscribeToDeck(
+    @Arg("deckId") deckId: Number,
+    @Ctx() { em, req }: MyContext
+  ): Promise<DeckResponse> {
+    const user = await em.findOne(User, { _id: req.session.userId });
+
+    if (!user) {
+      return {
+        errors: "Cannot subscribe to deck: User not found",
+      };
+    }
+    
+
+    const deck = await em.findOne(Deck, { _id: deckId });
+    if (!deck) {
+      return {
+        errors: "Cannot subscribe to deck: Deck not found",
+      };
+    }
+
+    deck.subscribers.add(user);
+
     try {
       await em.persistAndFlush(deck);
     } catch (err) {

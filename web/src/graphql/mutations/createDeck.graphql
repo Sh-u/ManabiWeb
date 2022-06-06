@@ -3,7 +3,7 @@ mutation CreateDeck($title: String!) {
     decks {
       createdAt,
       title,
-      author {
+      user {
         _id
         username
       }

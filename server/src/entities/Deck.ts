@@ -6,8 +6,10 @@ import {
   ManyToOne,
   OneToMany,
   Collection,
+  ManyToMany,
 } from "@mikro-orm/core";
 import { Field, Int, ObjectType } from "type-graphql";
+import { DeckSubscriber } from "./DeckSubscriber";
 import { Post } from "./Post";
 import { User } from "./User";
 
@@ -21,8 +23,14 @@ export class Deck {
   title!: string;
 
   @Field(() => User)
-  @ManyToOne()
-  author!: User;
+  @ManyToOne(() => User)
+  user!: User;
+
+
+  @Field(() => [DeckSubscriber])
+  @ManyToMany({ entity: () => User, pivotEntity: () => DeckSubscriber })
+  subscribers = new Collection<User>(this);
+
 
   @Field(() => Int)
   @PrimaryKey()
