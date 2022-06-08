@@ -12,6 +12,7 @@ type MyInputProps = InputHTMLAttributes< HTMLInputElement> & {
   label: string;
   type?: string;
 
+
  
 };
 
@@ -36,7 +37,7 @@ const InputField  = ({label, size: _, ...props} : MyInputProps) => {
         {...props}
         id={field.name}
         placeholder={props.placeholder}
-        
+        autoComplete="on"
       />
       {error ? <FormErrorMessage>{error}</FormErrorMessage>  : null}
       

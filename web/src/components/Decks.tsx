@@ -81,7 +81,7 @@ const Decks = () => {
   if (decks){
     orderedDecks = [...decks]?.sort((a,b) => (a._id > b._id) ? 1 : -1);
   }
-  console.log(orderedDecks)   
+  console.log(`getMyDecks`,   orderedDecks)   
 
   return (
     <Box>

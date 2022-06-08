@@ -178,12 +178,12 @@
     },
     {
       "columns": {
-        "deck__id": {
-          "name": "deck__id",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
+        "_id": {
+          "name": "_id",
+          "type": "serial",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
           "nullable": false,
           "mappedType": "integer"
         },
@@ -195,48 +195,54 @@
           "primary": false,
           "nullable": false,
           "mappedType": "integer"
+        },
+        "deck__id": {
+          "name": "deck__id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
         }
       },
-      "name": "deck_subscribers",
+      "name": "deck_subscriber",
       "schema": "public",
       "indexes": [
         {
-          "keyName": "deck_subscribers_pkey",
+          "keyName": "deck_subscriber_pkey",
           "columnNames": [
-            "deck__id",
-            "user__id"
+            "_id"
           ],
-          "composite": true,
+          "composite": false,
           "primary": true,
           "unique": true
         }
       ],
       "checks": [],
       "foreignKeys": {
-        "deck_subscribers_deck__id_foreign": {
-          "constraintName": "deck_subscribers_deck__id_foreign",
-          "columnNames": [
-            "deck__id"
-          ],
-          "localTableName": "public.deck_subscribers",
-          "referencedColumnNames": [
-            "_id"
-          ],
-          "referencedTableName": "public.deck",
-          "deleteRule": "cascade",
-          "updateRule": "cascade"
-        },
-        "deck_subscribers_user__id_foreign": {
-          "constraintName": "deck_subscribers_user__id_foreign",
+        "deck_subscriber_user__id_foreign": {
+          "constraintName": "deck_subscriber_user__id_foreign",
           "columnNames": [
             "user__id"
           ],
-          "localTableName": "public.deck_subscribers",
+          "localTableName": "public.deck_subscriber",
           "referencedColumnNames": [
             "_id"
           ],
           "referencedTableName": "public.user",
-          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "deck_subscriber_deck__id_foreign": {
+          "constraintName": "deck_subscriber_deck__id_foreign",
+          "columnNames": [
+            "deck__id"
+          ],
+          "localTableName": "public.deck_subscriber",
+          "referencedColumnNames": [
+            "_id"
+          ],
+          "referencedTableName": "public.deck",
           "updateRule": "cascade"
         }
       }

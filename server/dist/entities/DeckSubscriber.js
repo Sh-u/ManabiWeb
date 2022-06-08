@@ -22,11 +22,12 @@ __decorate([
     __metadata("design:type", Number)
 ], DeckSubscriber.prototype, "_id", void 0);
 __decorate([
-    (0, core_1.ManyToOne)({ primary: true }),
+    (0, type_graphql_1.Field)(() => User_1.User),
+    (0, core_1.ManyToOne)(() => User_1.User),
     __metadata("design:type", User_1.User)
 ], DeckSubscriber.prototype, "user", void 0);
 __decorate([
-    (0, core_1.ManyToOne)({ primary: true }),
+    (0, core_1.ManyToOne)(() => Deck_1.Deck),
     __metadata("design:type", Deck_1.Deck)
 ], DeckSubscriber.prototype, "deck", void 0);
 DeckSubscriber = __decorate([

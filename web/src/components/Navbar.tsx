@@ -51,8 +51,8 @@ const Navbar = () => {
         query: GetMyDecksDocument,
         data: {
           getMyDecks: {
-            decks: undefined,
-            errors: null,
+            decks: [],
+            errors: "user not found",
           },
         },
       });

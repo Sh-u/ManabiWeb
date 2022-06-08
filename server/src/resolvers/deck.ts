@@ -1,3 +1,4 @@
+import { doesNotReject } from "assert";
 import {
   Arg,
   Ctx,
@@ -28,9 +29,6 @@ export class DeckResolver {
     return await em.find(Deck, {});
   }
 
-
-
-
   @Query(() => DeckResponse)
   async getMyDecks(@Ctx() { req, em }: MyContext): Promise<DeckResponse> {
     const user = await em.findOne(User, { _id: req.session.userId });
@@ -41,15 +39,27 @@ export class DeckResolver {
       };
     }
 
-    const decks = await em.find(Deck, { user: user });
+    const ownerDecks = await em.find(Deck, { user: user });
+    const subscriberDecks = await em.find(Deck, {
+      subscribers: { _id: user._id },
+    });
+    // console.log(subscriberDecks)
 
-    if (!decks) {
+    // console.log('decks', ownerDecks)
+
+    if (!ownerDecks) {
       return {
         errors: "No decks found",
       };
     }
 
-    if (decks.length < 1) {
+    if (!subscriberDecks) {
+      return {
+        errors: "No subscribers decks found",
+      };
+    }
+
+    if (ownerDecks.length < 1) {
       return {
         errors: "Looks like you have no decks created...",
       };
@@ -57,7 +67,7 @@ export class DeckResolver {
 
     console.log("success getting decks");
     return {
-      decks,
+      decks: [...ownerDecks, ...subscriberDecks],
     };
   }
 
@@ -105,7 +115,6 @@ export class DeckResolver {
         errors: "Cannot Create Deck: USER NOT FOUND",
       };
     }
-    
 
     const deck = await em.create(Deck, { title, user: user });
     try {
@@ -124,14 +133,13 @@ export class DeckResolver {
     @Arg("deckId") deckId: Number,
     @Ctx() { em, req }: MyContext
   ): Promise<DeckResponse> {
-    const user = await em.findOne(User, { _id: req.session.userId });
+    const currentUser = await em.findOne(User, { _id: req.session.userId });
 
-    if (!user) {
+    if (!currentUser) {
       return {
         errors: "Cannot subscribe to deck: User not found",
       };
     }
-    
 
     const deck = await em.findOne(Deck, { _id: deckId });
     if (!deck) {
@@ -140,7 +148,17 @@ export class DeckResolver {
       };
     }
 
-    deck.subscribers.add(user);
+    console.log("subs:    ", deck.subscribers.toArray());
+
+    if (
+      deck.subscribers.toArray().some((user) => user._id === currentUser._id)
+    ) {
+      return {
+        errors: "You are already subscribed to this deck",
+      };
+    }
+
+    await deck.subscribers.add(currentUser);
 
     try {
       await em.persistAndFlush(deck);
@@ -153,19 +171,58 @@ export class DeckResolver {
     };
   }
 
+  @Mutation(() => Boolean)
+  async unsubscribeToDeck(
+    @Arg("deckId") deckId: Number,
+    @Ctx() { em, req }: MyContext
+  ): Promise<Boolean> {
+    const currentUser = await em.findOne(User, { _id: req.session.userId });
+    if (!currentUser) {
+      console.log("unsubscribeToDeck error: user not found");
+      return false;
+    }
+
+    const deck = await em.findOne(Deck, { _id: deckId });
+    if (!deck) {
+      console.log("unsubscribeToDeck error: deck not found");
+      return false;
+    }
+    // deck.subscribers.init()
+
+    console.log(deck)
+    if (!deck.subscribers.isInitialized()) { 
+      await deck.subscribers.init();
+      console.log("unitialized"); 
+      return false;}
+
+    if (!deck.subscribers.getItems().some((user) => user._id === currentUser._id)) {
+      console.log("unsubscribeToDeck error: user not found on the deck");
+      return false;
+    }
+
+    console.log('removing')
+    await deck.subscribers.remove(currentUser);
+
+    try {
+      await em.persistAndFlush(deck);
+    } catch (err) {
+      console.log(err);
+    }
+
+    return true;
+  }
+
   @Mutation(() => Deck, { nullable: true })
   async renameDeck(
     @Arg("_id") _id: number,
     @Arg("title", () => String) title: string,
     @Ctx() { em }: MyContext
   ): Promise<Deck | null> {
-
-    if (title.length < 3){
+    if (title.length < 3) {
       return null;
     }
     const deck = await em.findOne(Deck, { _id });
     if (!deck) {
-      
       return null;
     }
 
@@ -184,7 +241,7 @@ export class DeckResolver {
     if (!deck) {
       return false;
     }
-    
+
     await em.removeAndFlush(deck);
 
     return true;

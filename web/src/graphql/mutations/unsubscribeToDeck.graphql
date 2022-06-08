@@ -1,0 +1,3 @@
+mutation UnsubscribeToDeck($deckId: Float!) {
+    unsubscribeToDeck(deckId: $deckId)
+}

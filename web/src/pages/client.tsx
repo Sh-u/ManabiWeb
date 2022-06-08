@@ -8,15 +8,7 @@ export const client = new ApolloClient({
     credentials: "include",
   }),
 
-  cache: new InMemoryCache({
-    typePolicies: {
-      DeckResponse: {
-        keyFields: ["decks"],
-        merge: true,
-      },
-
-    },
-  }),
+  cache: new InMemoryCache(),
 });
 
 // export const client = new ApolloClient({

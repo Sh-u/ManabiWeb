@@ -95,7 +95,7 @@ export class UserResolver {
     }
 
     const user = await em.findOne(User, { _id: req.session.userId });
-
+  
     return user;
   }
 

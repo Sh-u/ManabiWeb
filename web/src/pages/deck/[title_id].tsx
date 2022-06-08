@@ -2,90 +2,162 @@ import { Avatar, Button, Flex, Text, Tooltip } from "@chakra-ui/react";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
+import Navbar from "../../components/Navbar";
 import {
   DeckResponse,
   FindDeckDocument,
-  FindDeckQuery, useMeQuery, useSubscribeToDeckMutation
+  FindDeckQuery,
+  useMeQuery,
+  useSubscribeToDeckMutation,
+  useUnsubscribeToDeckMutation,
 } from "../../generated/graphql";
 import { client } from "../client";
 
 const DeckPage = ({ decks }: DeckResponse) => {
   const router = useRouter();
-
+  const refreshData = () => {
+    console.log("refresh");
+    router.replace(router.asPath);
+  };
   const { data: userData, loading, error } = useMeQuery();
+  const [subscribeToDeck, { error: subscribeToDeckError }] =
+    useSubscribeToDeckMutation();
+  const [unsubscribeToDeck] = useUnsubscribeToDeckMutation();
+  const isSubscribedToDeck = () => {
+    if (decks[0].subscribers.some((user) => user._id === userData?.me?._id)) {
+      return true;
+    }
+    return false;
+  };
 
-  let isSubscribedToDeck;
-  let isOwnerOfDeck;
+  const isOwnerOfDeck = () => {
+    if (userData?.me?.decks?.some((deck) => deck._id === decks[0]._id)) {
+      return true;
+    }
+    return false;
+  };
+
   useEffect(() => {
     if (!loading) {
-      console.log(userData.me);
-      isSubscribedToDeck = decks[0].subscribers.some((user) => user._id === userData.me._id);
-      isOwnerOfDeck = userData.me.decks.some((deck) => deck._id === decks[0]._id);
+      console.log("user: ", userData.me);
+      console.log("rendered deck: ", decks[0]);
     }
-  }, [loading]);
-  const handleAddingDeck = async () => {
+  }, [loading, userData, decks]);
+
+  const handleSubscribingToDeck = async () => {
     if (!userData.me && !loading) {
       router.push("/login");
       return;
     }
 
-    if (isOwnerOfDeck) return;
-    if (isSubscribedToDeck) return;
-
-    const [subscribeToDeck, {error}] = useSubscribeToDeckMutation();
-    const response = await subscribeToDeck(({variables: {
-      deckId: decks[0]._id
-    }}))
-
-    if (error){
-      console.log(error)
+    if (isOwnerOfDeck()) {
+      console.log(`isOwnerOfDeck `, isOwnerOfDeck());
+      return;
     }
-    if (response?.errors){
-      console.log(response.errors)
+    if (isSubscribedToDeck()) {
+      console.log(`isSubscribedToDeck `, isSubscribedToDeck());
+      return;
     }
-  
 
+    const response = await subscribeToDeck({
+      variables: {
+        deckId: decks[0]._id,
+      }
+      // refetchQueries: [
+      //   {
+      //     query: FindDeckDocument,
+      //     variables: {
+      //       _id: decks[0]._id,
+      //     },
+      //   },
+      // ],
+    });
+
+    if (subscribeToDeckError) {
+      console.log(`subscribeToDeckError `, subscribeToDeckError);
+      return;
+    }
+    if (response?.data?.subscribeToDeck?.errors) {
+      console.log(`response.errors `, response?.data?.subscribeToDeck?.errors);
+      return;
+    }
+
+    console.log(response);
+    refreshData();
+  };
+
+  const handleUnsubscribingToDeck = async () => {
+    if (!userData.me && !loading) {
+      router.push("/login");
+      return;
+    }
+    if (isOwnerOfDeck()) {
+      console.log(`isOwnerOfDeck `, isOwnerOfDeck());
+      return;
+    }
+    if (!isSubscribedToDeck()) {
+      console.log(`isSubscribedToDeck `, isSubscribedToDeck());
+      return;
+    }
+
+    const response = await unsubscribeToDeck({
+      variables: {
+        deckId: decks[0]._id,
+      },
+    });
+
+    if (!response) {
+      console.log("unsubscribing failed");
+      return;
+    }
+    refreshData();
   };
 
   return (
-    <Flex
-      align={"center"}
-      justify={"center"}
-      flexDir="column"
-      mt="10"
-      bg="gray.700"
-      w="full"
-      h="auto"
-      p="2"
-    >
-      <Flex align={"center"} justify={"center"}>
-        <Text fontSize={"2xl"}>{decks[0].title}</Text>
-        <Tooltip
-          hasArrow
-          label={decks[0].user.username}
-          bg="gray.300"
-          color="black"
-        >
-          <Avatar name="author" src="https://i.imgur.com/1M2viYL.png" ml="5" />
-        </Tooltip>
-      </Flex>
-      <Flex align={"center"} justify={"center"} mt="5">
-        <Text fontSize={"xl"}>description</Text>
-      </Flex>
-      <Flex align={"center"} justify={"center"} mt="5">
-        <Text fontSize={"lg"}>Cards: {decks[0].posts.length}</Text>
-      </Flex>
-      <Flex align={"center"} justify={"center"} mt="5">
-        {userData?.me?.decks?.map((myDeck) =>
-          myDeck._id === decks[0]._id ||
-          decks[0].subscribers.some((user) => user._id === userData.me._id) ? (
-            <Text fontSize={"sm"}>This deck is already added</Text>
+    <>
+      <Navbar />
+      <Flex
+        align={"center"}
+        justify={"center"}
+        flexDir="column"
+        mt="10"
+        bg="gray.700"
+        w="full"
+        h="auto"
+        p="2"
+      >
+        <Flex align={"center"} justify={"center"}>
+          <Text fontSize={"2xl"}>{decks[0].title}</Text>
+          <Tooltip
+            hasArrow
+            label={decks[0].user.username}
+            bg="gray.300"
+            color="black"
+          >
+            <Avatar
+              name="author"
+              src="https://i.imgur.com/1M2viYL.png"
+              ml="5"
+            />
+          </Tooltip>
+        </Flex>
+        <Flex align={"center"} justify={"center"} mt="5">
+          <Text fontSize={"xl"}>description</Text>
+        </Flex>
+        <Flex align={"center"} justify={"center"} mt="5">
+          <Text fontSize={"lg"}>Cards: {decks[0].posts.length}</Text>
+        </Flex>
+        <Flex align={"center"} justify={"center"} mt="5">
+          {isSubscribedToDeck() || isOwnerOfDeck() ? (
+            <Button onClick={handleUnsubscribingToDeck} fontSize={"sm"}>
+              Unsubscribe to Deck
+            </Button>
           ) : (
-            <Button onClick={handleAddingDeck}>Add deck</Button>
-          )
-        )}
+            <Button onClick={handleSubscribingToDeck}>Subscribe to deck</Button>
+          )}
+        </Flex>
       </Flex>
-    </Flex>
+    </>
   );
 };
 
@@ -97,15 +169,18 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
     parsedUrl.substring(parsedUrl.indexOf("-")).match(/(\d+)/)[0]
   );
 
-  const { data, loading, error } = await client.query<FindDeckQuery>({
+  const { data } = await client.query<FindDeckQuery>({
     query: FindDeckDocument,
     variables: {
       _id: deckId,
     },
+    fetchPolicy: 'no-cache'
   });
 
+  console.log(`subscribers :`, data.findDeck.decks[0].subscribers)
+
   if (!data?.findDeck?.decks) {
-    console.log("cannot found deck");
+    console.log("cannot find deck");
     return {
       notFound: true,
     };
@@ -115,11 +190,12 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
     data?.findDeck?.decks[0]?.title !== deckTitle ||
     data?.findDeck?.decks[0]?._id !== deckId
   ) {
-    console.log("cchek error");
+    console.log("check error");
     return {
       notFound: true,
     };
   }
+  // console.log(data.findDeck.decks[0].subscribers);
 
   return {
     props: {

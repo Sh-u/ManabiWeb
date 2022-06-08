@@ -12,6 +12,7 @@ import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import { COOKIE_NAME } from "./constants";
 import { Deck } from "./entities/Deck";
+import { DeckSubscriber } from "./entities/DeckSubscriber";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
 import mikroOrmConfig from "./mikro-orm.config";
@@ -33,6 +34,10 @@ const corsOptions = {
 const main = async () => {
   const orm = await MikroORM.init(mikroOrmConfig);
 
+  // await orm.em.nativeDelete(DeckSubscriber, {});
+  // await orm.em.nativeDelete(Deck, {});
+
+  // await orm.em.nativeDelete(User, {});
 
   
   await orm.getMigrator().up();

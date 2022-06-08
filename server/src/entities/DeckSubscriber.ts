@@ -10,11 +10,10 @@ export class DeckSubscriber {
   @PrimaryKey()
   _id: Number;
 
-  @ManyToOne({ primary: true })
+  @Field(() => User)
+  @ManyToOne(() => User)
   user: User;
 
-  @ManyToOne({ primary: true })
-    deck: Deck;
-
-
+  @ManyToOne(() => Deck)
+  deck: Deck;
 }

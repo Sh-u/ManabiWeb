@@ -35,6 +35,7 @@ export type DeckResponse = {
 export type DeckSubscriber = {
   __typename?: 'DeckSubscriber';
   _id: Scalars['Int'];
+  user: User;
 };
 
 export type FieldError = {
@@ -62,6 +63,7 @@ export type Mutation = {
   removePost: Scalars['Boolean'];
   renameDeck?: Maybe<Deck>;
   subscribeToDeck: DeckResponse;
+  unsubscribeToDeck: Scalars['Boolean'];
   updatePostTitle?: Maybe<Post>;
 };
 
@@ -115,6 +117,11 @@ export type MutationRenameDeckArgs = {
 
 
 export type MutationSubscribeToDeckArgs = {
+  deckId: Scalars['Float'];
+};
+
+
+export type MutationUnsubscribeToDeckArgs = {
   deckId: Scalars['Float'];
 };
 
@@ -265,6 +272,13 @@ export type SubscribeToDeckMutationVariables = Exact<{
 
 
 export type SubscribeToDeckMutation = { __typename?: 'Mutation', subscribeToDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', _id: number, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
+
+export type UnsubscribeToDeckMutationVariables = Exact<{
+  deckId: Scalars['Float'];
+}>;
+
+
+export type UnsubscribeToDeckMutation = { __typename?: 'Mutation', unsubscribeToDeck: boolean };
 
 export type FindDeckQueryVariables = Exact<{
   _id: Scalars['Int'];
@@ -678,6 +692,37 @@ export function useSubscribeToDeckMutation(baseOptions?: Apollo.MutationHookOpti
 export type SubscribeToDeckMutationHookResult = ReturnType<typeof useSubscribeToDeckMutation>;
 export type SubscribeToDeckMutationResult = Apollo.MutationResult<SubscribeToDeckMutation>;
 export type SubscribeToDeckMutationOptions = Apollo.BaseMutationOptions<SubscribeToDeckMutation, SubscribeToDeckMutationVariables>;
+export const UnsubscribeToDeckDocument = gql`
+    mutation UnsubscribeToDeck($deckId: Float!) {
+  unsubscribeToDeck(deckId: $deckId)
+}
+    `;
+export type UnsubscribeToDeckMutationFn = Apollo.MutationFunction<UnsubscribeToDeckMutation, UnsubscribeToDeckMutationVariables>;
+
+/**
+ * __useUnsubscribeToDeckMutation__
+ *
+ * To run a mutation, you first call `useUnsubscribeToDeckMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUnsubscribeToDeckMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [unsubscribeToDeckMutation, { data, loading, error }] = useUnsubscribeToDeckMutation({
+ *   variables: {
+ *      deckId: // value for 'deckId'
+ *   },
+ * });
+ */
+export function useUnsubscribeToDeckMutation(baseOptions?: Apollo.MutationHookOptions<UnsubscribeToDeckMutation, UnsubscribeToDeckMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UnsubscribeToDeckMutation, UnsubscribeToDeckMutationVariables>(UnsubscribeToDeckDocument, options);
+      }
+export type UnsubscribeToDeckMutationHookResult = ReturnType<typeof useUnsubscribeToDeckMutation>;
+export type UnsubscribeToDeckMutationResult = Apollo.MutationResult<UnsubscribeToDeckMutation>;
+export type UnsubscribeToDeckMutationOptions = Apollo.BaseMutationOptions<UnsubscribeToDeckMutation, UnsubscribeToDeckMutationVariables>;
 export const FindDeckDocument = gql`
     query FindDeck($_id: Int!) {
   findDeck(_id: $_id) {
@@ -936,7 +981,8 @@ export const namedOperations = {
     Logout: 'Logout',
     Register: 'Register',
     RenameDeck: 'RenameDeck',
-    SubscribeToDeck: 'SubscribeToDeck'
+    SubscribeToDeck: 'SubscribeToDeck',
+    UnsubscribeToDeck: 'UnsubscribeToDeck'
   },
   Fragment: {
     BasicUser: 'BasicUser'

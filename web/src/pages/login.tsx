@@ -78,6 +78,7 @@ const Login = () => {
               label="Password"
               placeholder="password"
               type="password"
+              
             />
 
             <Box display={"flex"} justifyContent="center" alignItems="center">
