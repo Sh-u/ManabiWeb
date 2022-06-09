@@ -13,6 +13,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeckResolver = void 0;
+const DeckSubscriber_1 = require("../entities/DeckSubscriber");
 const type_graphql_1 = require("type-graphql");
 const Deck_1 = require("../entities/Deck");
 const User_1 = require("../entities/User");
@@ -201,9 +202,11 @@ let DeckResolver = class DeckResolver {
         }
         if (deck.user._id === (currentUser === null || currentUser === void 0 ? void 0 : currentUser._id)) {
             if (deck.subscribers.count() > 0) {
-                await deck.subscribers.removeAll();
+                console.log('removing subs');
+                const deckSubs = await em.find(DeckSubscriber_1.DeckSubscriber, { deck: deck });
+                await em.removeAndFlush(deckSubs);
             }
-            console.log("removing owning deck");
+            console.log('removing owner deck');
             await em.removeAndFlush(deck);
         }
         else if (deck.subscribers.toArray().some((user) => user._id === currentUser._id)) {

@@ -30,8 +30,9 @@ export class Deck {
 
 
   @Field(() => [DeckSubscriber])
-  @ManyToMany({ entity: () => User, pivotEntity: () => DeckSubscriber })
+  @ManyToMany({ entity: () => User, pivotEntity: () => DeckSubscriber})
   subscribers = new Collection<User>(this);
+
 
 
   @Field(() => Int)

@@ -1,4 +1,5 @@
 import { doesNotReject } from "assert";
+import { DeckSubscriber } from "../entities/DeckSubscriber";
 import {
   Arg,
   Ctx,
@@ -271,11 +272,15 @@ export class DeckResolver {
       await deck.subscribers.init();
     }
     if (deck.user._id === currentUser?._id) {
+
       if (deck.subscribers.count() > 0) {
-        await deck.subscribers.removeAll();
+        console.log('removing subs')
+        const deckSubs = await em.find(DeckSubscriber, {deck: deck})
+        await em.removeAndFlush(deckSubs)
       }
-      console.log("removing owning deck");
+      console.log('removing owner deck')
       await em.removeAndFlush(deck);
+ 
     } else if (
       deck.subscribers.toArray().some((user) => user._id === currentUser._id)
     ) {

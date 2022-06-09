@@ -1,4 +1,5 @@
 import { MikroORM } from "@mikro-orm/core";
+import { PostgreSqlDriver } from "@mikro-orm/postgresql/PostgreSqlDriver";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import { ApolloServer } from "apollo-server-express";
 import connectRedis from "connect-redis";

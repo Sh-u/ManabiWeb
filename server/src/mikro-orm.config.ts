@@ -1,7 +1,7 @@
 import { _prod_ } from "./constants";
 import { Post } from "./entities/Post";
 import {  Options } from "@mikro-orm/core";
-import { PostgreSqlDriver } from "@mikro-orm/postgresql";
+import { PostgreSqlDriver, EntityManager } from "@mikro-orm/postgresql";
 import path from 'path'
 import { User } from "./entities/User";
 import { Deck } from "./entities/Deck";
