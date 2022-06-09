@@ -15,6 +15,7 @@ import {
 import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
 import { User } from "../entities/User";
 import { v4 } from "uuid";
+import { Deck } from "../entities/Deck";
 
 
 @InputType()
@@ -96,6 +97,13 @@ export class UserResolver {
 
     const user = await em.findOne(User, { _id: req.session.userId });
   
+   if (!user){
+     return null;
+   }
+    if (!user.decks.isInitialized()){
+      await user.decks.init();
+    }
+ 
     return user;
   }
 

@@ -166,6 +166,7 @@ export type Query = {
   me?: Maybe<User>;
   post?: Maybe<Post>;
   posts: Array<Post>;
+  searchForDeck: Array<Deck>;
 };
 
 
@@ -176,6 +177,11 @@ export type QueryFindDeckArgs = {
 
 export type QueryPostArgs = {
   _id: Scalars['Int'];
+};
+
+
+export type QuerySearchForDeckArgs = {
+  input: Scalars['String'];
 };
 
 export type RegisterInput = {
@@ -311,6 +317,13 @@ export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', _id: number, sentence: string, word: string, createdAt: string, updatedAt: string }> };
+
+export type SearchForDeckQueryVariables = Exact<{
+  input: Scalars['String'];
+}>;
+
+
+export type SearchForDeckQuery = { __typename?: 'Query', searchForDeck: Array<{ __typename?: 'Deck', title: string, user: { __typename?: 'User', _id: number } }> };
 
 export const BasicUserFragmentDoc = gql`
     fragment BasicUser on User {
@@ -962,6 +975,44 @@ export function usePostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Post
 export type PostsQueryHookResult = ReturnType<typeof usePostsQuery>;
 export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
 export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
+export const SearchForDeckDocument = gql`
+    query SearchForDeck($input: String!) {
+  searchForDeck(input: $input) {
+    title
+    user {
+      _id
+    }
+  }
+}
+    `;
+
+/**
+ * __useSearchForDeckQuery__
+ *
+ * To run a query within a React component, call `useSearchForDeckQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchForDeckQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchForDeckQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSearchForDeckQuery(baseOptions: Apollo.QueryHookOptions<SearchForDeckQuery, SearchForDeckQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchForDeckQuery, SearchForDeckQueryVariables>(SearchForDeckDocument, options);
+      }
+export function useSearchForDeckLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchForDeckQuery, SearchForDeckQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchForDeckQuery, SearchForDeckQueryVariables>(SearchForDeckDocument, options);
+        }
+export type SearchForDeckQueryHookResult = ReturnType<typeof useSearchForDeckQuery>;
+export type SearchForDeckLazyQueryHookResult = ReturnType<typeof useSearchForDeckLazyQuery>;
+export type SearchForDeckQueryResult = Apollo.QueryResult<SearchForDeckQuery, SearchForDeckQueryVariables>;
 export const namedOperations = {
   Query: {
     FindDeck: 'FindDeck',
@@ -969,7 +1020,8 @@ export const namedOperations = {
     GetMyDecks: 'GetMyDecks',
     GetUsers: 'GetUsers',
     Me: 'Me',
-    Posts: 'Posts'
+    Posts: 'Posts',
+    SearchForDeck: 'SearchForDeck'
   },
   Mutation: {
     ChangePassword: 'ChangePassword',

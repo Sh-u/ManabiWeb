@@ -99,6 +99,12 @@ let UserResolver = class UserResolver {
             return null;
         }
         const user = await em.findOne(User_1.User, { _id: req.session.userId });
+        if (!user) {
+            return null;
+        }
+        if (!user.decks.isInitialized()) {
+            await user.decks.init();
+        }
         return user;
     }
     async getUsers({ em }) {

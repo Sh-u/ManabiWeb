@@ -30,6 +30,15 @@ DeckResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], DeckResponse);
 let DeckResolver = class DeckResolver {
+    async searchForDeck(input, { em }) {
+        const allDecks = await em.find(Deck_1.Deck, {});
+        const decks = allDecks.filter((deck) => deck.title.toLocaleLowerCase().includes(input));
+        console.log('decks: ', decks);
+        if (decks.length < 1) {
+            return [];
+        }
+        return decks;
+    }
     async getAllDecks({ em }) {
         return await em.find(Deck_1.Deck, {});
     }
@@ -155,7 +164,7 @@ let DeckResolver = class DeckResolver {
             console.log("unsubscribeToDeck error: user not found on the deck");
             return false;
         }
-        console.log('removing');
+        console.log("removing");
         await deck.subscribers.remove(currentUser);
         try {
             await em.persistAndFlush(deck);
@@ -177,15 +186,41 @@ let DeckResolver = class DeckResolver {
         await em.persistAndFlush(deck);
         return deck;
     }
-    async deleteDeck(_id, { em }) {
+    async deleteDeck(_id, { em, req }) {
+        const currentUser = await em.findOne(User_1.User, { _id: req.session.userId });
+        if (!currentUser) {
+            console.log("cannot remove deck: user not found");
+            return false;
+        }
         const deck = await em.findOne(Deck_1.Deck, { _id });
         if (!deck) {
             return false;
         }
-        await em.removeAndFlush(deck);
+        if (!deck.subscribers.isInitialized()) {
+            await deck.subscribers.init();
+        }
+        if (deck.user._id === (currentUser === null || currentUser === void 0 ? void 0 : currentUser._id)) {
+            if (deck.subscribers.count() > 0) {
+                await deck.subscribers.removeAll();
+            }
+            console.log("removing owning deck");
+            await em.removeAndFlush(deck);
+        }
+        else if (deck.subscribers.toArray().some((user) => user._id === currentUser._id)) {
+            console.log("removing subscription");
+            await deck.subscribers.remove(currentUser);
+        }
         return true;
     }
 };
+__decorate([
+    (0, type_graphql_1.Query)(() => [Deck_1.Deck]),
+    __param(0, (0, type_graphql_1.Arg)("input", () => String)),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], DeckResolver.prototype, "searchForDeck", null);
 __decorate([
     (0, type_graphql_1.Query)(() => [Deck_1.Deck]),
     __param(0, (0, type_graphql_1.Ctx)()),

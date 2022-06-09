@@ -25,6 +25,23 @@ class DeckResponse {
 @Resolver()
 export class DeckResolver {
   @Query(() => [Deck])
+  async searchForDeck(
+    @Arg("input", () => String) input: string,
+    @Ctx() { em }: MyContext
+  ): Promise<Deck[]> {
+
+    const allDecks = await em.find(Deck, {});
+
+    const decks = allDecks.filter((deck) => deck.title.toLocaleLowerCase().includes(input))
+    console.log('decks: ', decks)
+    if (decks.length < 1){
+      return [];
+    }
+
+    return decks;
+  }
+
+  @Query(() => [Deck])
   async getAllDecks(@Ctx() { em }: MyContext): Promise<Deck[]> {
     return await em.find(Deck, {});
   }
@@ -43,7 +60,7 @@ export class DeckResolver {
     const subscriberDecks = await em.find(Deck, {
       subscribers: { _id: user._id },
     });
-    // console.log(subscriberDecks)
+    // console.log(`sub decks`, subscriberDecks)
 
     // console.log('decks', ownerDecks)
 
@@ -189,18 +206,21 @@ export class DeckResolver {
     }
     // deck.subscribers.init()
 
-    console.log(deck)
-    if (!deck.subscribers.isInitialized()) { 
+    console.log(deck);
+    if (!deck.subscribers.isInitialized()) {
       await deck.subscribers.init();
-      console.log("unitialized"); 
-      return false;}
+      console.log("unitialized");
+      return false;
+    }
 
-    if (!deck.subscribers.getItems().some((user) => user._id === currentUser._id)) {
+    if (
+      !deck.subscribers.getItems().some((user) => user._id === currentUser._id)
+    ) {
       console.log("unsubscribeToDeck error: user not found on the deck");
       return false;
     }
 
-    console.log('removing')
+    console.log("removing");
     await deck.subscribers.remove(currentUser);
 
     try {
@@ -235,14 +255,33 @@ export class DeckResolver {
   @Mutation(() => Boolean)
   async deleteDeck(
     @Arg("_id") _id: number,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<Boolean> {
+    const currentUser = await em.findOne(User, { _id: req.session.userId });
+
+    if (!currentUser) {
+      console.log("cannot remove deck: user not found");
+      return false;
+    }
     const deck = await em.findOne(Deck, { _id });
     if (!deck) {
       return false;
     }
-
-    await em.removeAndFlush(deck);
+    if (!deck.subscribers.isInitialized()) {
+      await deck.subscribers.init();
+    }
+    if (deck.user._id === currentUser?._id) {
+      if (deck.subscribers.count() > 0) {
+        await deck.subscribers.removeAll();
+      }
+      console.log("removing owning deck");
+      await em.removeAndFlush(deck);
+    } else if (
+      deck.subscribers.toArray().some((user) => user._id === currentUser._id)
+    ) {
+      console.log("removing subscription");
+      await deck.subscribers.remove(currentUser);
+    }
 
     return true;
   }

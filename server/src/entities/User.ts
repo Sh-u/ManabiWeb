@@ -1,4 +1,5 @@
 import {
+  Cascade,
     Collection, Entity, OneToMany, OptionalProps, PrimaryKey, Property
 } from "@mikro-orm/core";
 import { Field, Int, ObjectType } from "type-graphql";
@@ -13,7 +14,7 @@ export class User {
   _id: Number;
 
   @Field(() => [Deck])
-  @OneToMany(() => Deck, (deck) => deck.user)
+  @OneToMany(() => Deck, (deck) => deck.user, {orphanRemoval: true})
   decks = new Collection<Deck>(this);
 
   @Field(() => String)

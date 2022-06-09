@@ -62,15 +62,7 @@ const DeckPage = ({ decks }: DeckResponse) => {
     const response = await subscribeToDeck({
       variables: {
         deckId: decks[0]._id,
-      }
-      // refetchQueries: [
-      //   {
-      //     query: FindDeckDocument,
-      //     variables: {
-      //       _id: decks[0]._id,
-      //     },
-      //   },
-      // ],
+      },
     });
 
     if (subscribeToDeckError) {
@@ -147,15 +139,21 @@ const DeckPage = ({ decks }: DeckResponse) => {
         <Flex align={"center"} justify={"center"} mt="5">
           <Text fontSize={"lg"}>Cards: {decks[0].posts.length}</Text>
         </Flex>
-        <Flex align={"center"} justify={"center"} mt="5">
-          {isSubscribedToDeck() || isOwnerOfDeck() ? (
-            <Button onClick={handleUnsubscribingToDeck} fontSize={"sm"}>
-              Unsubscribe to Deck
-            </Button>
-          ) : (
-            <Button onClick={handleSubscribingToDeck}>Subscribe to deck</Button>
-          )}
-        </Flex>
+        {isOwnerOfDeck() ? (
+          <Text font->You are the owner of this deck</Text>
+        ) : (
+          <Flex align={"center"} justify={"center"} mt="5">
+            {isSubscribedToDeck() ? (
+              <Button onClick={handleUnsubscribingToDeck} fontSize={"sm"}>
+                Unsubscribe to Deck
+              </Button>
+            ) : (
+              <Button onClick={handleSubscribingToDeck}>
+                Subscribe to deck
+              </Button>
+            )}
+          </Flex>
+        )}
       </Flex>
     </>
   );
@@ -174,10 +172,10 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
     variables: {
       _id: deckId,
     },
-    fetchPolicy: 'no-cache'
+    fetchPolicy: "no-cache",
   });
 
-  console.log(`subscribers :`, data.findDeck.decks[0].subscribers)
+  console.log(`subscribers :`, data.findDeck.decks[0].subscribers);
 
   if (!data?.findDeck?.decks) {
     console.log("cannot find deck");

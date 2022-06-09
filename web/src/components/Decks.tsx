@@ -1,44 +1,20 @@
-import { ChevronDownIcon, SettingsIcon, DeleteIcon } from "@chakra-ui/icons";
 import {
-  Text,
-  Box,
-  Flex,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  FormControl,
-  FormLabel,
-  Input,
-  FormErrorMessage,
-  Checkbox,
-  ModalFooter,
-  Button,
-  useDisclosure,
-  Icon,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
+  Box, Button, Checkbox, Flex, FormControl, FormErrorMessage, FormLabel,
+  Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure
 } from "@chakra-ui/react";
-import { Formik, Form, Field } from "formik";
+import { Field, Form, Formik } from "formik";
 import router from "next/router";
-import React, { useEffect, useState } from "react";
-import { FaPlusCircle, FaPen, FaShare } from "react-icons/fa";
+import React from "react";
+import { FaPlusCircle } from "react-icons/fa";
 import { useRecoilState } from "recoil";
 import { currentDeckBodyInfoState } from "../atoms/currentDeckBodyInfoState";
 import { showDeckBodyState } from "../atoms/showDeckBodyState";
 import {
-  GetMyDecksQuery,
-  GetMyDecksDocument,
-  useCreateDeckMutation,
+  GetMyDecksDocument, GetMyDecksQuery, useCreateDeckMutation,
   useGetMyDecksQuery,
-  useMeQuery,
+  useMeQuery
 } from "../generated/graphql";
 import { DeckButton } from "./DeckButton";
-import Post from "./Post";
 
 const Decks = () => {
   const [showDeckBody, setShowDeckBody] =
@@ -58,7 +34,6 @@ const Decks = () => {
 
   const handleDeckCreation = () => {
     if (!meQuery.data?.me) {
-      console.log("no user");
       router.push("/login");
       return;
     }
@@ -77,11 +52,12 @@ const Decks = () => {
   let decks = decksData?.getMyDecks?.decks;
   
   let orderedDecks = undefined;
-  
+
   if (decks){
     orderedDecks = [...decks]?.sort((a,b) => (a._id > b._id) ? 1 : -1);
   }
-  console.log(`getMyDecks`,   orderedDecks)   
+
+
 
   return (
     <Box>
