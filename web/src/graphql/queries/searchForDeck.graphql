@@ -1,6 +1,7 @@
 query SearchForDeck($input: String!) {
   searchForDeck(input: $input) {
-    title
+    title,
+    _id,
     user {
       _id
     }

@@ -33,8 +33,9 @@ export class DeckResolver {
 
     const allDecks = await em.find(Deck, {});
 
-    const decks = allDecks.filter((deck) => deck.title.toLocaleLowerCase().includes(input))
-    console.log('decks: ', decks)
+    console.log(input)
+    const decks = allDecks.filter((deck) => deck.title.toLowerCase().includes(input.toLowerCase()))
+    // console.log('decks: ', decks)
     if (decks.length < 1){
       return [];
     }

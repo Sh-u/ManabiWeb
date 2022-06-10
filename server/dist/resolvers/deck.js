@@ -33,8 +33,8 @@ DeckResponse = __decorate([
 let DeckResolver = class DeckResolver {
     async searchForDeck(input, { em }) {
         const allDecks = await em.find(Deck_1.Deck, {});
-        const decks = allDecks.filter((deck) => deck.title.toLocaleLowerCase().includes(input));
-        console.log('decks: ', decks);
+        console.log(input);
+        const decks = allDecks.filter((deck) => deck.title.toLowerCase().includes(input.toLowerCase()));
         if (decks.length < 1) {
             return [];
         }

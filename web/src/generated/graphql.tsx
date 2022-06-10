@@ -323,7 +323,7 @@ export type SearchForDeckQueryVariables = Exact<{
 }>;
 
 
-export type SearchForDeckQuery = { __typename?: 'Query', searchForDeck: Array<{ __typename?: 'Deck', title: string, user: { __typename?: 'User', _id: number } }> };
+export type SearchForDeckQuery = { __typename?: 'Query', searchForDeck: Array<{ __typename?: 'Deck', title: string, _id: number, user: { __typename?: 'User', _id: number } }> };
 
 export const BasicUserFragmentDoc = gql`
     fragment BasicUser on User {
@@ -979,6 +979,7 @@ export const SearchForDeckDocument = gql`
     query SearchForDeck($input: String!) {
   searchForDeck(input: $input) {
     title
+    _id
     user {
       _id
     }

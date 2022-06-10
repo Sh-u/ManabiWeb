@@ -31,8 +31,10 @@ import {
   Text,
   Icon,
 } from "@chakra-ui/react";
+
 import NextLink from "next/link";
-import React, { useCallback, useRef, useState } from "react";
+import { getEventListeners } from "node:events";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FaDiscord, FaGithub } from "react-icons/fa";
 import {
   Deck,
@@ -46,17 +48,13 @@ import {
   useSearchForDeckQuery,
 } from "../generated/graphql";
 import { client } from "../pages/client";
+import { SearchResults } from "../types";
 import { ColorModeSwitcher } from "./ColorModeSwitcher";
 
-type SearchResults = {
-  __typename?: string;
-  title: string;
-  user: {
-    __typename?: string;
-    username?: string;
-    _id: number;
-  };
-};
+import SearchBarButton from "./SearchBarButton";
+import SearchBarInput from "./SearchBarInput";
+
+
 
 const Navbar = () => {
   const { isOpen, onToggle } = useDisclosure();
@@ -87,15 +85,14 @@ const Navbar = () => {
   }, []);
 
   const onFocus = useCallback(() => {
-    console.log("focus");
+    if (showSearchBody) return;
 
     setShowSearchBody(true);
+
     window.addEventListener("click", onClick);
   }, []);
 
   const onClick = useCallback((event) => {
-    console.log(`target`, event.target);
-    console.log(`searchref`, searchRef.current);
     if (searchRef.current && !searchRef.current.contains(event.target)) {
       setShowSearchBody(false);
       window.removeEventListener("click", onClick);
@@ -166,84 +163,8 @@ const Navbar = () => {
       </Flex>
 
       <Box w="lg" display={{ base: "none", md: "block" }} position="relative">
-        <InputGroup>
-          <InputLeftElement
-            pointerEvents="none"
-            children={
-              <Search2Icon color={useColorModeValue("gray.600", "gray.200")} />
-            }
-          />
-          <Input
-            onChange={onChange}
-            onFocus={onFocus}
-            ref={searchRef}
-            type={"text"}
-            placeholder="Search... "
-            size="md"
-            rounded="lg"
-            backgroundColor={useColorModeValue("gray.100", "gray.700")}
-            color={useColorModeValue("gray.400", "gray.200")}
-            variant="filled"
-            boxShadow={useColorModeValue("sm", "none")}
-            focusBorderColor="pink.400"
-            _placeholder={{
-              opacity: 0.7,
-              color: useColorModeValue("gray.900", "gray.200"),
-            }}
-            _focus={{ bg: useColorModeValue("gray.200", "gray.600") }}
-            _hover={{ bg: useColorModeValue("gray.200", "gray.600") }}
-          />
-          <InputRightElement mr="3" children={<Kbd>Ctrl+K</Kbd>} />
-        </InputGroup>
-        {showSearchBody ? (
-          <Flex
-            position={"absolute"}
-            width="full"
-            bg="gray.600"
-            top="12"
-            h="xs"
-            rounded="lg"
-            zIndex={"10"}
-          >
-            <List spacing={3} w="full" p="2">
-              {searchResults.map((result, index) => (
-                <ListItem
-                  bg="gray.700"
-                  _hover={{
-                    bg: "gray.400",
-                    cursor: "pointer",
-                  }}
-                  w="full"
-                  rounded={"xl"}
-                  position='relative'
-                >
-                  <Flex align="center" justify="start" p="2" key={index}>
-                    <ListIcon as={CalendarIcon} color='gray.500' />
-
-                    <Flex align="center" justify="center" flexDir={"column"}>
-                      <Flex align="center" justify="center">
-                        <Avatar
-                          name="author"
-                          src="https://i.imgur.com/1M2viYL.png"
-                          ml="2"
-                          w="5"
-                          h="5"
-                        />
-                        <Text fontSize={"xs"} ml="2" color='gray.500'>
-                          by: {result.user.username ?? result.user._id}
-                        </Text>
-                      </Flex>
-                      <Text ml="2">{result.title}</Text>
-                    </Flex>
-                  </Flex>
-                  <Box position="absolute" top='4' right='5' padding={'inherit'} color='gray.500'>
-                    <Icon as={ExternalLinkIcon} h='5' w='5' />
-                  </Box>
-                </ListItem>
-              ))}
-            </List>
-          </Flex>
-        ) : null}
+        <SearchBarButton/>
+       
       </Box>
 
       <SearchIcon display={{ base: "block", md: "none" }} />
