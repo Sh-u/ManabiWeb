@@ -1,63 +1,67 @@
-import { Search2Icon } from "@chakra-ui/icons";
+import { SearchIcon } from "@chakra-ui/icons";
 import {
-  useDisclosure,
-  Button,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
   Input,
-  InputRightElement,
-  Kbd,
-  useColorModeValue,
   InputGroup,
   InputLeftElement,
+  InputRightElement,
+  Kbd,
+  Modal,
+  ModalContent,
+  ModalOverlay,
+  useDisclosure,
 } from "@chakra-ui/react";
-import React from "react";
+import { useRef } from "react";
+import useColors from "../hooks/useColors";
 import SearchBarInput from "./SearchBarInput";
 
 const SearchBarButton = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { getColor } = useColors();
+  const finalRef = useRef(null);
   return (
     <>
-      <InputGroup>
+      <InputGroup boxShadow={getColor("md", "none")} rounded="lg">
         <InputLeftElement
           pointerEvents="none"
           children={
-            <Search2Icon color={useColorModeValue("gray.600", "gray.200")} />
+            <SearchIcon
+              color={getColor("gray.600", "gray.400")}
+              height="full"
+            />
           }
         />
         <Input
-        tabIndex={-1}
-        readOnly
+          tabIndex={-1}
+          readOnly
           onClick={onOpen}
           cursor={"pointer"}
           type={"search"}
           placeholder="Search... "
-        textDecor={'none'}
+          textDecor={"none"}
           rounded="lg"
-          backgroundColor={useColorModeValue("gray.100", "gray.700")}
-          color={useColorModeValue("gray.400", "gray.200")}
+          backgroundColor={getColor("white", "gray.700")}
+          color={getColor("gray.400", "gray.200")}
           variant="filled"
-          boxShadow={useColorModeValue("sm", "none")}
           focusBorderColor="pink.400"
           _placeholder={{
-            opacity: 0.7,
-            color: useColorModeValue("gray.900", "gray.200"),
+            color: getColor("gray.900", "gray.400"),
           }}
-          _focus={{ bg: useColorModeValue("gray.200", "gray.600") }}
-          _hover={{ bg: useColorModeValue("gray.200", "gray.600") }}
+          _focus={{ bg: getColor("gray.200", "gray.600") }}
+          _hover={{ bg: getColor("gray.200", "gray.600") }}
         />
-        <InputRightElement mr="3" children={<Kbd>Ctrl+K</Kbd>} />
+        <InputRightElement mr="5" children={<Kbd>Ctrl+K</Kbd>} />
       </InputGroup>
 
-      <Modal isOpen={isOpen} onClose={onClose} size={'xl'}>
+      <Modal
+        finalFocusRef={finalRef}
+        isOpen={isOpen}
+        onClose={onClose}
+        size={"xl"}
+        scrollBehavior={"outside"}
+      >
         <ModalOverlay />
         <ModalContent top={15}>
-          <SearchBarInput/>
+          <SearchBarInput />
         </ModalContent>
       </Modal>
     </>

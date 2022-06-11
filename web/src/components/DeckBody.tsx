@@ -1,5 +1,5 @@
-import { Box, Text, Container, Flex, Wrap, Button } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import { Button, Flex, Text } from "@chakra-ui/react";
+import { useEffect } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { currentDeckBodyInfoState } from "../atoms/currentDeckBodyInfoState";
 import { showCreatePostState } from "../atoms/showCreatePostState";
@@ -14,16 +14,16 @@ const DeckBody = () => {
   const [showDeckBody, setShowDeckBody] =
     useRecoilState<boolean>(showDeckBodyState);
 
-  const {data, error, loading} = useFindDeckQuery({
+  const { data, error, loading } = useFindDeckQuery({
     variables: {
       _id: currentDeck,
     },
   });
 
   useEffect(() => {
-console.log('find deck: ', data?.findDeck)
-console.log('find deck error: ', error)
-  }, [loading])
+    console.log("find deck: ", data?.findDeck);
+    console.log("find deck error: ", error);
+  }, [loading]);
 
   return (
     <Flex
@@ -49,7 +49,6 @@ console.log('find deck error: ', error)
             variant={"link"}
             onClick={() => {
               setCreatePost(!createPost);
-            
             }}
           >
             Add

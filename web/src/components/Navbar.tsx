@@ -1,105 +1,36 @@
-import {
-  Search2Icon,
-  SearchIcon,
-  CalendarIcon,
-  ExternalLinkIcon,
-} from "@chakra-ui/icons";
+import { SearchIcon } from "@chakra-ui/icons";
 import {
   Avatar,
   Box,
   Button,
   Flex,
   IconButton,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  InputRightElement,
-  Kbd,
   Link,
-  List,
-  ListIcon,
-  ListItem,
   Menu,
   MenuButton,
   MenuDivider,
   MenuGroup,
   MenuItem,
-  MenuList,
-  useColorMode,
-  useColorModeValue,
-  useDisclosure,
-  Text,
-  Icon,
+  MenuList, 
+  useDisclosure
 } from "@chakra-ui/react";
-
 import NextLink from "next/link";
-import { getEventListeners } from "node:events";
-import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FaDiscord, FaGithub } from "react-icons/fa";
 import {
-  Deck,
   GetMyDecksDocument,
-  GetMyDecksQuery,
   MeDocument,
-  SearchForDeckDocument,
-  SearchForDeckQuery,
   useLogoutMutation,
-  useMeQuery,
-  useSearchForDeckQuery,
+  useMeQuery
 } from "../generated/graphql";
-import { client } from "../pages/client";
-import { SearchResults } from "../types";
+import useColors from "../hooks/useColors";
 import { ColorModeSwitcher } from "./ColorModeSwitcher";
-
 import SearchBarButton from "./SearchBarButton";
-import SearchBarInput from "./SearchBarInput";
-
-
 
 const Navbar = () => {
   const { isOpen, onToggle } = useDisclosure();
   const MeQuery = useMeQuery();
+  const { getColor } = useColors();
 
-  const [showSearchBody, setShowSearchBody] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
-  const [searchResults, setSearchResults] = useState<SearchResults[]>([]);
-
-  const searchRef = useRef(null);
-
-  const onChange = useCallback(async (event) => {
-    const value = event.target.value;
-    setSearchValue(value);
-    if (value.length) {
-      const { data, loading, error } = await client.query<SearchForDeckQuery>({
-        query: SearchForDeckDocument,
-        variables: {
-          input: value,
-        },
-      });
-      if (data?.searchForDeck) {
-        setSearchResults(data?.searchForDeck);
-      }
-    } else {
-      setSearchResults([]);
-    }
-  }, []);
-
-  const onFocus = useCallback(() => {
-    if (showSearchBody) return;
-
-    setShowSearchBody(true);
-
-    window.addEventListener("click", onClick);
-  }, []);
-
-  const onClick = useCallback((event) => {
-    if (searchRef.current && !searchRef.current.contains(event.target)) {
-      setShowSearchBody(false);
-      window.removeEventListener("click", onClick);
-    }
-  }, []);
-
-  const { colorMode, toggleColorMode } = useColorMode();
   const [logout, { loading }] = useLogoutMutation({
     update(cache, { data }) {
       cache.writeQuery({
@@ -134,7 +65,7 @@ const Navbar = () => {
           fontSize={"24px"}
           fontWeight={"600"}
           display={{ base: "none", md: "block" }}
-          color={useColorModeValue("gray.800", "gray.200")}
+          color={getColor("gray.800", "gray.200")}
         >
           <NextLink href="/">
             <Link fontSize={"xl"} style={{ textDecoration: "none" }}>
@@ -163,8 +94,7 @@ const Navbar = () => {
       </Flex>
 
       <Box w="lg" display={{ base: "none", md: "block" }} position="relative">
-        <SearchBarButton/>
-       
+        <SearchBarButton />
       </Box>
 
       <SearchIcon display={{ base: "block", md: "none" }} />

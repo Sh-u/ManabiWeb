@@ -1,50 +1,37 @@
-import { Search2Icon, CalendarIcon, ExternalLinkIcon } from "@chakra-ui/icons";
+import { ExternalLinkIcon, SearchIcon } from "@chakra-ui/icons";
 import {
+  Avatar,
   Box,
+  Divider,
+  Flex,
+  Icon,
+  Input,
   InputGroup,
   InputLeftElement,
-  useColorModeValue,
-  Input,
-  InputRightElement,
-  Kbd,
-  Text,
-  Flex,
   Link,
   List,
-  ListItem,
   ListIcon,
-  Avatar,
-  Icon,
-  Divider,
-  InputLeftAddon,
+  ListItem,
+  Text,
 } from "@chakra-ui/react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
 import NextLink from "next/link";
-import { SearchResults } from "../types";
+import React, { useCallback, useState } from "react";
+import { TiDocumentText } from "react-icons/ti";
 import {
-  SearchForDeckQuery,
   SearchForDeckDocument,
+  SearchForDeckQuery,
 } from "../generated/graphql";
+import useColors from "../hooks/useColors";
 import { client } from "../pages/client";
-
-interface SearchBarProps {
-  showSearchBody: boolean;
-  searchResults: SearchResults[];
-  onChange: (event: any) => Promise<void>;
-  onFocus: () => void;
-  searchRef: React.MutableRefObject<any>;
-}
+import { SearchResults } from "../types";
 
 const SearchBarInput = () => {
-  const [showSearchBody, setShowSearchBody] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResults[]>([]);
 
-  const searchRef = useRef(null);
+  const { getColor } = useColors();
 
   const onChange = useCallback(async (event) => {
     const value = event.target.value;
-    setSearchValue(value);
     if (value.length) {
       const { data, loading, error } = await client.query<SearchForDeckQuery>({
         query: SearchForDeckDocument,
@@ -52,71 +39,63 @@ const SearchBarInput = () => {
           input: value,
         },
       });
-      if (data?.searchForDeck) {
-        setSearchResults(data?.searchForDeck);
+      if (!loading && data?.searchForDeck.length > 0) {
+        setSearchResults([...data?.searchForDeck]); //error shows when setting value here
       }
     } else {
       setSearchResults([]);
     }
   }, []);
 
-  useEffect(() => {
-    if (!showSearchBody) {
-      setShowSearchBody(true);
-    }
-  }, [searchValue]);
-  const onFocus = useCallback(() => {
-    console.log("focus");
-
-    console.log(showSearchBody);
-    window.addEventListener("click", onClick);
-  }, []);
-
-  const onClick = useCallback((event) => {
-    if (searchRef.current && !searchRef.current.contains(event.target)) {
-      setShowSearchBody(false);
-      window.removeEventListener("click", onClick);
-    }
-  }, []);
   return (
     <>
-      <InputGroup  rounded="2xl">
-        
-        <InputLeftElement children={<Search2Icon color={useColorModeValue("gray.600", "gray.200")}/>}/>
-        
+      <InputGroup rounded="3xl">
+        <InputLeftElement
+          left="2"
+          h="full"
+          fontSize={"xl"}
+          children={<SearchIcon color="red.800" />}
+        />
+
         <Input
+          pl="12"
+          pr="0"
+          fontSize={"lg"}
           onChange={onChange}
-          onFocus={onFocus}
-          ref={searchRef}
           type={"text"}
           placeholder="Search for deck"
           h="60px"
-         
-          backgroundColor={useColorModeValue("gray.100", "gray.700")}
-          color={useColorModeValue("gray.400", "gray.200")}
+          bg={getColor("gray.50", "gray.700")}
           variant="filled"
-          boxShadow={useColorModeValue("sm", "none")}
-          focusBorderColor="pink.400"
+          boxShadow={getColor("sm", "none")}
           _placeholder={{
             opacity: 0.7,
-            color: useColorModeValue("gray.900", "gray.200"),
+            color: getColor("gray.900", "gray.200"),
           }}
-          _focus={{ bg: useColorModeValue("gray.200", "gray.600") }}
-          _hover={{ bg: useColorModeValue("gray.200", "gray.600") }}
+          _focus={{ bg: getColor("gray.50", "gray.700") }}
+          _hover={{ bg: getColor("gray.50", "gray.700") }}
         />
       </InputGroup>
-  
-      {showSearchBody ? (
+
+      {searchResults.length > 0 ? (
         <Box
+          p="2"
           position={"absolute"}
           width="full"
-          bg="gray.600"
-          top="20"
-          h="xs"
-          rounded="lg"
+          bg={getColor("gray.50", "gray.700")}
+          top="45px"
+          min-h="xs"
+          h="auto"
+          rounded="md"
           zIndex={"10"}
         >
           <List spacing={3} w="full" p="2">
+            <Divider
+              opacity={1}
+              borderColor={getColor("gray.300", "gray.500")}
+              orientation="horizontal"
+              mt="0"
+            />
             {searchResults.map((result, index) => (
               <NextLink
                 href={`/deck/${result.title}-${result._id}`}
@@ -128,10 +107,13 @@ const SearchBarInput = () => {
                   }}
                 >
                   <ListItem
+                    role="group"
+                    p="1"
+                    mt="3"
                     textDecor={"none"}
-                    bg="gray.700"
+                    bg={getColor("gray.200", "gray.600")}
                     _hover={{
-                      bg: "gray.400",
+                      bg: getColor("red.700", "red.800"),
                       cursor: "pointer",
                     }}
                     w="full"
@@ -139,7 +121,12 @@ const SearchBarInput = () => {
                     position="relative"
                   >
                     <Flex align="center" justify="start" p="2">
-                      <ListIcon as={CalendarIcon} color="gray.500" />
+                      <ListIcon
+                        fontSize={"2xl"}
+                        as={TiDocumentText}
+                        color={getColor("gray.400", "gray.400")}
+                        _groupHover={{ color: "gray.300" }}
+                      />
 
                       <Flex align="center" justify="center" flexDir={"column"}>
                         <Flex align="center" justify="center">
@@ -150,11 +137,24 @@ const SearchBarInput = () => {
                             w="5"
                             h="5"
                           />
-                          <Text fontSize={"xs"} ml="2" color="gray.500">
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight="semibold"
+                            ml="2"
+                            color={getColor("gray.400", "gray.400")}
+                            _groupHover={{ color: "gray.300" }}
+                          >
                             by: {result.user.username ?? result.user._id}
                           </Text>
                         </Flex>
-                        <Text ml="2">{result.title}</Text>
+                        <Text
+                          fontWeight={"semibold"}
+                          fontSize="md"
+                          ml="2"
+                          _groupHover={{ color: "white" }}
+                        >
+                          {result.title}
+                        </Text>
                       </Flex>
                     </Flex>
                     <Box
@@ -162,9 +162,14 @@ const SearchBarInput = () => {
                       top="4"
                       right="5"
                       padding={"inherit"}
-                      color="gray.500"
                     >
-                      <Icon as={ExternalLinkIcon} h="5" w="5" />
+                      <Icon
+                        as={ExternalLinkIcon}
+                        h="5"
+                        w="5"
+                        color={getColor("gray.400", "gray.400")}
+                        _groupHover={{ color: "gray.300" }}
+                      />
                     </Box>
                   </ListItem>
                 </Link>

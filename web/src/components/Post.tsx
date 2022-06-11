@@ -1,3 +1,4 @@
+import { CloseIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -8,17 +9,16 @@ import {
   ModalOverlay,
   Text,
   Textarea,
-  useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
-import React, { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useRecoilState } from "recoil";
 import Dropzone from "./Dropzone";
 import Player from "./Player";
-import { CloseIcon } from "@chakra-ui/icons";
-import { useRecoilState } from "recoil";
 
 import { showCreatePostState } from "../atoms/showCreatePostState";
+import useColors from "../hooks/useColors";
 
 const Post = () => {
   const [image, setImage] = useState({ url: null, image: null });
@@ -26,7 +26,7 @@ const Post = () => {
   const [showDeleteIcon, setshowDeleteIcon] = useState(false);
   const [showCreatePost, setShowCreatePost] =
     useRecoilState(showCreatePostState);
-
+  const { getColor } = useColors();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
@@ -84,7 +84,7 @@ const Post = () => {
             width={"auto"}
             alignItems={"flex-start"}
             justifyContent={"flex-start"}
-            bg={useColorModeValue("gray.600", "gray.700")}
+            bg={getColor("gray.600", "gray.700")}
             minH="lg"
             mt="5"
             rounded={"lg"}
@@ -164,7 +164,7 @@ const Post = () => {
                             <Player url={audio.url} />
                             <Text ml="5"> Your audio</Text>
                             <CloseIcon
-                            ml="2"
+                              ml="2"
                               h={"7"}
                               w={"7"}
                               transform={"auto"}

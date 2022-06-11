@@ -36,7 +36,6 @@ import {
   useDeleteDeckMutation,
   useRenameDeckMutation,
 } from "../generated/graphql";
-import { CopyToClipboard } from "react-copy-to-clipboard";
 interface renameDeckProps {
   currentDeckID: number;
   showModal: boolean;
@@ -97,11 +96,11 @@ export const DeckButton = ({
 
     const text = `localhost:3000/deck/${deck.title}-${deck._id}`;
     console.log(text);
-    copyTextToClipboard(text).then(() => {
-    }).catch((err) => {
-      console.log(err)
-    })
-  
+    copyTextToClipboard(text)
+      .then(() => {})
+      .catch((err) => {
+        console.log(err);
+      });
 
     toast({
       title: "Link copied.",

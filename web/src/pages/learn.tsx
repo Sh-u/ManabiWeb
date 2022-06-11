@@ -1,6 +1,6 @@
 import { Box } from "@chakra-ui/react";
-import {useRouter} from "next/router";
-import React, { useEffect } from "react";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { useRecoilValue } from "recoil";
 import { showCreatePostState } from "../atoms/showCreatePostState";
 import { showDeckBodyState } from "../atoms/showDeckBodyState";
@@ -18,22 +18,17 @@ const Learn = () => {
 
   const { data, loading } = useMeQuery();
 
-
-
   useEffect(() => {
-
     if (!loading && !data.me) {
-      router.push('/')
-      
-  }
-  }, [loading, data?.me])
+      router.push("/");
+    }
+  }, [loading, data?.me]);
 
-  
   return (
     <Box height="100vh" maxW={"7xl"} mx={"auto"}>
       <Navbar />
-      {showBodyState ? <DeckBody/> : <Decks />}
-      {showCreatePost ? <Post/> : null}
+      {showBodyState ? <DeckBody /> : <Decks />}
+      {showCreatePost ? <Post /> : null}
     </Box>
   );
 };

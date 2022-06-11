@@ -6,8 +6,6 @@ import InputField from "../components/InputField";
 import {
   GetMyDecksDocument,
   MeDocument,
-  namedOperations,
-  useGetMyDecksLazyQuery,
   useGetMyDecksQuery,
   useLoginMutation,
 } from "../generated/graphql";
@@ -15,7 +13,7 @@ import { toErrorMap } from "../utils/toErrorMap";
 const Login = () => {
   const [login] = useLoginMutation();
   const router = useRouter();
-  const {refetch} = useGetMyDecksQuery();
+  const { refetch } = useGetMyDecksQuery();
   return (
     <Flex
       h={"full"}
@@ -48,20 +46,16 @@ const Login = () => {
                   me: data.login.user,
                 },
               });
-
-
-
             },
             refetchQueries: [
               {
                 query: GetMyDecksDocument,
-              }     
-            ]
+              },
+            ],
           });
           if (response.data?.login.errors) {
             setErrors(toErrorMap(response.data?.login.errors));
           } else if (response.data?.login.user) {
-          
             router.push("/");
           }
         }}
@@ -78,7 +72,6 @@ const Login = () => {
               label="Password"
               placeholder="password"
               type="password"
-              
             />
 
             <Box display={"flex"} justifyContent="center" alignItems="center">
@@ -97,7 +90,6 @@ const Login = () => {
                 Back
               </Button>
               <Button
-              
                 mt={4}
                 colorScheme="messenger"
                 isLoading={isSubmitting}
