@@ -10,7 +10,7 @@ const DeckBody = () => {
   const currentDeck = useRecoilValue(currentDeckBodyInfoState);
 
   const [createPost, setCreatePost] = useRecoilState(showCreatePostState);
-
+  console.log('deck body')
   const [showDeckBody, setShowDeckBody] =
     useRecoilState<boolean>(showDeckBodyState);
 

@@ -54,6 +54,8 @@ export const DeckButton = ({
   const cancelRef = React.useRef();
   const toast = useToast();
 
+  console.log('deckButton render')
+
   const copyTextToClipboard = async (text) => {
     if ("clipboard" in navigator) {
       return await navigator.clipboard.writeText(text);
