@@ -11,8 +11,8 @@ import {
   MenuDivider,
   MenuGroup,
   MenuItem,
-  MenuList, 
-  useDisclosure
+  MenuList,
+  useDisclosure,
 } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { FaDiscord, FaGithub } from "react-icons/fa";
@@ -20,7 +20,7 @@ import {
   GetMyDecksDocument,
   MeDocument,
   useLogoutMutation,
-  useMeQuery
+  useMeQuery,
 } from "../generated/graphql";
 import useColors from "../hooks/useColors";
 import { ColorModeSwitcher } from "./ColorModeSwitcher";
@@ -69,7 +69,6 @@ const Navbar = () => {
         >
           <NextLink href="/">
             <Link fontSize={"xl"} style={{ textDecoration: "none" }}>
-              {" "}
               ManabiWeb
             </Link>
           </NextLink>
@@ -143,8 +142,10 @@ const Navbar = () => {
 
                 <MenuList>
                   <MenuGroup title="Profile">
-                    <MenuItem fontWeight={"bold"}>
-                      {MeQuery.data?.me?.username}
+                    <MenuItem fontWeight={"bold"} >
+                      <NextLink href={`/profile/${MeQuery.data?.me?.username}`} >
+                        <Link style={{ textDecoration: "none" }} w='full'>{MeQuery.data?.me?.username}</Link>
+                      </NextLink>
                     </MenuItem>
                     <MenuItem>Settings </MenuItem>
                   </MenuGroup>
