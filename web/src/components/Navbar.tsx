@@ -142,12 +142,18 @@ const Navbar = () => {
 
                 <MenuList>
                   <MenuGroup title="Profile">
-                    <MenuItem fontWeight={"bold"} >
-                      <NextLink href={`/profile/${MeQuery.data?.me?.username}`} >
-                        <Link style={{ textDecoration: "none" }} w='full'>{MeQuery.data?.me?.username}</Link>
+                    <MenuItem fontWeight={"bold"}>
+                      <NextLink href={`/profile/${MeQuery.data?.me?.username}`}>
+                        <Link style={{ textDecoration: "none" }} w="full">
+                          {MeQuery.data?.me?.username}
+                        </Link>
                       </NextLink>
                     </MenuItem>
-                    <MenuItem>Settings </MenuItem>
+                    <MenuItem>
+                      <NextLink  href='/settings/account'>
+                        <Link style={{ textDecoration: "none" }} w='full'>Settings</Link>
+                      </NextLink>
+                    </MenuItem>
                   </MenuGroup>
                   <MenuDivider />
                   <MenuItem

@@ -1,5 +1,6 @@
 fragment BasicUser on User {
   createdAt,
+  email,
   _id
   username
   decks {

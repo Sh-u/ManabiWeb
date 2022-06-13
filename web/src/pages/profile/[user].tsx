@@ -6,21 +6,19 @@ import {
   Divider,
   Flex,
   Icon,
-  SimpleGrid,
   Text,
-  VisuallyHidden,
 } from "@chakra-ui/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import React from "react";
-import { HiClock, HiUserGroup, HiPencil, HiSearch } from "react-icons/hi";
+import { HiClock, HiPencil, HiSearch, HiUserGroup } from "react-icons/hi";
 import Navbar from "../../components/Navbar";
 import {
   GetUsersDocument,
   GetUsersQuery,
   useMeQuery,
 } from "../../generated/graphql";
-import { client } from "../client";
 import useColors from "../../hooks/useColors";
+import { client } from "../client";
+
 interface FoundUser {
   foundUser: {
     createdAt?: Date;
@@ -66,128 +64,125 @@ const UserPage = ({
   return (
     <>
       <Navbar />
-      <Box bg={getColor("white", "gray.800")}>
-        <Flex
-          maxW="7xl"
-          mx={"auto"}
-          mt="20"
-          align="start"
-          justify={"start"}
-          flexDir="column"
-          fontSize="3xl"
-          h="auto"
-          p="3"
-        >
-          <Flex align="center" justify={"space-around"} w="full">
-            <Flex align="center" justify={"center"}>
-              <Avatar src="" size={"2xl"} />
-              <Flex align="start" justify={"center"} flexDir="column" ml="3">
-                <Text fontSize={"3xl"} fontWeight="semibold">
-                  {foundUser?.username}
-                  <Badge ml="2" colorScheme="green">
-                    New
-                  </Badge>
-                </Text>
-                <Flex fontSize={"sm"} align="center" justify={"center"}>
-                  <Icon as={HiClock} />{" "}
-                  <Text ml="2">joined on: {createdAt}</Text>
-                </Flex>
-                <Flex fontSize={"sm"} align="center" justify={"center"}>
-                  <Icon as={HiUserGroup} />{" "}
-                  <Text ml="2">Followers: 0 / Following: 0</Text>
-                </Flex>
-                <Flex fontSize={"sm"} align="center" justify={"center"}>
-                  🇯🇵
-                </Flex>
+
+      <Flex
+        maxW="7xl"
+        mx={"auto"}
+        mt="20"
+        align="start"
+        justify={"start"}
+        flexDir="column"
+        fontSize="3xl"
+        h="auto"
+        p="3"
+      >
+        <Flex align="center" justify={"space-around"} w="full">
+          <Flex align="center" justify={"center"}>
+            <Avatar src="" size={"2xl"} />
+            <Flex align="start" justify={"center"} flexDir="column" ml="3">
+              <Text fontSize={"3xl"} fontWeight="semibold">
+                {foundUser?.username}
+                <Badge ml="2" colorScheme="green">
+                  New
+                </Badge>
+              </Text>
+              <Flex fontSize={"sm"} align="center" justify={"center"}>
+                <Icon as={HiClock} /> <Text ml="2">joined on: {createdAt}</Text>
+              </Flex>
+              <Flex fontSize={"sm"} align="center" justify={"center"}>
+                <Icon as={HiUserGroup} />{" "}
+                <Text ml="2">Followers: 0 / Following: 0</Text>
+              </Flex>
+              <Flex fontSize={"sm"} align="center" justify={"center"}>
+                🇯🇵
               </Flex>
             </Flex>
-            <Box opacity={0}>empty</Box>
-            {EditButtonCheck}
           </Flex>
-          <Divider mt="10" />
+          <Box opacity={0}>empty</Box>
+          {EditButtonCheck}
+        </Flex>
 
-          <Flex align="center" justify={"space-around"} w="full">
-            <Flex
-              align="start"
-              justify="center"
-              flexDir={"column"}
-              px="12"
+        <Divider mt="10" />
+
+        <Flex align="center" justify={"space-around"} w="full">
+          <Flex
+            align="start"
+            justify="center"
+            flexDir={"column"}
+            px="12"
+            mt="5"
+          >
+            <Text fontSize={"2xl"} fontWeight="semibold">
+              Stats
+            </Text>
+            <Box
               mt="5"
+              outline={"2px solid #718096"}
+              rounded="xl"
+              p="2"
+              w="10vw"
+              color="gray.400"
+              opacity={0.5}
             >
-              <Text fontSize={"2xl"} fontWeight="semibold">
-                Stats
-              </Text>
-
-              <Box
-                mt="5"
-                outline={"2px solid #718096"}
-                rounded="xl"
-                p="2"
-                w="10vw"
-                color="gray.400"
-                opacity={0.5}
-              >
-                <Flex align="center" justify="start">
-                  <Text fontSize={"lg"}>🔥</Text>
-                  <Flex
-                    align="start"
-                    justify="center"
-                    flexDir={"column"}
-                    fontSize="md"
-                    ml="3"
-                  >
-                    <Text fontWeight={"bold"}>0</Text>
-                    <Text>Day Streak</Text>
-                  </Flex>
+              <Flex align="center" justify="start">
+                <Text fontSize={"lg"}>🔥</Text>
+                <Flex
+                  align="start"
+                  justify="center"
+                  flexDir={"column"}
+                  fontSize="md"
+                  ml="3"
+                >
+                  <Text fontWeight={"bold"}>0</Text>
+                  <Text>Day Streak</Text>
                 </Flex>
-              </Box>
-
-              <Box
-                outline={"2px solid #718096"}
-                rounded="xl"
-                p="2"
-                w="10vw"
-                color="gray.400"
-                opacity={0.5}
-                mt="10"
-              >
-                <Flex align="center" justify="start">
-                  <Text fontSize={"lg"}>✨</Text>
-                  <Flex
-                    align="start"
-                    justify="center"
-                    flexDir={"column"}
-                    fontSize="md"
-                    ml="3"
-                  >
-                    <Text fontWeight={"bold"}>0</Text>
-                    <Text>Cards Studied</Text>
-                  </Flex>
-                </Flex>
-              </Box>
-            </Flex>
-            <Box opacity={0}>empty</Box>
-            <Flex
-              align="start"
-              justify="center"
-              flexDir={"column"}
-              px="12"
-              mt="5"
+              </Flex>
+            </Box>
+            <Box
+              outline={"2px solid #718096"}
+              rounded="xl"
+              p="2"
+              w="10vw"
+              color="gray.400"
+              opacity={0.5}
+              mt="10"
             >
-              <Text fontSize={"2xl"} fontWeight="semibold" mt="5">
-                Friends
-              </Text>
-              <Text fontSize={"lg"}>Seems like no one is here 😭</Text>
-              {loggedUser?.me?._id === foundUser?._id ? (
-                <Button variant={"outline"} mt="5">
-                  <Icon as={HiSearch} />
-                  <Text ml="2">Find friends</Text>
-                </Button>
-              ) : null}
-            </Flex>
+              <Flex align="center" justify="start">
+                <Text fontSize={"lg"}>✨</Text>
+                <Flex
+                  align="start"
+                  justify="center"
+                  flexDir={"column"}
+                  fontSize="md"
+                  ml="3"
+                >
+                  <Text fontWeight={"bold"}>0</Text>
+                  <Text>Cards Studied</Text>
+                </Flex>
+              </Flex>
+            </Box>
+          </Flex>
+          <Box opacity={0}>empty</Box>
+          <Flex
+            align="start"
+            justify="center"
+            flexDir={"column"}
+            px="12"
+            mt="5"
+          >
+            <Text fontSize={"2xl"} fontWeight="semibold" mt="5">
+              Friends
+            </Text>
+            <Text fontSize={"lg"}>Seems like no one is here 😭</Text>
+            {loggedUser?.me?._id === foundUser?._id ? (
+              <Button variant={"outline"} mt="5">
+                <Icon as={HiSearch} />
+                <Text ml="2">Find friends</Text>
+              </Button>
+            ) : null}
           </Flex>
         </Flex>
-      </Box>
+      </Flex>
     </>
   );
 };
