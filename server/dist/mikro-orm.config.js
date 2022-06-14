@@ -20,6 +20,7 @@ exports.default = {
         path: path_1.default.join(__dirname, "./migrations"),
         glob: '!(*.d).{js,ts}'
     },
-    allowGlobalContext: true
+    allowGlobalContext: true,
+    forceUtcTimezone: true
 };
 //# sourceMappingURL=mikro-orm.config.js.map

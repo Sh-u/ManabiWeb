@@ -18,7 +18,8 @@ export default {
         path: path.join(__dirname, "./migrations"),
         glob: '!(*.d).{js,ts}' 
     },
-    allowGlobalContext: true
+    allowGlobalContext: true,
+    forceUtcTimezone: true
 } as Options<PostgreSqlDriver>
 
 

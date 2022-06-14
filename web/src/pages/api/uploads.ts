@@ -29,6 +29,8 @@ export default async (req, res) => {
       let newPathAudio;
       let newPathImage;
 
+      
+
       if (files.audioFile){
         oldPathAudio = files.audioFile.filepath;
         newPathAudio = `./public/uploads/${files.audioFile.originalFilename}`;
@@ -37,7 +39,9 @@ export default async (req, res) => {
         })
       }
       if (files.imageFile){
+        console.log('image')
         oldPathImage = files.imageFile.filepath;
+        console.log(oldPathImage)
         newPathImage = `./public/uploads/${files.imageFile.originalFilename}`;
         mv(oldPathImage, newPathImage, function(err){
 

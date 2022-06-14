@@ -89,9 +89,9 @@ let UserResolver = class UserResolver {
             return false;
         }
         const token = (0, uuid_1.v4)();
-        await redis.set(constants_1.FORGOT_PASSWORD_PREFIX + token, user._id, 'EX', 1000 * 60 * 60 * 24);
+        await redis.set(constants_1.FORGOT_PASSWORD_PREFIX + token, user._id, "EX", 1000 * 60 * 60 * 24);
         const redirect = `<a href="localhost:3000/reset-password/${token}">Reset Password</a>`;
-        await (0, sendMail_1.sendMail)(user.email, 'Manabi: Password Change Request', redirect);
+        await (0, sendMail_1.sendMail)(user.email, "Manabi: Password Change Request", redirect);
         return true;
     }
     async me({ req, em }) {
@@ -112,7 +112,7 @@ let UserResolver = class UserResolver {
         return users;
     }
     async changePassword(token, newPassword, { req, em, redis }) {
-        if (newPassword.includes('@')) {
+        if (newPassword.includes("@")) {
             return {
                 errors: [
                     {
@@ -159,7 +159,95 @@ let UserResolver = class UserResolver {
         await em.persistAndFlush(user);
         req.session.userId = user._id;
         return {
-            user
+            user,
+        };
+    }
+    async changeUsername(newUsername, { req, em, }) {
+        if (!req.session.userId) {
+            return {
+                errors: [
+                    {
+                        field: "Username",
+                        message: "No active user found",
+                    },
+                ],
+            };
+        }
+        const currentUser = await em.findOne(User_1.User, { _id: req.session.userId });
+        if (!currentUser) {
+            return {
+                errors: [
+                    {
+                        field: "Username",
+                        message: "Cannot find matching user",
+                    },
+                ],
+            };
+        }
+        console.log('newname', newUsername);
+        const userWithThatName = await em.findOne(User_1.User, { username: newUsername });
+        if (userWithThatName) {
+            return {
+                errors: [
+                    {
+                        field: "Username",
+                        message: "Username already taken",
+                    },
+                ],
+            };
+        }
+        if (newUsername.length < 4 || newUsername.includes("@")) {
+            return {
+                errors: [
+                    {
+                        field: "Username",
+                        message: "Invalid username",
+                    },
+                ],
+            };
+        }
+        currentUser.username = newUsername;
+        await em.persistAndFlush(currentUser);
+        return {
+            user: currentUser,
+        };
+    }
+    async changeEmail(newEmail, { req, em }) {
+        if (!req.session.userId) {
+            return {
+                errors: [
+                    {
+                        field: "Username",
+                        message: "No active user found",
+                    },
+                ],
+            };
+        }
+        const currentUser = await em.findOne(User_1.User, { _id: req.session.userId });
+        if (!currentUser) {
+            return {
+                errors: [
+                    {
+                        field: "Username",
+                        message: "Cannot find matching user",
+                    },
+                ],
+            };
+        }
+        if (newEmail.length < 4 || !newEmail.includes("@")) {
+            return {
+                errors: [
+                    {
+                        field: "Username",
+                        message: "Invalid email",
+                    },
+                ],
+            };
+        }
+        currentUser.email = newEmail;
+        await em.persistAndFlush(currentUser);
+        return {
+            user: currentUser,
         };
     }
     async logout({ req, res }) {
@@ -277,9 +365,7 @@ let UserResolver = class UserResolver {
                 ],
             };
         }
-        const user = await em.findOne(User_1.User, options.email
-            ? { email: options.email }
-            : { username: options.username });
+        const user = await em.findOne(User_1.User, options.email ? { email: options.email } : { username: options.username });
         if (!user) {
             return {
                 errors: [
@@ -339,6 +425,22 @@ __decorate([
         String, Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "changePassword", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => UserResponse),
+    __param(0, (0, type_graphql_1.Arg)("newUsername")),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "changeUsername", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => UserResponse),
+    __param(0, (0, type_graphql_1.Arg)("newEmail")),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "changeEmail", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
     __param(0, (0, type_graphql_1.Ctx)()),

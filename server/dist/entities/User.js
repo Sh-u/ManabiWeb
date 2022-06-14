@@ -19,6 +19,7 @@ let User = class User {
         this.createdAt = new Date();
         this.updatedAt = new Date();
     }
+    ;
 };
 __decorate([
     (0, type_graphql_1.Field)(() => type_graphql_1.Int),
@@ -30,6 +31,11 @@ __decorate([
     (0, core_1.OneToMany)(() => Deck_1.Deck, (deck) => deck.user, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], User.prototype, "decks", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    (0, core_1.Property)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "image", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
     (0, core_1.Property)({ type: "text", unique: true }),
@@ -45,12 +51,12 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => String),
+    (0, type_graphql_1.Field)(() => Date),
     (0, core_1.Property)({ type: "date" }),
     __metadata("design:type", Date)
 ], User.prototype, "createdAt", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => String),
+    (0, type_graphql_1.Field)(() => Date),
     (0, core_1.Property)({ type: "date", onUpdate: () => new Date() }),
     __metadata("design:type", Date)
 ], User.prototype, "updatedAt", void 0);

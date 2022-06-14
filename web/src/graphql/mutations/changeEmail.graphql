@@ -1,0 +1,13 @@
+mutation ChangeEmail($newEmail: String!) {
+  changeEmail(newEmail: $newEmail) {
+    user {
+      _id
+      username
+      email
+    }
+    errors {
+      field
+      message
+    }
+  }
+}
