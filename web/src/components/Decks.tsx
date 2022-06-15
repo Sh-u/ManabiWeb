@@ -1,6 +1,20 @@
 import {
-  Box, Button, Checkbox, Flex, FormControl, FormErrorMessage, FormLabel,
-  Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import router from "next/router";
@@ -10,9 +24,11 @@ import { useRecoilState } from "recoil";
 import { currentDeckBodyInfoState } from "../atoms/currentDeckBodyInfoState";
 import { showDeckBodyState } from "../atoms/showDeckBodyState";
 import {
-  GetMyDecksDocument, GetMyDecksQuery, useCreateDeckMutation,
+  GetMyDecksDocument,
+  GetMyDecksQuery,
+  useCreateDeckMutation,
   useGetMyDecksQuery,
-  useMeQuery
+  useMeQuery,
 } from "../generated/graphql";
 import { DeckButton } from "./DeckButton";
 
@@ -23,7 +39,6 @@ const Decks = () => {
   const [currentDeckBodyInfo, setCurrentDeckBodyInfo] = useRecoilState<
     number | undefined
   >(currentDeckBodyInfoState);
-
 
   const { data: decksData, loading, error } = useGetMyDecksQuery();
   const meQuery = useMeQuery();
@@ -42,37 +57,36 @@ const Decks = () => {
 
   const handleShowDeckBody = () => {
     setShowDeckBody(!showDeckBody);
-  }
+  };
   const handleShowCurrentDeckInfo = (deckId) => {
     setCurrentDeckBodyInfo(deckId);
-  }
-
-
+  };
 
   let decks = decksData?.getMyDecks?.decks;
-  
+
   let orderedDecks = undefined;
 
-  if (decks){
-    orderedDecks = [...decks]?.sort((a,b) => (a._id > b._id) ? 1 : -1);
+  if (decks) {
+    orderedDecks = [...decks]?.sort((a, b) => (a._id > b._id ? 1 : -1));
   }
-
-
 
   return (
     <Box>
       {decks ? (
         <Box>
-          {
-          
-          orderedDecks?.map((deck) => (
-           <DeckButton handleShowDeckBody={handleShowDeckBody} handleShowCurrentDeckInfo={handleShowCurrentDeckInfo} deck={deck} key={deck._id}/>
-          
-          ))
-          }
+          {orderedDecks?.map((deck) => (
+            <DeckButton
+              handleShowDeckBody={handleShowDeckBody}
+              handleShowCurrentDeckInfo={handleShowCurrentDeckInfo}
+              deck={deck}
+              key={deck._id}
+            />
+          ))}
         </Box>
       ) : (
-        <Box textAlign={'center'}>{loading ? loading : decksData?.getMyDecks?.errors}</Box>
+        <Box textAlign={"center"}>
+          {loading ? loading : decksData?.getMyDecks?.errors}
+        </Box>
       )}
       <Flex
         alignItems={"center"}

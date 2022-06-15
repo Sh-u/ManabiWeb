@@ -94,6 +94,14 @@ let UserResolver = class UserResolver {
         await (0, sendMail_1.sendMail)(user.email, "Manabi: Password Change Request", redirect);
         return true;
     }
+    async uploadAvatar({ em, req }, image) {
+        const currentUser = await em.findOne(User_1.User, { _id: req.session.userId });
+        if (!currentUser) {
+            return false;
+        }
+        console.log(image);
+        return true;
+    }
     async me({ req, em }) {
         if (!req.session.userId) {
             return null;
@@ -162,7 +170,7 @@ let UserResolver = class UserResolver {
             user,
         };
     }
-    async changeUsername(newUsername, { req, em, }) {
+    async changeUsername(newUsername, { req, em }) {
         if (!req.session.userId) {
             return {
                 errors: [
@@ -184,7 +192,7 @@ let UserResolver = class UserResolver {
                 ],
             };
         }
-        console.log('newname', newUsername);
+        console.log("newname", newUsername);
         const userWithThatName = await em.findOne(User_1.User, { username: newUsername });
         if (userWithThatName) {
             return {
@@ -401,6 +409,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "forgotPassword", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Boolean),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)("image")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "uploadAvatar", null);
 __decorate([
     (0, type_graphql_1.Query)(() => User_1.User, { nullable: true }),
     __param(0, (0, type_graphql_1.Ctx)()),

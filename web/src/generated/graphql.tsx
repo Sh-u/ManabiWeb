@@ -69,6 +69,7 @@ export type Mutation = {
   subscribeToDeck: DeckResponse;
   unsubscribeToDeck: Scalars['Boolean'];
   updatePostTitle?: Maybe<Post>;
+  uploadAvatar: Scalars['Boolean'];
 };
 
 
@@ -142,6 +143,11 @@ export type MutationUnsubscribeToDeckArgs = {
 
 export type MutationUpdatePostTitleArgs = {
   _id: Scalars['Float'];
+};
+
+
+export type MutationUploadAvatarArgs = {
+  image: Scalars['String'];
 };
 
 export type Post = {
@@ -314,6 +320,13 @@ export type UnsubscribeToDeckMutationVariables = Exact<{
 
 
 export type UnsubscribeToDeckMutation = { __typename?: 'Mutation', unsubscribeToDeck: boolean };
+
+export type UploadAvatarMutationVariables = Exact<{
+  image: Scalars['String'];
+}>;
+
+
+export type UploadAvatarMutation = { __typename?: 'Mutation', uploadAvatar: boolean };
 
 export type FindDeckQueryVariables = Exact<{
   _id: Scalars['Int'];
@@ -849,6 +862,37 @@ export function useUnsubscribeToDeckMutation(baseOptions?: Apollo.MutationHookOp
 export type UnsubscribeToDeckMutationHookResult = ReturnType<typeof useUnsubscribeToDeckMutation>;
 export type UnsubscribeToDeckMutationResult = Apollo.MutationResult<UnsubscribeToDeckMutation>;
 export type UnsubscribeToDeckMutationOptions = Apollo.BaseMutationOptions<UnsubscribeToDeckMutation, UnsubscribeToDeckMutationVariables>;
+export const UploadAvatarDocument = gql`
+    mutation UploadAvatar($image: String!) {
+  uploadAvatar(image: $image)
+}
+    `;
+export type UploadAvatarMutationFn = Apollo.MutationFunction<UploadAvatarMutation, UploadAvatarMutationVariables>;
+
+/**
+ * __useUploadAvatarMutation__
+ *
+ * To run a mutation, you first call `useUploadAvatarMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUploadAvatarMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [uploadAvatarMutation, { data, loading, error }] = useUploadAvatarMutation({
+ *   variables: {
+ *      image: // value for 'image'
+ *   },
+ * });
+ */
+export function useUploadAvatarMutation(baseOptions?: Apollo.MutationHookOptions<UploadAvatarMutation, UploadAvatarMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UploadAvatarMutation, UploadAvatarMutationVariables>(UploadAvatarDocument, options);
+      }
+export type UploadAvatarMutationHookResult = ReturnType<typeof useUploadAvatarMutation>;
+export type UploadAvatarMutationResult = Apollo.MutationResult<UploadAvatarMutation>;
+export type UploadAvatarMutationOptions = Apollo.BaseMutationOptions<UploadAvatarMutation, UploadAvatarMutationVariables>;
 export const FindDeckDocument = gql`
     query FindDeck($_id: Int!) {
   findDeck(_id: $_id) {
@@ -1150,7 +1194,8 @@ export const namedOperations = {
     Register: 'Register',
     RenameDeck: 'RenameDeck',
     SubscribeToDeck: 'SubscribeToDeck',
-    UnsubscribeToDeck: 'UnsubscribeToDeck'
+    UnsubscribeToDeck: 'UnsubscribeToDeck',
+    UploadAvatar: 'UploadAvatar'
   },
   Fragment: {
     BasicUser: 'BasicUser'

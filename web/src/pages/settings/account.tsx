@@ -133,12 +133,15 @@ const AccountPage = () => {
       body.append("imageFile", image.file);
     }
 
+    body.append("userId", userData?.me?._id.toString());
+
     console.log(`body: `, body.get("imageFile"));
 
     try {
       const response = await fetch("/api/uploads", {
         method: "POST",
         body,
+
       });
 
       console.log(response);

@@ -7,6 +7,7 @@ import {
   Ctx,
   Field,
   InputType,
+  Int,
   Mutation,
   ObjectType,
   Query,
@@ -16,6 +17,15 @@ import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
 import { User } from "../entities/User";
 import { v4 } from "uuid";
 import { Deck } from "../entities/Deck";
+import mv from "mv";
+import { Stream } from "stream";
+
+interface Upload {
+  filename: string;
+  mimetype: string;
+  encoding: string;
+  createReadStream: () => Stream;
+}
 
 @InputType()
 class RegisterInput {
@@ -81,6 +91,22 @@ export class UserResolver {
 
     const redirect = `<a href="localhost:3000/reset-password/${token}">Reset Password</a>`;
     await sendMail(user.email, "Manabi: Password Change Request", redirect);
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  async uploadAvatar(
+    @Ctx() { em, req }: MyContext,
+    @Arg("image") image: string
+  ): Promise<Boolean> {
+    const currentUser = await em.findOne(User, { _id: req.session.userId });
+
+    if (!currentUser) {
+      return false
+    }
+
+    console.log(image);
 
     return true;
   }
@@ -177,7 +203,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async changeUsername(
     @Arg("newUsername") newUsername: string,
-    @Ctx() { req, em,  }: MyContext
+    @Ctx() { req, em }: MyContext
   ): Promise<UserResponse> {
     if (!req.session.userId) {
       return {
@@ -189,10 +215,9 @@ export class UserResolver {
         ],
       };
     }
-    
+
     const currentUser = await em.findOne(User, { _id: req.session.userId });
 
-   
     if (!currentUser) {
       return {
         errors: [
@@ -203,11 +228,11 @@ export class UserResolver {
         ],
       };
     }
-    
-    console.log('newname', newUsername)
-    const userWithThatName = await em.findOne(User, {username: newUsername})
 
-    if (userWithThatName){
+    console.log("newname", newUsername);
+    const userWithThatName = await em.findOne(User, { username: newUsername });
+
+    if (userWithThatName) {
       return {
         errors: [
           {
@@ -217,7 +242,6 @@ export class UserResolver {
         ],
       };
     }
-
 
     if (newUsername.length < 4 || newUsername.includes("@")) {
       return {
@@ -233,7 +257,7 @@ export class UserResolver {
     currentUser.username = newUsername;
 
     await em.persistAndFlush(currentUser);
-   
+
     return {
       user: currentUser,
     };

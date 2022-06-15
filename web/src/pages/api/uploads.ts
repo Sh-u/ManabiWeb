@@ -10,17 +10,21 @@ export const config = {
   },
 };
 
-export default async (req, res) => {
+export default async (req: NextApiRequest, res: NextApiResponse) => {
   const data = new Promise((resolve, reject) => {
+    
     const form = new IncomingForm();
 
     // console.log(`api form: `, form);
+    console.log(`reqbody`, req.body)
 
+    console.log(typeof window)
     form.parse(req, (err, fields, files) => {
       if (err) {
         return reject(err);
       }
        console.log(`fields: `, fields);
+       console.log(`files: `, fields);
       // console.log(files.file.filepath);
 
       let oldPathAudio;
@@ -41,7 +45,10 @@ export default async (req, res) => {
       if (files.imageFile){
         console.log('image')
         oldPathImage = files.imageFile.filepath;
-        console.log(oldPathImage)
+        console.log(oldPathImage);
+        if (fields.userId){
+          newPathImage = `./public/uploads/${fields.userId}/${files.imageFile.originalFilename}`;
+        }
         newPathImage = `./public/uploads/${files.imageFile.originalFilename}`;
         mv(oldPathImage, newPathImage, function(err){
 
