@@ -6,5 +6,6 @@ export type SearchResults = {
       __typename?: string;
       username?: string;
       _id: number;
+      image?: string;
     };
   };

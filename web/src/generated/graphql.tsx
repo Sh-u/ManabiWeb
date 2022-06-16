@@ -15,6 +15,8 @@ export type Scalars = {
   Float: number;
   /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
   DateTime: any;
+  /** The `Upload` scalar type represents a file upload. */
+  Upload: any;
 };
 
 export type Deck = {
@@ -147,7 +149,7 @@ export type MutationUpdatePostTitleArgs = {
 
 
 export type MutationUploadAvatarArgs = {
-  image: Scalars['String'];
+  image: Scalars['Upload'];
 };
 
 export type Post = {
@@ -227,7 +229,7 @@ export type UserResponse = {
   user?: Maybe<User>;
 };
 
-export type BasicUserFragment = { __typename?: 'User', createdAt: any, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> };
+export type BasicUserFragment = { __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> };
 
 export type ChangeEmailMutationVariables = Exact<{
   newEmail: Scalars['String'];
@@ -242,7 +244,7 @@ export type ChangePasswordMutationVariables = Exact<{
 }>;
 
 
-export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', createdAt: any, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
+export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
 
 export type ChangeUsernameMutationVariables = Exact<{
   newUsername: Scalars['String'];
@@ -285,7 +287,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', createdAt: any, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -297,7 +299,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', createdAt: any, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
 
 export type RenameDeckMutationVariables = Exact<{
   _id: Scalars['Float'];
@@ -322,7 +324,7 @@ export type UnsubscribeToDeckMutationVariables = Exact<{
 export type UnsubscribeToDeckMutation = { __typename?: 'Mutation', unsubscribeToDeck: boolean };
 
 export type UploadAvatarMutationVariables = Exact<{
-  image: Scalars['String'];
+  image: Scalars['Upload'];
 }>;
 
 
@@ -333,7 +335,7 @@ export type FindDeckQueryVariables = Exact<{
 }>;
 
 
-export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, user: { __typename?: 'User', _id: number, username: string }, posts: Array<{ __typename?: 'Post', _id: number }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
+export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, user: { __typename?: 'User', _id: number, username: string, image?: string | null }, posts: Array<{ __typename?: 'Post', _id: number }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
 
 export type GetAllDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -343,17 +345,17 @@ export type GetAllDecksQuery = { __typename?: 'Query', getAllDecks: Array<{ __ty
 export type GetMyDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMyDecksQuery = { __typename?: 'Query', getMyDecks: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, user: { __typename?: 'User', _id: number, username: string } }> | null } };
+export type GetMyDecksQuery = { __typename?: 'Query', getMyDecks: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, user: { __typename?: 'User', _id: number, username: string, image?: string | null } }> | null } };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename?: 'User', createdAt: any, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> }> };
+export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> }> };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', createdAt: any, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null };
 
 export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -365,11 +367,12 @@ export type SearchForDeckQueryVariables = Exact<{
 }>;
 
 
-export type SearchForDeckQuery = { __typename?: 'Query', searchForDeck: Array<{ __typename?: 'Deck', title: string, _id: number, user: { __typename?: 'User', _id: number } }> };
+export type SearchForDeckQuery = { __typename?: 'Query', searchForDeck: Array<{ __typename?: 'Deck', title: string, _id: number, user: { __typename?: 'User', _id: number, image?: string | null } }> };
 
 export const BasicUserFragmentDoc = gql`
     fragment BasicUser on User {
   createdAt
+  image
   email
   _id
   username
@@ -863,7 +866,7 @@ export type UnsubscribeToDeckMutationHookResult = ReturnType<typeof useUnsubscri
 export type UnsubscribeToDeckMutationResult = Apollo.MutationResult<UnsubscribeToDeckMutation>;
 export type UnsubscribeToDeckMutationOptions = Apollo.BaseMutationOptions<UnsubscribeToDeckMutation, UnsubscribeToDeckMutationVariables>;
 export const UploadAvatarDocument = gql`
-    mutation UploadAvatar($image: String!) {
+    mutation UploadAvatar($image: Upload!) {
   uploadAvatar(image: $image)
 }
     `;
@@ -901,6 +904,7 @@ export const FindDeckDocument = gql`
       user {
         _id
         username
+        image
       }
       posts {
         _id
@@ -992,6 +996,7 @@ export const GetMyDecksDocument = gql`
       user {
         _id
         username
+        image
       }
       _id
     }
@@ -1139,6 +1144,7 @@ export const SearchForDeckDocument = gql`
     _id
     user {
       _id
+      image
     }
   }
 }

@@ -1,17 +1,24 @@
 import { Box, Text, Flex, Heading } from "@chakra-ui/react";
-import React from "react";
+import router, { useRouter } from "next/router";
+import React, { useEffect } from "react";
 
 import Navbar from "../components/Navbar";
 import { useMeQuery } from "../generated/graphql";
 
 const Index = () => {
-  const meQuery = useMeQuery();
-  
+  const {data: meData, loading} = useMeQuery();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !meData?.me) {
+      router.push("/");
+    }
+  }, [loading, meData?.me]);
 
   return (
     <Box height="100vh" maxW={"7xl"} mx={"auto"}>
       <Navbar />
-      {meQuery.data?.me ? (
+      {meData?.me ? (
         <Flex
           alignItems={"center"}
           justifyContent="center"

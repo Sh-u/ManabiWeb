@@ -19,6 +19,7 @@ const deck_1 = require("./resolvers/deck");
 const hello_1 = require("./resolvers/hello");
 const post_1 = require("./resolvers/post");
 const user_1 = require("./resolvers/user");
+const graphql_upload_1 = require("graphql-upload");
 const corsOptions = {
     origin: [
         "http://localhost:4000",
@@ -51,7 +52,7 @@ const main = async () => {
         saveUninitialized: false,
         secret: "dudu",
         resave: false,
-    }));
+    }), (0, graphql_upload_1.graphqlUploadExpress)({ maxFileSize: 10000000, maxFiles: 2 }));
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: await (0, type_graphql_1.buildSchema)({
             resolvers: [hello_1.HelloResolver, post_1.PostResolver, user_1.UserResolver, deck_1.DeckResolver],

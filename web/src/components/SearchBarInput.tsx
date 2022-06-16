@@ -27,7 +27,7 @@ import { SearchResults } from "../types";
 
 const SearchBarInput = () => {
   const [searchResults, setSearchResults] = useState<SearchResults[]>([]);
-
+  
   const { getColor } = useColors();
 
   const onChange = useCallback(async (event) => {
@@ -132,7 +132,7 @@ const SearchBarInput = () => {
                         <Flex align="center" justify="center">
                           <Avatar
                             name="author"
-                            src="https://i.imgur.com/1M2viYL.png"
+                            src={"/" + result.user.image}
                             ml="2"
                             w="5"
                             h="5"

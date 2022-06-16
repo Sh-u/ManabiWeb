@@ -15,6 +15,15 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
         "username": {
           "name": "username",
           "type": "text",

@@ -133,7 +133,7 @@ const Navbar = () => {
                   }}
                 >
                   <Avatar
-                    src="https://i.imgur.com/1M2viYL.png"
+                    src={"/" + MeQuery?.data?.me?.image}
                     w={"40px"}
                     h={"40px"}
                     name="User"

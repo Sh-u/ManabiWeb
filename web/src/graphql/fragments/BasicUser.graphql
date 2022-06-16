@@ -1,5 +1,6 @@
 fragment BasicUser on User {
   createdAt,
+  image,
   email,
   _id
   username

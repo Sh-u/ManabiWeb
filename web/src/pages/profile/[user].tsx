@@ -21,6 +21,7 @@ import { client } from "../client";
 
 interface FoundUser {
   foundUser: {
+    image?: string;
     createdAt?: Date;
     __typename?: string;
     _id: number;
@@ -78,7 +79,7 @@ const UserPage = ({
       >
         <Flex align="center" justify={"space-around"} w="full">
           <Flex align="center" justify={"center"}>
-            <Avatar src="" size={"2xl"} />
+            <Avatar src={"/" + foundUser?.image} size={"2xl"} />
             <Flex align="start" justify={"center"} flexDir="column" ml="3">
               <Text fontSize={"3xl"} fontWeight="semibold">
                 {foundUser?.username}

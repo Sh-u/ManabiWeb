@@ -3,7 +3,8 @@ query SearchForDeck($input: String!) {
     title,
     _id,
     user {
-      _id
+      _id,
+      image
     }
   }
 }

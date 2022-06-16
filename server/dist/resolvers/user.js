@@ -22,6 +22,9 @@ const type_graphql_1 = require("type-graphql");
 const constants_1 = require("../constants");
 const User_1 = require("../entities/User");
 const uuid_1 = require("uuid");
+const graphql_upload_1 = require("graphql-upload");
+const fs_1 = require("fs");
+const path_1 = __importDefault(require("path"));
 let RegisterInput = class RegisterInput {
 };
 __decorate([
@@ -96,10 +99,39 @@ let UserResolver = class UserResolver {
     }
     async uploadAvatar({ em, req }, image) {
         const currentUser = await em.findOne(User_1.User, { _id: req.session.userId });
+        const { createReadStream, filename } = await image;
         if (!currentUser) {
             return false;
         }
-        console.log(image);
+        const basePath = path_1.default.join("userFiles", currentUser._id.toString(), filename);
+        console.log(`basepath`, basePath);
+        const targetPath = path_1.default.resolve('..', 'web', 'public', basePath);
+        if (currentUser.image) {
+            await (0, fs_1.unlink)(targetPath, (err) => { if (err) {
+                console.log(err);
+            } });
+        }
+        console.log(`target`, targetPath);
+        new Promise(async (resolve, reject) => {
+            createReadStream()
+                .pipe((0, fs_1.createWriteStream)(targetPath))
+                .on("finish", () => {
+                console.log("finish");
+                return resolve(true);
+            })
+                .on("error", () => {
+                console.log("ee");
+                return reject(false);
+            });
+        });
+        currentUser.image = basePath;
+        try {
+            await em.persistAndFlush(currentUser);
+        }
+        catch (err) {
+            console.log(err);
+            return false;
+        }
         return true;
     }
     async me({ req, em }) {
@@ -341,6 +373,11 @@ let UserResolver = class UserResolver {
                 ],
             };
         }
+        (0, fs_1.mkdir)(path_1.default.join(__dirname, `../../userFiles/${user._id}`), (err) => {
+            if (err) {
+                return console.log(err);
+            }
+        });
         try {
             await em.persistAndFlush(user);
         }
@@ -412,9 +449,9 @@ __decorate([
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
     __param(0, (0, type_graphql_1.Ctx)()),
-    __param(1, (0, type_graphql_1.Arg)("image")),
+    __param(1, (0, type_graphql_1.Arg)("image", () => graphql_upload_1.GraphQLUpload)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "uploadAvatar", null);
 __decorate([

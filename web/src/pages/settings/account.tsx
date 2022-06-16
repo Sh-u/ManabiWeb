@@ -22,6 +22,7 @@ import {
   useChangeEmailMutation,
   useChangeUsernameMutation,
   useForgotPasswordMutation,
+  useUploadAvatarMutation,
   useMeQuery,
 } from "../../generated/graphql";
 import { toErrorMap } from "../../utils/toErrorMap";
@@ -54,6 +55,7 @@ const AccountPage = () => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
 
+  const [uploadAvatar] = useUploadAvatarMutation();
   const [changeUsername] = useChangeUsernameMutation();
   const [changeEmail] = useChangeEmailMutation();
   const [forgotPassword] = useForgotPasswordMutation();
@@ -127,27 +129,38 @@ const AccountPage = () => {
   };
 
   const uploadToServer = async () => {
-    const body = new FormData();
-    console.log(`body: `, body);
-    if (image) {
-      body.append("imageFile", image.file);
+    // const body = new FormData();
+
+    // if (image) {
+    //   body.append("image", image.file);
+    //   body.append("map", JSON.stringify({image: "variables.image"}))
+    //   // body.append("variables", JSON.stringify({ }))
+    // }
+
+    // body.append("operations","{"query":"mutation UploadAvatar($image: Upload!) {\n  uploadAvatar(image: $image)\n}"}"")
+
+    if (!image) return;
+    const response = await uploadAvatar({
+      variables: {
+        image: image.file
+      }
+    })
+     
+    if (response?.errors){
+      console.log(response?.errors)
     }
+    // console.log(`body: `, body.get("imageFile"));
 
-    body.append("userId", userData?.me?._id.toString());
+    // try {
+    //   const response = await fetch("http://localhost:4000/graphql", {
+    //     method: "POST",
+    //     body,
+    //   });
 
-    console.log(`body: `, body.get("imageFile"));
-
-    try {
-      const response = await fetch("/api/uploads", {
-        method: "POST",
-        body,
-
-      });
-
-      console.log(response);
-    } catch (e) {
-      console.log(e);
-    }
+    //   console.log(response);
+    // } catch (e) {
+    //   console.log(e);
+    // }
   };
 
   const handleSaveChanges = async () => {

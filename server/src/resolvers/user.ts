@@ -18,14 +18,11 @@ import { User } from "../entities/User";
 import { v4 } from "uuid";
 import { Deck } from "../entities/Deck";
 import mv from "mv";
-import { Stream } from "stream";
+import { finished, Stream } from "stream";
+import { GraphQLUpload, FileUpload } from "graphql-upload";
+import { createWriteStream, mkdir, unlink } from "fs";
+import path from "path";
 
-interface Upload {
-  filename: string;
-  mimetype: string;
-  encoding: string;
-  createReadStream: () => Stream;
-}
 
 @InputType()
 class RegisterInput {
@@ -98,15 +95,55 @@ export class UserResolver {
   @Mutation(() => Boolean)
   async uploadAvatar(
     @Ctx() { em, req }: MyContext,
-    @Arg("image") image: string
+    @Arg("image", () => GraphQLUpload)
+    image: FileUpload
   ): Promise<Boolean> {
     const currentUser = await em.findOne(User, { _id: req.session.userId });
-
+    const { createReadStream, filename } = await image;
     if (!currentUser) {
-      return false
+      return false;
     }
 
-    console.log(image);
+    const basePath = path.join(
+      "userFiles",
+      currentUser._id.toString(),
+      filename
+    );
+    console.log(`basepath`, basePath)
+    const targetPath = path.resolve('..', 'web', 'public', basePath);
+
+    if (currentUser.image) {
+      
+      await unlink(targetPath, (err) => {if (err) {console.log(err)}});
+    }
+
+    console.log(`target`, targetPath);
+    new Promise(async (resolve, reject) => {
+      createReadStream()
+        .pipe(createWriteStream(targetPath))
+        .on("finish", () => {
+          console.log("finish");
+          return resolve(true);
+        })
+        .on("error", () => {
+          console.log("ee");
+          return reject(false);
+        });
+    });
+
+    // const imagePath = path.join(process.cwd(), basePath);
+    // console.log(`imagepath`, imagePath)
+
+    
+ 
+    currentUser.image = basePath;
+
+    try {
+      await em.persistAndFlush(currentUser);
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
 
     return true;
   }
@@ -412,6 +449,13 @@ export class UserResolver {
         ],
       };
     }
+
+    mkdir(path.join(__dirname, `../../userFiles/${user._id}`), (err) => {
+      if (err) {
+        return console.log(err);
+      }
+    });
+
     try {
       await em.persistAndFlush(user);
     } catch (err) {

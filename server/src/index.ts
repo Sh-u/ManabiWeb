@@ -22,7 +22,7 @@ import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import { MyContext } from "./types";
-
+import {graphqlUploadExpress} from 'graphql-upload'
 const corsOptions = {
   origin: [
     "http://localhost:4000",
@@ -70,15 +70,16 @@ const main = async () => {
       saveUninitialized: false,
       secret: "dudu",
       resave: false,
-    })
+    }),
+    graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 2 })
   );
 
   const apolloServer = new ApolloServer({
+    
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver, DeckResolver],
       validate: false,
     }),
-
     plugins: [
       ApolloServerPluginLandingPageGraphQLPlayground({
         settings: { "request.credentials": "include" },

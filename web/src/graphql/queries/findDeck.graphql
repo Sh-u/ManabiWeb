@@ -4,7 +4,8 @@ query FindDeck($_id: Int!) {
       _id,
       user {
         _id,
-        username
+        username,
+        image
       },
       posts {
         _id,

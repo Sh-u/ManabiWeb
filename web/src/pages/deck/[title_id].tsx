@@ -126,11 +126,7 @@ const DeckPage = ({ decks }: DeckResponse) => {
             bg="gray.300"
             color="black"
           >
-            <Avatar
-              name="author"
-              src="https://i.imgur.com/1M2viYL.png"
-              ml="5"
-            />
+            <Avatar name="author" src={"/" + decks[0]?.user.image} ml="5" />
           </Tooltip>
         </Flex>
         <Flex align={"center"} justify={"center"} mt="5">

@@ -1,9 +1,10 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client";
 import { Deck } from "../generated/graphql";
+import { createUploadLink } from "apollo-upload-client";
 
 export const client = new ApolloClient({
   ssrMode: true,
-  link: createHttpLink({
+  link: createUploadLink({
     uri: "http://localhost:4000/graphql",
     credentials: "include",
   }),
@@ -11,10 +12,10 @@ export const client = new ApolloClient({
   cache: new InMemoryCache({
     typePolicies: {
       DeckResponse: {
-        keyFields: ['decks'],
-        merge: true
-      }
-    }
+        keyFields: ["decks"],
+        merge: true,
+      },
+    },
   }),
 });
 
@@ -24,4 +25,8 @@ export const client = new ApolloClient({
 //   credentials: 'include',
 //   cache: new InMemoryCache(),
 
+// createHttpLink({
+//   uri: "http://localhost:4000/graphql",
+//   credentials: "include",
+// }),
 // });

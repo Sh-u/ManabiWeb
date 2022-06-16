@@ -7,6 +7,7 @@ query GetMyDecks {
       user {
         _id
         username
+        image
       }
       _id
     }
