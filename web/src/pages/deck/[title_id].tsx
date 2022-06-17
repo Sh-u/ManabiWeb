@@ -1,4 +1,12 @@
-import { Avatar, Button, Flex, Text, Tooltip } from "@chakra-ui/react";
+import {
+  Avatar,
+  Button,
+  Center,
+  Flex,
+  Spinner,
+  Text,
+  Tooltip,
+} from "@chakra-ui/react";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
@@ -20,6 +28,7 @@ const DeckPage = ({ decks }: DeckResponse) => {
     router.replace(router.asPath);
   };
   const { data: userData, loading, error } = useMeQuery();
+
   const [subscribeToDeck, { error: subscribeToDeckError }] =
     useSubscribeToDeckMutation();
   const [unsubscribeToDeck] = useUnsubscribeToDeckMutation();
@@ -104,6 +113,7 @@ const DeckPage = ({ decks }: DeckResponse) => {
     }
     refreshData();
   };
+
 
   return (
     <>
@@ -190,7 +200,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
     };
   }
   // console.log(data.findDeck.decks[0].subscribers);
-
+  console.log(data.findDeck.decks[0].user.image)
   return {
     props: {
       decks: data.findDeck.decks,

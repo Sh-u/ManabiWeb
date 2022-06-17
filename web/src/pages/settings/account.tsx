@@ -15,7 +15,7 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import router from "next/router";
+import router, { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 import Navbar from "../../components/Navbar";
 import {
@@ -45,6 +45,11 @@ interface SaveChangesResponse {
 const AccountPage = () => {
   const { data: userData, loading } = useMeQuery();
 
+  const router = useRouter();
+  const refreshData = () => {
+    router.replace(router.asPath);
+  };
+
   const [usernameChangeInput, setUsernameChangeInput] = useState("");
 
   const [emailChangeInput, setEmailChangeInput] = useState("");
@@ -62,10 +67,10 @@ const AccountPage = () => {
 
   const toast = useToast();
 
-  const ShowResponseToast = (response: SaveChangesResponse) => {
+  const ShowResponseToast = (response?: SaveChangesResponse) => {
     if (toast.isActive("the-toast")) return;
     let title, description, status;
-    if (response.errors) {
+    if (response?.errors) {
       title = response.errors[0].field;
       description = response.errors[0].message;
       status = "error";
@@ -142,12 +147,12 @@ const AccountPage = () => {
     if (!image) return;
     const response = await uploadAvatar({
       variables: {
-        image: image.file
-      }
-    })
-     
-    if (response?.errors){
-      console.log(response?.errors)
+        image: image.file,
+      },
+    });
+
+    if (response?.errors) {
+      console.log(response?.errors);
     }
     // console.log(`body: `, body.get("imageFile"));
 
@@ -183,9 +188,8 @@ const AccountPage = () => {
         return;
       }
       console.log(response);
-      ShowResponseToast(response?.data?.changeUsername);
     }
-    
+
     if (emailChangeInput.length > 0) {
       const response = await changeEmail({
         variables: {
@@ -199,12 +203,23 @@ const AccountPage = () => {
         return;
       }
       console.log(response);
-      ShowResponseToast(response?.data?.changeEmail);
+
     }
 
     if (image) {
-      await uploadToServer();
+      try {
+        await uploadToServer();
+      } catch (err) {
+        ShowResponseToast({
+          errors: [{
+            field: 'image',
+            message: 'uploading image failed'
+          }],
+        });
+      }
     }
+    ShowResponseToast();
+    refreshData();
   };
 
   const handleResetPassword = () => {
@@ -354,9 +369,6 @@ const AccountPage = () => {
             m="0"
             fontWeight={"bold"}
             fontSize="xl"
-            _hover={{
-              transform: "scale(1.1)",
-            }}
             htmlFor="myImage"
             cursor={"pointer"}
             p="2"

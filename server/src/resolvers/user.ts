@@ -131,11 +131,6 @@ export class UserResolver {
         });
     });
 
-    // const imagePath = path.join(process.cwd(), basePath);
-    // console.log(`imagepath`, imagePath)
-
-    
- 
     currentUser.image = basePath;
 
     try {

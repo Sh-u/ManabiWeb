@@ -3,6 +3,7 @@ import {
   Avatar,
   Box,
   Button,
+  Center,
   Flex,
   IconButton,
   Link,
@@ -12,6 +13,7 @@ import {
   MenuGroup,
   MenuItem,
   MenuList,
+  Spinner,
   useDisclosure,
 } from "@chakra-ui/react";
 import NextLink from "next/link";
@@ -28,10 +30,10 @@ import SearchBarButton from "./SearchBarButton";
 
 const Navbar = () => {
   const { isOpen, onToggle } = useDisclosure();
-  const MeQuery = useMeQuery();
+  const {data: meData, loading: meLoading} = useMeQuery();
   const { getColor } = useColors();
 
-  const [logout, { loading }] = useLogoutMutation({
+  const [logout] = useLogoutMutation({
     update(cache, { data }) {
       cache.writeQuery({
         query: MeDocument,
@@ -51,6 +53,14 @@ const Navbar = () => {
       });
     },
   });
+
+  // if (meLoading) {
+  //   return (
+  //     <Center w='full' h='full'>
+  //       <Spinner color="red.500" />
+  //     </Center>
+  //   );
+  // }
 
   return (
     <Flex
@@ -123,7 +133,7 @@ const Navbar = () => {
         </Link>
         <ColorModeSwitcher />
 
-        {MeQuery.data?.me?.username ? (
+        {meData?.me?.username ? (
           <Box>
             <Flex justifyContent="flex-end">
               <Menu>
@@ -133,7 +143,7 @@ const Navbar = () => {
                   }}
                 >
                   <Avatar
-                    src={"/" + MeQuery?.data?.me?.image}
+                    src={"/" + meData?.me?.image}
                     w={"40px"}
                     h={"40px"}
                     name="User"
@@ -143,9 +153,9 @@ const Navbar = () => {
                 <MenuList>
                   <MenuGroup title="Profile">
                     <MenuItem fontWeight={"bold"}>
-                      <NextLink href={`/profile/${MeQuery.data?.me?.username}`}>
+                      <NextLink href={`/profile/${meData?.me?.username}`}>
                         <Link style={{ textDecoration: "none" }} w="full">
-                          {MeQuery.data?.me?.username}
+                          {meData?.me?.username}
                         </Link>
                       </NextLink>
                     </MenuItem>

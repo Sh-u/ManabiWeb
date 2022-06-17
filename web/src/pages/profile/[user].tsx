@@ -7,6 +7,7 @@ import {
   Flex,
   Icon,
   Text,
+  Link,
 } from "@chakra-ui/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { HiClock, HiPencil, HiSearch, HiUserGroup } from "react-icons/hi";
@@ -18,6 +19,7 @@ import {
 } from "../../generated/graphql";
 import useColors from "../../hooks/useColors";
 import { client } from "../client";
+import NextLink from "next/link";
 
 interface FoundUser {
   foundUser: {
@@ -46,18 +48,40 @@ const UserPage = ({
 
   const EditButtonCheck =
     loggedUser?.me?._id === foundUser?._id ? (
-      <Button
-        p="4"
-        size={"lg"}
-        rounded="xl"
-        bg={getColor("red.600", "red.800")}
-        _hover={{
-          bg: getColor("red.500", "red.700"),
-        }}
-      >
-        <Icon as={HiPencil} />
-        <Text ml="1">Edit Profile</Text>
-      </Button>
+      <NextLink href="/settings/account">
+        <Link style={{ textDecoration: "none" }} >
+          <Button
+            p="0"
+            borderRadius={"12px"}
+            bg="red.800"
+            outlineOffset="4px"
+            border="none"
+            _hover={{
+              bg: "red.800",
+            }}
+            _active={{
+              bg: "red.800",
+            }}
+          >
+            <Text
+              transform={"translateY(-6px)"}
+              bg={"red.700"}
+              borderRadius={"12px"}
+              color="white"
+              display={"block"}
+              p="3"
+              fontWeight={"semibold"}
+              fontSize={"sm"}
+              _active={{
+                transform: "translateY(-2px)",
+              }}
+            >
+              <Icon as={HiPencil} transform="translate3d(-2px, 2px, 0)" />
+              EDIT PROFILE
+            </Text>
+          </Button>
+        </Link>
+      </NextLink>
     ) : (
       <Button variant={"outline"}>Follow</Button>
     );

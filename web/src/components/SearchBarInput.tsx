@@ -128,7 +128,7 @@ const SearchBarInput = () => {
                         _groupHover={{ color: "gray.300" }}
                       />
 
-                      <Flex align="center" justify="center" flexDir={"column"}>
+                      <Flex align="start" justify="center" flexDir={"column"}>
                         <Flex align="center" justify="center">
                           <Avatar
                             name="author"
