@@ -5,15 +5,20 @@ import { currentDeckBodyInfoState } from "../atoms/currentDeckBodyInfoState";
 import { showCreatePostState } from "../atoms/showCreatePostState";
 import { showDeckBodyState } from "../atoms/showDeckBodyState";
 import { useFindDeckQuery } from "../generated/graphql";
+import useColors from "../hooks/useColors";
 
 const DeckBody = () => {
   const currentDeck = useRecoilValue(currentDeckBodyInfoState);
 
   const [createPost, setCreatePost] = useRecoilState(showCreatePostState);
-  console.log('deck body')
+  console.log("deck body");
   const [showDeckBody, setShowDeckBody] =
     useRecoilState<boolean>(showDeckBodyState);
 
+  const { getColor } = useColors();
+
+  const [showCreatePost, setShowCreatePost] =
+    useRecoilState<boolean>(showCreatePostState);
   const { data, error, loading } = useFindDeckQuery({
     variables: {
       _id: currentDeck,
@@ -28,25 +33,47 @@ const DeckBody = () => {
   return (
     <Flex
       mt="5"
-      bg="gray.700"
+      // bg={getColor('gray.400', 'gray.800')}
+
+      bgGradient={getColor(
+        "linear(to-b, gray.50, white)",
+        "linear(to-b, gray.700, gray.800)"
+      )}
+      border="1px solid"
+      borderColor={getColor("gray.100", "gray.700")}
       width={"auto"}
       h="lg"
-      rounded="lg"
-      ml="300px"
-      mr="300px"
+      rounded="2xl"
+      mx={{ base: "xl", md: "300px  " }}
       flexDir={"column"}
     >
-      <Flex minH="20%" minW="full" flexDir={"column"}>
-        <Flex align="center" justify={"space-evenly"} mt="5">
+      <Flex minH="auto" minW="full" flexDir={"column"}>
+        <Flex align="center" justify={"space-evenly"} mt="5" textUnderlineOffset={'2px'}>
           <Button
-            variant={"link"}
+            fontSize={"lg"}
+            _hover={{
+              textDecoration: "underline",
+            }}
+            variant={"unstyled"}
             onClick={() => setShowDeckBody(!showDeckBody)}
           >
             Decks
           </Button>
-          <Text>Stats</Text>
           <Button
-            variant={"link"}
+            _hover={{
+              textDecoration: "underline",
+            }}
+            fontSize={"lg"}
+            variant={"unstyled"}
+          >
+            Stats
+          </Button>
+          <Button
+            _hover={{
+              textDecoration: "underline",
+            }}
+            fontSize={"lg"}
+            variant={"unstyled"}
             onClick={() => {
               setCreatePost(!createPost);
             }}
@@ -55,24 +82,28 @@ const DeckBody = () => {
           </Button>
         </Flex>
         <Flex align="center" justify={"center"} mt="5">
-          <Text fontSize={"3xl"}>{data?.findDeck?.decks[0]?.title}</Text>
+          <Text fontSize={"3xl"} fontWeight="bold">
+            {data?.findDeck?.decks[0]?.title}
+          </Text>
         </Flex>
       </Flex>
-      <Flex minH="80%">
+      <Flex h="full">
         <Flex
           flexDir={"column"}
           alignItems="center"
           justify={"center"}
           width={"50%"}
         >
-          <Flex>
-            New: <Text ml="5">0</Text>
-          </Flex>
-          <Flex>
-            Learning: <Text ml="5">0</Text>
-          </Flex>
-          <Flex>
-            To Review: <Text ml="5">0</Text>
+          <Flex flexDir={"column"} alignItems="start" justify={"center"}>
+            <Flex>
+              New: <Text ml="5">0</Text>
+            </Flex>
+            <Flex>
+              Learning: <Text ml="5">0</Text>
+            </Flex>
+            <Flex>
+              To Review: <Text ml="5">0</Text>
+            </Flex>
           </Flex>
         </Flex>
         <Flex
@@ -81,7 +112,42 @@ const DeckBody = () => {
           justify={"center"}
           width={"50%"}
         >
-          <Button fontSize={"lg"}>Study Now!</Button>
+          <Button
+          opacity={0.9}
+            onClick={() => {
+              setShowCreatePost(showCreatePost);
+            }}
+            role='group'
+            p="0"
+            borderRadius={"12px"}
+            bg="red.800"
+            outlineOffset="4px"
+            border="none"
+            _hover={{
+              bg: "red.800",
+              opacity: 1
+            }}
+            _active={{
+              bg: "red.800",
+            }}
+          >
+            <Text
+           
+              transform={"translateY(-6px)"}
+              bg={"red.700"}
+              borderRadius={"12px"}
+              color="white"
+              display={"block"}
+              p="3"
+              fontWeight={"light"}
+              fontSize={"sm"}
+              _active={{
+                transform: "translateY(-2px)",
+              }}
+            >
+              Study Now
+            </Text>
+          </Button>
         </Flex>
       </Flex>
     </Flex>

@@ -12,7 +12,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import Dropzone from "./Dropzone";
 import Player from "./Player";
@@ -29,6 +29,9 @@ const Post = () => {
   const { getColor } = useColors();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+
+
+
   useEffect(() => {
     console.log("post effect");
     if (!showCreatePost) {
@@ -36,6 +39,12 @@ const Post = () => {
     }
     onOpen();
   }, [showCreatePost]);
+
+  const handleOnClose = () => {
+    if (!showCreatePost) return;
+    setShowCreatePost(!showCreatePost);
+    onClose();
+  }
 
   const handleDeleteClick = () => {
     if (!audio.url) {
@@ -77,16 +86,16 @@ const Post = () => {
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={handleOnClose} >
         <ModalOverlay />
         <ModalContent width={"auto"}>
           <Flex
-            width={"auto"}
+            
             alignItems={"flex-start"}
             justifyContent={"flex-start"}
             bg={getColor("gray.600", "gray.700")}
-            minH="lg"
-            mt="5"
+            h="full"
+        
             rounded={"lg"}
           >
             <Formik

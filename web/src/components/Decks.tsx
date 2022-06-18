@@ -19,7 +19,7 @@ import {
 import { Field, Form, Formik } from "formik";
 import router from "next/router";
 import React from "react";
-import { FaPlusCircle } from "react-icons/fa";
+import { IoMdAdd } from "react-icons/io";
 import { useRecoilState } from "recoil";
 import { currentDeckBodyInfoState } from "../atoms/currentDeckBodyInfoState";
 import { showDeckBodyState } from "../atoms/showDeckBodyState";
@@ -96,21 +96,18 @@ const Decks = () => {
       >
         <Flex
           alignItems={"center"}
+          
           justifyContent={"center"}
           mt={"3"}
+          as={Button}
           cursor={"pointer"}
           onClick={handleDeckCreation}
           transition={"ease-in-out"}
           transitionDuration="100ms"
-          _hover={{
-            textDecoration: "underline",
-            textUnderlinePosition: "under",
-          }}
+         
         >
-          <Box>Create new deck: </Box>
-          <Box ml={"3"}>
-            <FaPlusCircle />
-          </Box>
+          Create Deck
+          
           {isOpen ? (
             <Modal
               initialFocusRef={initialRef}

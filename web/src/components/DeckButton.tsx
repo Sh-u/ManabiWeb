@@ -114,9 +114,16 @@ export const DeckButton = ({
   };
 
   return (
-    <Flex flexDir={"column"} alignItems="center" key={deck._id}>
+    <Flex flexDir={"column"} alignItems="center" key={deck._id} >
       <Flex mt="5" align="center" justify={"center"}>
         <Button
+        
+        _hover={{
+          textDecoration: 'underline',
+          textUnderlineOffset: '2px'
+        }}
+        variant={'unstyled'}
+        rounded='lg'
           onClick={() => {
             handleShowDeckBody();
             handleShowCurrentDeckInfo(deck._id);
