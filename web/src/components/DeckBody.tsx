@@ -33,22 +33,26 @@ const DeckBody = () => {
   return (
     <Flex
       mt="5"
-      // bg={getColor('gray.400', 'gray.800')}
-
+      bg={getColor("gray.400", "gray.800")}
       bgGradient={getColor(
         "linear(to-b, gray.50, white)",
-        "linear(to-b, gray.700, gray.800)"
+        "linear(to-b, gray.800, gray.700)"
       )}
       border="1px solid"
       borderColor={getColor("gray.100", "gray.700")}
       width={"auto"}
       h="lg"
       rounded="2xl"
-      mx={{ base: "xl", md: "300px  " }}
+      mx={{ base: "xl", md: "350px  " }}
       flexDir={"column"}
     >
-      <Flex minH="auto" minW="full" flexDir={"column"}>
-        <Flex align="center" justify={"space-evenly"} mt="5" textUnderlineOffset={'2px'}>
+      <Flex h="auto" w="full" flexDir={"column"} rounded="2xl">
+        <Flex
+          align="center"
+          justify={"space-evenly"}
+          mt="5"
+          textUnderlineOffset={"2px"}
+        >
           <Button
             fontSize={"lg"}
             _hover={{
@@ -87,7 +91,7 @@ const DeckBody = () => {
           </Text>
         </Flex>
       </Flex>
-      <Flex h="full">
+      <Flex h="full" rounded="2xl">
         <Flex
           flexDir={"column"}
           alignItems="center"
@@ -113,11 +117,11 @@ const DeckBody = () => {
           width={"50%"}
         >
           <Button
-          opacity={0.9}
+            opacity={0.9}
             onClick={() => {
               setShowCreatePost(showCreatePost);
             }}
-            role='group'
+            role="group"
             p="0"
             borderRadius={"12px"}
             bg="red.800"
@@ -125,14 +129,13 @@ const DeckBody = () => {
             border="none"
             _hover={{
               bg: "red.800",
-              opacity: 1
+              opacity: 1,
             }}
             _active={{
               bg: "red.800",
             }}
           >
             <Text
-           
               transform={"translateY(-6px)"}
               bg={"red.700"}
               borderRadius={"12px"}

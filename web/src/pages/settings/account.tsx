@@ -134,15 +134,7 @@ const AccountPage = () => {
   };
 
   const uploadToServer = async () => {
-    // const body = new FormData();
 
-    // if (image) {
-    //   body.append("image", image.file);
-    //   body.append("map", JSON.stringify({image: "variables.image"}))
-    //   // body.append("variables", JSON.stringify({ }))
-    // }
-
-    // body.append("operations","{"query":"mutation UploadAvatar($image: Upload!) {\n  uploadAvatar(image: $image)\n}"}"")
 
     if (!image) return;
     const response = await uploadAvatar({
@@ -154,18 +146,8 @@ const AccountPage = () => {
     if (response?.errors) {
       console.log(response?.errors);
     }
-    // console.log(`body: `, body.get("imageFile"));
+  
 
-    // try {
-    //   const response = await fetch("http://localhost:4000/graphql", {
-    //     method: "POST",
-    //     body,
-    //   });
-
-    //   console.log(response);
-    // } catch (e) {
-    //   console.log(e);
-    // }
   };
 
   const handleSaveChanges = async () => {
@@ -378,6 +360,10 @@ const AccountPage = () => {
             w="auto"
             bg="inherit"
             position={"relative"}
+            _hover={{
+              textDecoration: 'underline'
+            }}
+            textUnderlineOffset={'2px'}
           >
             Upload Image
           </FormLabel>

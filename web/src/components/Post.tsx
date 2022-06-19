@@ -12,7 +12,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
 import Dropzone from "./Dropzone";
 import Player from "./Player";
@@ -29,9 +29,7 @@ const Post = () => {
   const { getColor } = useColors();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-
-
-
+  const currentRef = useRef();
   useEffect(() => {
     console.log("post effect");
     if (!showCreatePost) {
@@ -44,13 +42,6 @@ const Post = () => {
     if (!showCreatePost) return;
     setShowCreatePost(!showCreatePost);
     onClose();
-  }
-
-  const handleDeleteClick = () => {
-    if (!audio.url) {
-      return;
-    }
-    setshowDeleteIcon(!showDeleteIcon);
   };
 
   const handleImageState = (image, url) => {
@@ -86,16 +77,14 @@ const Post = () => {
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={handleOnClose} >
+      <Modal isOpen={isOpen} onClose={handleOnClose}  autoFocus={false}>
         <ModalOverlay />
         <ModalContent width={"auto"}>
           <Flex
-            
             alignItems={"flex-start"}
             justifyContent={"flex-start"}
             bg={getColor("gray.600", "gray.700")}
             h="full"
-        
             rounded={"lg"}
           >
             <Formik
@@ -113,7 +102,7 @@ const Post = () => {
                       flexDirection={"column"}
                     >
                       <Box mt="5">
-                        <Box>
+                        <Box ref={currentRef}>
                           <Dropzone
                             imageState={handleImageState}
                             audioState={handleAudioState}
@@ -121,27 +110,32 @@ const Post = () => {
                         </Box>
                         {image?.url ? (
                           <Flex
+                            role="group"
                             mt="5"
                             alignItems={"center"}
                             justifyContent="center"
+                            position="relative"
                           >
                             <Image
+                              _groupHover={{
+                                opacity: "0.5",
+                              }}
                               maxH={"lg"}
                               src={image.url}
                               onMouseEnter={() => renderExitIcon()}
-                              _hover={{
-                                opacity: "0.5",
-                              }}
                             />
                             <CloseIcon
                               margin={"auto"}
                               h={"10"}
                               w={"10"}
+                              top="0"
+                              right="0"
                               position="absolute"
                               p="2"
                               cursor={"pointer"}
                               _hover={{
                                 color: "red.500",
+                                opacity: 1,
                               }}
                               onClick={() => setImage(null)}
                             />
@@ -202,7 +196,7 @@ const Post = () => {
                             onClose();
                           }}
                         >
-                          Cancel
+                          Close
                         </Button>
                         <Button
                           ml="5"

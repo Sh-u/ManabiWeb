@@ -1,16 +1,43 @@
-import { useCallback, useState } from "react";
+import { ForwardedRef, Ref, useCallback, useRef, useState, forwardRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { Center, Icon, Input } from "@chakra-ui/react";
 import { AiFillFileAdd } from "react-icons/ai";
 import useColors from "../hooks/useColors";
+import { usePasteUpload } from "@rpldy/upload-paste";
+import withPasteUpload from "@rpldy/upload-paste";
 
 const regex = /'.jpg'|'.png'/;
 
+interface DropzoneProps {
+
+  imageState: (image: any, url: any) => void;
+  audioState: (audio: any, url: any) => void;
+}
+
+
+
 const Dropzone = ({
+
   imageState: handleImageState,
   audioState: handleAudioState,
-}) => {
+}: DropzoneProps) => {
   const { getColor } = useColors();
+
+  const handlePaste = (event) => {
+
+    if (event.clipboardData.files.length) {
+      const files = event.clipboardData.files
+      onDrop(files);
+    }
+    console.log('paste', event.target)
+  }
+  useEffect(() => {
+    window.addEventListener("paste", handlePaste);
+    return () => {
+      window.removeEventListener("paste", handlePaste);
+    };
+  }, []);
+
   const onDrop = useCallback((acceptedFiles) => {
     console.log(acceptedFiles);
 
@@ -58,6 +85,8 @@ const Dropzone = ({
 
   return (
     <Center
+    
+     
       p={10}
       cursor="pointer"
       bg={isDragActive ? activeBg : "transparent"}
@@ -68,7 +97,7 @@ const Dropzone = ({
       borderColor={borderColor}
       {...getRootProps()}
     >
-      <input {...getInputProps()} />
+      <input  {...getInputProps()} />
       <Icon as={AiFillFileAdd} mr={2} />
       <p>{dropText}</p>
     </Center>
