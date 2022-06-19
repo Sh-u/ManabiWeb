@@ -97,7 +97,9 @@ export type MutationCreateDeckArgs = {
 
 
 export type MutationCreatePostArgs = {
+  audio: Scalars['Upload'];
   deckId: Scalars['Float'];
+  image: Scalars['Upload'];
   options: PostInput;
 };
 
@@ -166,9 +168,7 @@ export type Post = {
 };
 
 export type PostInput = {
-  dictionaryAudio?: InputMaybe<Scalars['String']>;
   sentence: Scalars['String'];
-  userAudio?: InputMaybe<Scalars['String']>;
   word: Scalars['String'];
 };
 
@@ -263,6 +263,8 @@ export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __type
 export type CreatePostMutationVariables = Exact<{
   deckId: Scalars['Float'];
   options: PostInput;
+  image: Scalars['Upload'];
+  audio: Scalars['Upload'];
 }>;
 
 
@@ -548,8 +550,8 @@ export type CreateDeckMutationHookResult = ReturnType<typeof useCreateDeckMutati
 export type CreateDeckMutationResult = Apollo.MutationResult<CreateDeckMutation>;
 export type CreateDeckMutationOptions = Apollo.BaseMutationOptions<CreateDeckMutation, CreateDeckMutationVariables>;
 export const CreatePostDocument = gql`
-    mutation CreatePost($deckId: Float!, $options: PostInput!) {
-  createPost(deckId: $deckId, options: $options) {
+    mutation CreatePost($deckId: Float!, $options: PostInput!, $image: Upload!, $audio: Upload!) {
+  createPost(deckId: $deckId, options: $options, image: $image, audio: $audio) {
     error
     post {
       _id
@@ -581,6 +583,8 @@ export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, C
  *   variables: {
  *      deckId: // value for 'deckId'
  *      options: // value for 'options'
+ *      image: // value for 'image'
+ *      audio: // value for 'audio'
  *   },
  * });
  */

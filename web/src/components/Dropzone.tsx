@@ -29,7 +29,7 @@ const Dropzone = ({
       const files = event.clipboardData.files
       onDrop(files);
     }
-    console.log('paste', event.target)
+    // console.log('paste', event.target)
   }
   useEffect(() => {
     window.addEventListener("paste", handlePaste);
@@ -66,7 +66,7 @@ const Dropzone = ({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      "image/jpeg": [".jpeg", ".png"],
+      "image/jpeg": [".jpeg", ".png", ".jpg"],
       "audio/mp3": [".mp3", ".wav", ".ogg"],
     },
     maxFiles: 1,
@@ -85,8 +85,6 @@ const Dropzone = ({
 
   return (
     <Center
-    
-     
       p={10}
       cursor="pointer"
       bg={isDragActive ? activeBg : "transparent"}

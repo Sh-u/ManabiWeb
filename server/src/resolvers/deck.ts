@@ -13,6 +13,8 @@ import {
 import { Deck } from "../entities/Deck";
 import { User } from "../entities/User";
 import { MyContext } from "../types";
+import { mkdir } from "fs";
+import path from "path";
 
 @ObjectType()
 class DeckResponse {
@@ -141,6 +143,13 @@ export class DeckResolver {
     } catch (err) {
       console.log(err);
     }
+
+    const targetPath = path.resolve('..', 'web', 'public', `userFiles/${user._id}/deck-${deck._id}`);
+    mkdir(targetPath, (err) => {
+      if (err) {
+        return console.log(err);
+      }
+    });
 
     return {
       decks: [deck],

@@ -373,7 +373,8 @@ let UserResolver = class UserResolver {
                 ],
             };
         }
-        (0, fs_1.mkdir)(path_1.default.join(__dirname, `../../userFiles/${user._id}`), (err) => {
+        const targetPath = path_1.default.resolve('..', 'web', 'public', `userFiles/${user._id}`);
+        (0, fs_1.mkdir)(targetPath, (err) => {
             if (err) {
                 return console.log(err);
             }

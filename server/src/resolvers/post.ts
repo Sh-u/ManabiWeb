@@ -3,7 +3,9 @@ import { MyContext } from "../types";
 import { Arg, Ctx, Field, InputType, Int, Mutation, ObjectType, Query, Resolver } from "type-graphql";
 import { Deck } from "../entities/Deck";
 import { workerData } from "worker_threads";
-
+import { GraphQLUpload, FileUpload } from "graphql-upload";
+import path from "path";
+import {createWriteStream} from 'fs'
 @InputType()
 class PostInput {
   @Field(() => String)
@@ -12,11 +14,11 @@ class PostInput {
   @Field(() => String)
   word!: string;
 
-  @Field({nullable: true})
-  dictionaryAudio?: string;
+  // @Field({nullable: true})
+  // dictionaryAudio?: string;
 
-  @Field({nullable: true})
-  userAudio?: string;
+  // @Field({nullable: true})
+  // userAudio?: string;
   
 }
 
@@ -51,10 +53,12 @@ export class PostResolver {
   async createPost(
     @Arg("options") options: PostInput,
     @Arg("deckId") deckId: number,
+    @Arg("audio", () =>GraphQLUpload ) audio: FileUpload,
+    @Arg("image", () =>GraphQLUpload ) image: FileUpload,
     @Ctx() { em }: MyContext
   ): Promise<PostResponse> {
 
-   
+    
 
     const currentDeck = await em.findOne(Deck, {_id: deckId})
 
@@ -63,11 +67,10 @@ export class PostResolver {
         error: "Couldn't find a current deck in Post/Resolver"
       }
     }
+
     const post = await em.create(Post, {
       sentence: options.sentence,
       word: options.word,
-      dictionaryAudio: options.dictionaryAudio,
-      userAudio: options.userAudio,
       deck: currentDeck
      });
 
@@ -77,22 +80,75 @@ export class PostResolver {
       }
     }
 
-    await em.persistAndFlush(post);
+    console.log('created post object')
     
-    if (!currentDeck.posts){
-      return {
-        error: "There are no posts in this"
-      }
+    const basePathImage = path.join(`userFiles/${currentDeck.user._id}/deck-${currentDeck._id}/post/${post._id}/`, image.filename)
+    const basePathAudio = path.join(`userFiles/${currentDeck.user._id}/deck-${currentDeck._id}/post/${post._id}/`, audio.filename)
+
+
+    const targetPathImage = path.resolve('..', 'web', 'public', basePathImage);
+    const targetPathAudio = path.resolve('..', 'web', 'public', basePathAudio);
+
+    await new Promise((resolve, reject) => {
+      image.createReadStream()
+      .pipe(createWriteStream(targetPathImage))
+      .on('finish', () => {
+        console.log('finish')
+        resolve(true)
+      })
+      .on('error', () => {
+        console.log('error')
+        reject(false)
+      })
+    })
+
+    await new Promise((resolve, reject) => {
+      audio.createReadStream()
+      .pipe(createWriteStream(targetPathAudio))
+      .on('finish', () => {
+        console.log('finish')
+        resolve(true)
+      })
+      .on('error', () => {
+        console.log('error')
+        reject(false)
+      })
+    })
+
+    const imgMimes = [".jpeg", ".png", ".jpg"]
+    const audioMimes = [".mp3", ".wav", ".ogg"]
+    if (imgMimes.some((item) => item === image.mimetype )){
+      console.log('imgMime')
+      post.image = basePathImage;
     }
 
-    let postsAmount = currentDeck.posts.length;
-
-    if (!postsAmount){
-      return {
-        error: "Couldn't get post amount"
-      }
+    if (audioMimes.some((item) => item === audio.mimetype )){
+      console.log('imgMime')
+      post.userAudio = basePathAudio;
+      
     }
-    currentDeck.posts[postsAmount] = post;
+
+    try {
+      await em.persistAndFlush(post);
+    }
+    catch (err) {
+      console.log(err)
+    }
+    
+    // if (!currentDeck.posts){
+    //   return {
+    //     error: "There are no posts in this"
+    //   }
+    // }
+
+    // let postsAmount = currentDeck.posts.length;
+
+    // if (!postsAmount){
+    //   return {
+    //     error: "Couldn't get post amount"
+    //   }
+    // }
+    // currentDeck.posts[postsAmount] = post;
 
     return {
       post

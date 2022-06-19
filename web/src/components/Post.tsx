@@ -11,7 +11,7 @@ import {
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
-import { Form, Formik } from "formik";
+import { Field, Form, Formik } from "formik";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
 import Dropzone from "./Dropzone";
@@ -19,8 +19,9 @@ import Player from "./Player";
 
 import { showCreatePostState } from "../atoms/showCreatePostState";
 import useColors from "../hooks/useColors";
+import { useCreatePostMutation } from "../generated/graphql";
 
-const Post = () => {
+const Post = (currentDeck) => {
   const [image, setImage] = useState({ url: null, image: null });
   const [audio, setAudio] = useState({ url: null, audio: null });
   const [showDeleteIcon, setshowDeleteIcon] = useState(false);
@@ -28,6 +29,8 @@ const Post = () => {
     useRecoilState(showCreatePostState);
   const { getColor } = useColors();
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const [createPost] = useCreatePostMutation();
 
   const currentRef = useRef();
   useEffect(() => {
@@ -55,29 +58,13 @@ const Post = () => {
   const renderExitIcon = () => {
     return <CloseIcon w={50} h={50} />;
   };
-  const uploadToServer = async (event) => {
-    const body = new FormData();
-    console.log(`body: `, body);
-    if (image.image) {
-      body.append("imageFile", image.image);
-    }
-    if (audio.audio) {
-      body.append("audioFile", audio.audio);
-    }
-
-    console.log(`body2: `, body.get("audioFile"));
-
-    const response = await fetch("/api/uploads", {
-      method: "POST",
-      body,
-    });
-
-    console.log(`response: `, response);
+  const uploadToServer = async () => {
+    if (!image.image && !audio.audio) return;
   };
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={handleOnClose}  autoFocus={false}>
+      <Modal isOpen={isOpen} onClose={handleOnClose} autoFocus={false}>
         <ModalOverlay />
         <ModalContent width={"auto"}>
           <Flex
@@ -88,14 +75,51 @@ const Post = () => {
             rounded={"lg"}
           >
             <Formik
-              initialValues={{ username: "", password: "" }}
-              onSubmit={async (values, { setErrors }) => {}}
+              initialValues={{ Sentence: "", Word: "" }}
+              onSubmit={async (values, { setErrors }) => {
+                console.log(values);
+           
+                const response = await createPost({
+                  variables: {
+                    deckId: currentDeck,
+                    audio: audio.audio,
+                    image: image.image,
+                    options: {
+                      sentence: values.Sentence,
+                      word: values.Word,
+                    },
+                  },
+                });
+                if (!response || response?.data?.createPost?.error) {
+                  console.log("error");
+                  return;
+                }
+
+                console.log("success ", response?.data?.createPost?.post);
+              }}
             >
               {({ values, handleChange, isSubmitting }) => (
                 <Box width={"full"} p="5">
                   <Form>
-                    <Textarea placeholder="Sentence" resize={"vertical"} />
-                    <Textarea placeholder="Word" resize={"vertical"} mt="5" />
+                    <Field name="Sentence">
+                      {({ field: sentenceField }) => (
+                        <Textarea
+                          {...sentenceField}
+                          placeholder="Sentence"
+                          resize={"vertical"}
+                        />
+                      )}
+                    </Field>
+                    <Field name="Word">
+                      {({ field: wordField }) => (
+                        <Textarea
+                          {...wordField}
+                          placeholder="Word"
+                          resize={"vertical"}
+                          mt="5"
+                        />
+                      )}
+                    </Field>
                     <Flex
                       alignItems={"center"}
                       justifyContent={"center"}
@@ -198,11 +222,7 @@ const Post = () => {
                         >
                           Close
                         </Button>
-                        <Button
-                          ml="5"
-                          variant={"solid"}
-                          onClick={uploadToServer}
-                        >
+                        <Button ml="5" variant={"solid"} type="submit">
                           Save
                         </Button>
                       </Flex>

@@ -11,11 +11,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostResolver = void 0;
 const Post_1 = require("../entities/Post");
 const type_graphql_1 = require("type-graphql");
 const Deck_1 = require("../entities/Deck");
+const graphql_upload_1 = require("graphql-upload");
+const path_1 = __importDefault(require("path"));
+const fs_1 = require("fs");
 let PostInput = class PostInput {
 };
 __decorate([
@@ -26,14 +32,6 @@ __decorate([
     (0, type_graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], PostInput.prototype, "word", void 0);
-__decorate([
-    (0, type_graphql_1.Field)({ nullable: true }),
-    __metadata("design:type", String)
-], PostInput.prototype, "dictionaryAudio", void 0);
-__decorate([
-    (0, type_graphql_1.Field)({ nullable: true }),
-    __metadata("design:type", String)
-], PostInput.prototype, "userAudio", void 0);
 PostInput = __decorate([
     (0, type_graphql_1.InputType)()
 ], PostInput);
@@ -57,7 +55,7 @@ let PostResolver = class PostResolver {
     post(_id, { em }) {
         return em.findOne(Post_1.Post, { _id });
     }
-    async createPost(options, deckId, { em }) {
+    async createPost(options, deckId, audio, image, { em }) {
         const currentDeck = await em.findOne(Deck_1.Deck, { _id: deckId });
         if (!currentDeck) {
             return {
@@ -67,8 +65,6 @@ let PostResolver = class PostResolver {
         const post = await em.create(Post_1.Post, {
             sentence: options.sentence,
             word: options.word,
-            dictionaryAudio: options.dictionaryAudio,
-            userAudio: options.userAudio,
             deck: currentDeck
         });
         if (!post) {
@@ -76,19 +72,51 @@ let PostResolver = class PostResolver {
                 error: "Couldn't create Post"
             };
         }
-        await em.persistAndFlush(post);
-        if (!currentDeck.posts) {
-            return {
-                error: "There are no posts in this"
-            };
+        console.log('created post object');
+        const basePathImage = path_1.default.join(`userFiles/${currentDeck.user._id}/deck-${currentDeck._id}/post/${post._id}/`, image.filename);
+        const basePathAudio = path_1.default.join(`userFiles/${currentDeck.user._id}/deck-${currentDeck._id}/post/${post._id}/`, audio.filename);
+        const targetPathImage = path_1.default.resolve('..', 'web', 'public', basePathImage);
+        const targetPathAudio = path_1.default.resolve('..', 'web', 'public', basePathAudio);
+        await new Promise((resolve, reject) => {
+            image.createReadStream()
+                .pipe((0, fs_1.createWriteStream)(targetPathImage))
+                .on('finish', () => {
+                console.log('finish');
+                resolve(true);
+            })
+                .on('error', () => {
+                console.log('error');
+                reject(false);
+            });
+        });
+        await new Promise((resolve, reject) => {
+            audio.createReadStream()
+                .pipe((0, fs_1.createWriteStream)(targetPathAudio))
+                .on('finish', () => {
+                console.log('finish');
+                resolve(true);
+            })
+                .on('error', () => {
+                console.log('error');
+                reject(false);
+            });
+        });
+        const imgMimes = [".jpeg", ".png", ".jpg"];
+        const audioMimes = [".mp3", ".wav", ".ogg"];
+        if (imgMimes.some((item) => item === image.mimetype)) {
+            console.log('imgMime');
+            post.image = basePathImage;
         }
-        let postsAmount = currentDeck.posts.length;
-        if (!postsAmount) {
-            return {
-                error: "Couldn't get post amount"
-            };
+        if (audioMimes.some((item) => item === audio.mimetype)) {
+            console.log('imgMime');
+            post.userAudio = basePathAudio;
         }
-        currentDeck.posts[postsAmount] = post;
+        try {
+            await em.persistAndFlush(post);
+        }
+        catch (err) {
+            console.log(err);
+        }
         return {
             post
         };
@@ -129,9 +157,11 @@ __decorate([
     (0, type_graphql_1.Mutation)(() => PostResponse),
     __param(0, (0, type_graphql_1.Arg)("options")),
     __param(1, (0, type_graphql_1.Arg)("deckId")),
-    __param(2, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.Arg)("audio", () => graphql_upload_1.GraphQLUpload)),
+    __param(3, (0, type_graphql_1.Arg)("image", () => graphql_upload_1.GraphQLUpload)),
+    __param(4, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [PostInput, Number, Object]),
+    __metadata("design:paramtypes", [PostInput, Number, Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "createPost", null);
 __decorate([

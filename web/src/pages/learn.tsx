@@ -28,7 +28,7 @@ const Learn = () => {
     <Box height="100vh" maxW={"7xl"} mx={"auto"}>
       <Navbar />
       {showBodyState ? <DeckBody /> : <Decks />}
-      {showCreatePost ? <Post /> : null}
+  
     </Box>
   );
 };

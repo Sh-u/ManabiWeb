@@ -6,6 +6,7 @@ import { showCreatePostState } from "../atoms/showCreatePostState";
 import { showDeckBodyState } from "../atoms/showDeckBodyState";
 import { useFindDeckQuery } from "../generated/graphql";
 import useColors from "../hooks/useColors";
+import Post from "./Post";
 
 const DeckBody = () => {
   const currentDeck = useRecoilValue(currentDeckBodyInfoState);
@@ -153,6 +154,8 @@ const DeckBody = () => {
           </Button>
         </Flex>
       </Flex>
+      
+      {showCreatePost ? <Post currentDeck={currentDeck} /> : null}
     </Flex>
   );
 };

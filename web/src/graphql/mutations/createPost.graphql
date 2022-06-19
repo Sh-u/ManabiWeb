@@ -1,5 +1,5 @@
-mutation CreatePost($deckId: Float!, $options: PostInput!) {
-  createPost(deckId: $deckId, options: $options) {
+mutation CreatePost($deckId: Float!, $options: PostInput!, $image: Upload!, $audio: Upload!) {
+  createPost(deckId: $deckId, options: $options, image: $image, audio: $audio) {
     error,
     post {
       _id,

@@ -444,8 +444,8 @@ export class UserResolver {
         ],
       };
     }
-
-    mkdir(path.join(__dirname, `../../userFiles/${user._id}`), (err) => {
+    const targetPath = path.resolve('..', 'web', 'public', `userFiles/${user._id}`);
+    mkdir(targetPath, (err) => {
       if (err) {
         return console.log(err);
       }

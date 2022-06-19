@@ -11,12 +11,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeckResolver = void 0;
 const DeckSubscriber_1 = require("../entities/DeckSubscriber");
 const type_graphql_1 = require("type-graphql");
 const Deck_1 = require("../entities/Deck");
 const User_1 = require("../entities/User");
+const fs_1 = require("fs");
+const path_1 = __importDefault(require("path"));
 let DeckResponse = class DeckResponse {
 };
 __decorate([
@@ -110,6 +115,12 @@ let DeckResolver = class DeckResolver {
         catch (err) {
             console.log(err);
         }
+        const targetPath = path_1.default.resolve('..', 'web', 'public', `userFiles/${user._id}/deck-${deck._id}`);
+        (0, fs_1.mkdir)(targetPath, (err) => {
+            if (err) {
+                return console.log(err);
+            }
+        });
         return {
             decks: [deck],
         };
