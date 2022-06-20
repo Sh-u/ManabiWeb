@@ -71,7 +71,7 @@ const main = async () => {
       secret: "dudu",
       resave: false,
     }),
-    graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 2 })
+    graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 4 })
   );
 
   const apolloServer = new ApolloServer({

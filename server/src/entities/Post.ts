@@ -8,6 +8,7 @@ import {
 import { Field, Int, ObjectType } from "type-graphql";
 import { Deck } from "./Deck";
 
+
 @ObjectType()
 @Entity()
 export class Post {
@@ -20,14 +21,15 @@ export class Post {
     | "userAudio";
 
   @Field(() => String)
-  @Property({ type: "text", default: "" })
+  @Property({ type: "text"})
   sentence!: string;
 
   @Field(() => String)
-  @Property({ type: "text", default: "" })
+  @Property({ type: "text" })
   word!: string;
 
   @Field(() => Int)
+
   @PrimaryKey()
   _id: Number;
 

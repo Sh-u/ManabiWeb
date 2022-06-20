@@ -3,6 +3,8 @@ import {
   Box,
   Button,
   Flex,
+  FormControl,
+  FormErrorMessage,
   Image,
   Modal,
   ModalContent,
@@ -21,7 +23,7 @@ import { showCreatePostState } from "../atoms/showCreatePostState";
 import useColors from "../hooks/useColors";
 import { useCreatePostMutation } from "../generated/graphql";
 
-const Post = (currentDeck) => {
+const Post = ({ currentDeck }: { currentDeck: number }) => {
   const [image, setImage] = useState({ url: null, image: null });
   const [audio, setAudio] = useState({ url: null, audio: null });
   const [showDeleteIcon, setshowDeleteIcon] = useState(false);
@@ -34,7 +36,6 @@ const Post = (currentDeck) => {
 
   const currentRef = useRef();
   useEffect(() => {
-    console.log("post effect");
     if (!showCreatePost) {
       return;
     }
@@ -78,11 +79,10 @@ const Post = (currentDeck) => {
               initialValues={{ Sentence: "", Word: "" }}
               onSubmit={async (values, { setErrors }) => {
                 console.log(values);
-           
+
                 const response = await createPost({
                   variables: {
                     deckId: currentDeck,
-                    audio: audio.audio,
                     image: image.image,
                     options: {
                       sentence: values.Sentence,
@@ -90,36 +90,54 @@ const Post = (currentDeck) => {
                     },
                   },
                 });
-                if (!response || response?.data?.createPost?.error) {
-                  console.log("error");
+
+                if (
+                  !response ||
+                  response?.data?.createPost?.error ||
+                  response?.errors
+                ) {
+                  console.log("error", response?.data?.createPost?.error);
+                  setErrors({
+                    Sentence: "Input is too short",
+                    Word: "Input is too short",
+                  });
                   return;
                 }
 
                 console.log("success ", response?.data?.createPost?.post);
               }}
             >
-              {({ values, handleChange, isSubmitting }) => (
+              {({ values, handleChange, isSubmitting, errors }) => (
                 <Box width={"full"} p="5">
                   <Form>
-                    <Field name="Sentence">
-                      {({ field: sentenceField }) => (
-                        <Textarea
-                          {...sentenceField}
-                          placeholder="Sentence"
-                          resize={"vertical"}
-                        />
-                      )}
-                    </Field>
-                    <Field name="Word">
-                      {({ field: wordField }) => (
-                        <Textarea
-                          {...wordField}
-                          placeholder="Word"
-                          resize={"vertical"}
-                          mt="5"
-                        />
-                      )}
-                    </Field>
+                    <FormControl
+                      isInvalid={
+                        errors?.Sentence?.length > 1 || errors?.Word?.length > 1
+                      }
+                    >
+                      <Field name="Sentence">
+                        {({ field: sentenceField, form }) => (
+                          <Textarea
+                            {...sentenceField}
+                            placeholder="Sentence"
+                            resize={"vertical"}
+                          />
+                        )}
+                        {errors.Sentence ? (
+                          <FormErrorMessage>{errors.Sentence}</FormErrorMessage>
+                        ) : null}
+                      </Field>
+                      <Field name="Word">
+                        {({ field: wordField }) => (
+                          <Textarea
+                            {...wordField}
+                            placeholder="Word"
+                            resize={"vertical"}
+                            mt="5"
+                          />
+                        )}
+                      </Field>
+                    </FormControl>
                     <Flex
                       alignItems={"center"}
                       justifyContent={"center"}

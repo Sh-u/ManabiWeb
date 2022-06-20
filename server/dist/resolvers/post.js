@@ -22,14 +22,17 @@ const Deck_1 = require("../entities/Deck");
 const graphql_upload_1 = require("graphql-upload");
 const path_1 = __importDefault(require("path"));
 const fs_1 = require("fs");
+const class_validator_1 = require("class-validator");
 let PostInput = class PostInput {
 };
 __decorate([
     (0, type_graphql_1.Field)(() => String),
+    (0, class_validator_1.Length)(5, 50),
     __metadata("design:type", String)
 ], PostInput.prototype, "sentence", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
+    (0, class_validator_1.Length)(5, 15),
     __metadata("design:type", String)
 ], PostInput.prototype, "word", void 0);
 PostInput = __decorate([
@@ -38,11 +41,11 @@ PostInput = __decorate([
 let PostResponse = class PostResponse {
 };
 __decorate([
-    (0, type_graphql_1.Field)(() => String),
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
     __metadata("design:type", String)
 ], PostResponse.prototype, "error", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => Post_1.Post),
+    (0, type_graphql_1.Field)(() => Post_1.Post, { nullable: true }),
     __metadata("design:type", Post_1.Post)
 ], PostResponse.prototype, "post", void 0);
 PostResponse = __decorate([
@@ -55,71 +58,66 @@ let PostResolver = class PostResolver {
     post(_id, { em }) {
         return em.findOne(Post_1.Post, { _id });
     }
-    async createPost(options, deckId, audio, image, { em }) {
+    async createPost(options, deckId, image, { em }) {
+        console.log('mime', image.mimetype);
+        if (options.sentence.length < 1 || options.word.length < 1) {
+            return {
+                error: "Input is too short"
+            };
+        }
         const currentDeck = await em.findOne(Deck_1.Deck, { _id: deckId });
         if (!currentDeck) {
             return {
                 error: "Couldn't find a current deck in Post/Resolver"
             };
         }
-        const post = await em.create(Post_1.Post, {
-            sentence: options.sentence,
-            word: options.word,
-            deck: currentDeck
-        });
-        if (!post) {
+        await em.begin();
+        try {
+            const post = await em.create(Post_1.Post, {
+                sentence: options.sentence,
+                word: options.word,
+                deck: currentDeck
+            });
+            try {
+                await em.persistAndFlush(post);
+            }
+            catch (err) {
+                console.log(err);
+            }
+            const baseImagePath = path_1.default.join(`userFiles/${currentDeck.user._id}/deck-${currentDeck._id}/post-${post._id}/`);
+            const targetImagePath = path_1.default.resolve('..', 'web', 'public', baseImagePath);
+            await (0, fs_1.mkdir)(targetImagePath, (err) => {
+                return console.log(err);
+            });
+            console.log(`basePath: `, baseImagePath);
+            console.log(`targetPath: `, targetImagePath);
+            await new Promise((resolve, reject) => {
+                image.createReadStream()
+                    .pipe((0, fs_1.createWriteStream)(path_1.default.join(targetImagePath, image.filename)))
+                    .on('finish', () => {
+                    console.log('finish');
+                    resolve(true);
+                })
+                    .on('error', () => {
+                    console.log('error');
+                    reject(false);
+                });
+            });
+            const imgMimes = [".jpeg", ".png", ".jpg", "image/jpeg"];
+            const audioMimes = [".mp3", ".wav", ".ogg"];
+            if (imgMimes.some((item) => item === image.mimetype)) {
+                console.log('imgMime');
+                post.image = path_1.default.join(baseImagePath, image.filename);
+            }
+            await em.commit();
             return {
-                error: "Couldn't create Post"
+                post
             };
         }
-        console.log('created post object');
-        const basePathImage = path_1.default.join(`userFiles/${currentDeck.user._id}/deck-${currentDeck._id}/post/${post._id}/`, image.filename);
-        const basePathAudio = path_1.default.join(`userFiles/${currentDeck.user._id}/deck-${currentDeck._id}/post/${post._id}/`, audio.filename);
-        const targetPathImage = path_1.default.resolve('..', 'web', 'public', basePathImage);
-        const targetPathAudio = path_1.default.resolve('..', 'web', 'public', basePathAudio);
-        await new Promise((resolve, reject) => {
-            image.createReadStream()
-                .pipe((0, fs_1.createWriteStream)(targetPathImage))
-                .on('finish', () => {
-                console.log('finish');
-                resolve(true);
-            })
-                .on('error', () => {
-                console.log('error');
-                reject(false);
-            });
-        });
-        await new Promise((resolve, reject) => {
-            audio.createReadStream()
-                .pipe((0, fs_1.createWriteStream)(targetPathAudio))
-                .on('finish', () => {
-                console.log('finish');
-                resolve(true);
-            })
-                .on('error', () => {
-                console.log('error');
-                reject(false);
-            });
-        });
-        const imgMimes = [".jpeg", ".png", ".jpg"];
-        const audioMimes = [".mp3", ".wav", ".ogg"];
-        if (imgMimes.some((item) => item === image.mimetype)) {
-            console.log('imgMime');
-            post.image = basePathImage;
+        catch (e) {
+            await em.rollback();
+            throw e;
         }
-        if (audioMimes.some((item) => item === audio.mimetype)) {
-            console.log('imgMime');
-            post.userAudio = basePathAudio;
-        }
-        try {
-            await em.persistAndFlush(post);
-        }
-        catch (err) {
-            console.log(err);
-        }
-        return {
-            post
-        };
     }
     async updatePostTitle(_id, { em }) {
         const post = await em.findOne(Post_1.Post, { _id });
@@ -156,12 +154,11 @@ __decorate([
 __decorate([
     (0, type_graphql_1.Mutation)(() => PostResponse),
     __param(0, (0, type_graphql_1.Arg)("options")),
-    __param(1, (0, type_graphql_1.Arg)("deckId")),
-    __param(2, (0, type_graphql_1.Arg)("audio", () => graphql_upload_1.GraphQLUpload)),
-    __param(3, (0, type_graphql_1.Arg)("image", () => graphql_upload_1.GraphQLUpload)),
-    __param(4, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)("deckId", () => type_graphql_1.Int)),
+    __param(2, (0, type_graphql_1.Arg)("image", () => graphql_upload_1.GraphQLUpload)),
+    __param(3, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [PostInput, Number, Object, Object, Object]),
+    __metadata("design:paramtypes", [PostInput, Number, Object, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "createPost", null);
 __decorate([

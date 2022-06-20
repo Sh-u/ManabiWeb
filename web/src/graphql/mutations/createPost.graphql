@@ -1,5 +1,5 @@
-mutation CreatePost($deckId: Float!, $options: PostInput!, $image: Upload!, $audio: Upload!) {
-  createPost(deckId: $deckId, options: $options, image: $image, audio: $audio) {
+mutation CreatePost($deckId: Int!, $options: PostInput!, $image: Upload!) {
+  createPost(deckId: $deckId, options: $options, image: $image) {
     error,
     post {
       _id,
@@ -13,3 +13,5 @@ mutation CreatePost($deckId: Float!, $options: PostInput!, $image: Upload!, $aud
     }
   }
 }
+
+

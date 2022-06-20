@@ -21,12 +21,12 @@ let Post = class Post {
 };
 __decorate([
     (0, type_graphql_1.Field)(() => String),
-    (0, core_1.Property)({ type: "text", default: "" }),
+    (0, core_1.Property)({ type: "text" }),
     __metadata("design:type", String)
 ], Post.prototype, "sentence", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
-    (0, core_1.Property)({ type: "text", default: "" }),
+    (0, core_1.Property)({ type: "text" }),
     __metadata("design:type", String)
 ], Post.prototype, "word", void 0);
 __decorate([

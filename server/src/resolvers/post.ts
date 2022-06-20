@@ -5,30 +5,29 @@ import { Deck } from "../entities/Deck";
 import { workerData } from "worker_threads";
 import { GraphQLUpload, FileUpload } from "graphql-upload";
 import path from "path";
-import {createWriteStream} from 'fs'
+import {createWriteStream, mkdir} from 'fs'
+import { Length } from "class-validator";
+
+
 @InputType()
 class PostInput {
   @Field(() => String)
+  @Length(5, 50)
   sentence!: string;
 
   @Field(() => String)
+  @Length(5, 15)
   word!: string;
-
-  // @Field({nullable: true})
-  // dictionaryAudio?: string;
-
-  // @Field({nullable: true})
-  // userAudio?: string;
   
 }
 
 
 @ObjectType()
 class PostResponse {
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   error?: string;
 
-  @Field(() => Post)
+  @Field(() => Post, { nullable: true })
   post?: Post;
 }
   
@@ -49,17 +48,26 @@ export class PostResolver {
     return em.findOne(Post, { _id });
   }
 
+
+
   @Mutation(() => PostResponse)
   async createPost(
     @Arg("options") options: PostInput,
-    @Arg("deckId") deckId: number,
-    @Arg("audio", () =>GraphQLUpload ) audio: FileUpload,
+    @Arg("deckId", () => Int) deckId: number,
+    // @Arg("audio", () =>GraphQLUpload ) audio: FileUpload,
     @Arg("image", () =>GraphQLUpload ) image: FileUpload,
     @Ctx() { em }: MyContext
   ): Promise<PostResponse> {
 
-    
+    console.log('mime', image.mimetype)
+    // const parsedId = Number(deckId);
+    // console.log(deckId)
 
+    if (options.sentence.length < 1 || options.word.length < 1){
+      return {
+        error: "Input is too short"
+      }
+    }
     const currentDeck = await em.findOne(Deck, {_id: deckId})
 
     if (!currentDeck){
@@ -68,72 +76,96 @@ export class PostResolver {
       }
     }
 
-    const post = await em.create(Post, {
-      sentence: options.sentence,
-      word: options.word,
-      deck: currentDeck
-     });
 
-    if (!post){
-      return {
-        error: "Couldn't create Post"
-      }
-    }
-
-    console.log('created post object')
-    
-    const basePathImage = path.join(`userFiles/${currentDeck.user._id}/deck-${currentDeck._id}/post/${post._id}/`, image.filename)
-    const basePathAudio = path.join(`userFiles/${currentDeck.user._id}/deck-${currentDeck._id}/post/${post._id}/`, audio.filename)
-
-
-    const targetPathImage = path.resolve('..', 'web', 'public', basePathImage);
-    const targetPathAudio = path.resolve('..', 'web', 'public', basePathAudio);
-
-    await new Promise((resolve, reject) => {
-      image.createReadStream()
-      .pipe(createWriteStream(targetPathImage))
-      .on('finish', () => {
-        console.log('finish')
-        resolve(true)
-      })
-      .on('error', () => {
-        console.log('error')
-        reject(false)
-      })
-    })
-
-    await new Promise((resolve, reject) => {
-      audio.createReadStream()
-      .pipe(createWriteStream(targetPathAudio))
-      .on('finish', () => {
-        console.log('finish')
-        resolve(true)
-      })
-      .on('error', () => {
-        console.log('error')
-        reject(false)
-      })
-    })
-
-    const imgMimes = [".jpeg", ".png", ".jpg"]
-    const audioMimes = [".mp3", ".wav", ".ogg"]
-    if (imgMimes.some((item) => item === image.mimetype )){
-      console.log('imgMime')
-      post.image = basePathImage;
-    }
-
-    if (audioMimes.some((item) => item === audio.mimetype )){
-      console.log('imgMime')
-      post.userAudio = basePathAudio;
-      
-    }
+    await em.begin();
 
     try {
-      await em.persistAndFlush(post);
+      //... do some work
+      const post = await em.create(Post, {
+
+        sentence: options.sentence,
+        word: options.word,
+        deck: currentDeck
+       });
+
+       try {
+        await em.persistAndFlush(post);
+       } catch (err){
+        console.log(err)
+       }
+ 
+
+   
+     
+      const baseImagePath = path.join(`userFiles/${currentDeck.user._id}/deck-${currentDeck._id}/post-${post._id}/`)
+
+      // const basePathAudio = path.join(`userFiles/${currentDeck.user._id}/deck-${currentDeck._id}/post/${post._id}/`, audio.filename)
+  
+  
+      const targetImagePath = path.resolve('..', 'web', 'public', baseImagePath);
+      // const targetPathAudio = path.resolve('..', 'web', 'public', basePathAudio);
+      await mkdir(targetImagePath, (err) => {
+        return console.log(err)
+      })
+  
+      console.log(`basePath: `, baseImagePath)
+      console.log(`targetPath: `, targetImagePath)
+  
+      await new Promise((resolve, reject) => {
+        image.createReadStream()
+        .pipe(createWriteStream(path.join(targetImagePath, image.filename)))
+        .on('finish', () => {
+          console.log('finish')
+          resolve(true)
+        })
+        .on('error', () => {
+          console.log('error')
+          reject(false)
+        })
+      });
+
+      const imgMimes = [".jpeg", ".png", ".jpg", "image/jpeg"]
+      const audioMimes = [".mp3", ".wav", ".ogg"]
+      if (imgMimes.some((item) => item === image.mimetype )){
+        console.log('imgMime')
+        post.image = path.join(baseImagePath, image.filename);
+      }
+  
+
+      
+      await em.commit(); // will flush before making the actual commit query
+
+      return {
+        post
+      }
+    } catch (e) {
+      await em.rollback();
+      throw e;
     }
-    catch (err) {
-      console.log(err)
-    }
+
+  
+   
+    // await new Promise((resolve, reject) => {
+    //   audio.createReadStream()
+    //   .pipe(createWriteStream(targetPathAudio))
+    //   .on('finish', () => {
+    //     console.log('finish')
+    //     resolve(true)
+    //   })
+    //   .on('error', () => {
+    //     console.log('error')
+    //     reject(false)
+    //   })
+    // })
+
+
+    // if (audioMimes.some((item) => item === audio.mimetype )){
+    //   console.log('imgMime')
+    //   post.userAudio = basePathAudio;
+      
+    // }
+
+   
     
     // if (!currentDeck.posts){
     //   return {
@@ -150,9 +182,7 @@ export class PostResolver {
     // }
     // currentDeck.posts[postsAmount] = post;
 
-    return {
-      post
-    }
+    
   }
 
   @Mutation(() => Post, { nullable: true })
