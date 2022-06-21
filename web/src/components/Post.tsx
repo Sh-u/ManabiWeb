@@ -80,6 +80,20 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
               onSubmit={async (values, { setErrors }) => {
                 console.log(values);
 
+                const checkValues = () => {
+                  const errObj ={
+
+                  }
+
+                  if (values.Sentence.length < 1){
+                    errObj["Sentence"] = 'Input is too short'
+                  }
+                  if (values.Word.length < 1){
+                    errObj["Word"] = 'Input is too short'
+                  }
+                  console.log(JSON.stringify(errObj))
+                  return errObj;
+                }
                 const response = await createPost({
                   variables: {
                     deckId: currentDeck,
@@ -91,16 +105,15 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
                   },
                 });
 
+
                 if (
                   !response ||
                   response?.data?.createPost?.error ||
                   response?.errors
                 ) {
                   console.log("error", response?.data?.createPost?.error);
-                  setErrors({
-                    Sentence: "Input is too short",
-                    Word: "Input is too short",
-                  });
+
+                  setErrors(checkValues());
                   return;
                 }
 
@@ -110,26 +123,24 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
               {({ values, handleChange, isSubmitting, errors }) => (
                 <Box width={"full"} p="5">
                   <Form>
-                    <FormControl
-                      isInvalid={
-                        errors?.Sentence?.length > 1 || errors?.Word?.length > 1
-                      }
-                    >
+                    <FormControl >
                       <Field name="Sentence">
                         {({ field: sentenceField, form }) => (
                           <Textarea
+                          isInvalid={Object.hasOwn(errors, 'Sentence')}
                             {...sentenceField}
                             placeholder="Sentence"
                             resize={"vertical"}
                           />
                         )}
-                        {errors.Sentence ? (
-                          <FormErrorMessage>{errors.Sentence}</FormErrorMessage>
-                        ) : null}
                       </Field>
+                      {errors?.Sentence ? (
+                        <FormErrorMessage>{errors.Sentence}</FormErrorMessage>
+                      ) : null}
                       <Field name="Word">
                         {({ field: wordField }) => (
                           <Textarea
+                          isInvalid={Object.hasOwn(errors, 'Word')}
                             {...wordField}
                             placeholder="Word"
                             resize={"vertical"}

@@ -55,13 +55,17 @@ export class PostResolver {
     @Arg("options") options: PostInput,
     @Arg("deckId", () => Int) deckId: number,
     // @Arg("audio", () =>GraphQLUpload ) audio: FileUpload,
-    @Arg("image", () =>GraphQLUpload ) image: FileUpload,
+    @Arg("image", () =>GraphQLUpload, {nullable: true} ) image: FileUpload,
+    @Arg("audio", () =>GraphQLUpload, {nullable: true} ) audio: FileUpload,
     @Ctx() { em }: MyContext
   ): Promise<PostResponse> {
-
-    console.log('mime', image.mimetype)
-    // const parsedId = Number(deckId);
-    // console.log(deckId)
+    if (image){
+      console.log('mime', image.mimetype)
+    }
+    if (audio) {
+      console.log('mime', audio.mimetype)
+    }
+  
 
     if (options.sentence.length < 1 || options.word.length < 1){
       return {
@@ -97,38 +101,52 @@ export class PostResolver {
 
    
      
-      const baseImagePath = path.join(`userFiles/${currentDeck.user._id}/deck-${currentDeck._id}/post-${post._id}/`)
+      const basePath = path.join(`userFiles/user-${currentDeck.user._id}/deck-${currentDeck._id}/post-${post._id}/`)
+      const targetPath = path.resolve('..', 'web', 'public', basePath);
 
-      // const basePathAudio = path.join(`userFiles/${currentDeck.user._id}/deck-${currentDeck._id}/post/${post._id}/`, audio.filename)
-  
-  
-      const targetImagePath = path.resolve('..', 'web', 'public', baseImagePath);
-      // const targetPathAudio = path.resolve('..', 'web', 'public', basePathAudio);
-      await mkdir(targetImagePath, (err) => {
-        return console.log(err)
+      await mkdir(targetPath, (err) => {
+        return console.log(`error while creating a dir `, err)
       })
   
-      console.log(`basePath: `, baseImagePath)
-      console.log(`targetPath: `, targetImagePath)
+      console.log(`basePath: `, basePath)
+      console.log(`targetPath: `, targetPath)
   
-      await new Promise((resolve, reject) => {
-        image.createReadStream()
-        .pipe(createWriteStream(path.join(targetImagePath, image.filename)))
-        .on('finish', () => {
-          console.log('finish')
-          resolve(true)
-        })
-        .on('error', () => {
-          console.log('error')
-          reject(false)
-        })
-      });
+    
 
       const imgMimes = [".jpeg", ".png", ".jpg", "image/jpeg"]
-      const audioMimes = [".mp3", ".wav", ".ogg"]
-      if (imgMimes.some((item) => item === image.mimetype )){
-        console.log('imgMime')
-        post.image = path.join(baseImagePath, image.filename);
+      const audioMimes = [".mp3", ".wav", ".ogg", "audio/mp3"]
+      if (image && imgMimes.some((item) => item === image.mimetype )){
+        console.log('writing image')
+        await new Promise((resolve, reject) => {
+          image.createReadStream()
+          .pipe(createWriteStream(path.join(targetPath, image.filename)))
+          .on('finish', () => {
+            console.log('finish')
+            resolve(true)
+          })
+          .on('error', () => {
+            console.log('error')
+            reject(false)
+          })
+        });
+        post.image = path.join(basePath, image.filename);
+      }
+
+      if (audio && audioMimes.some((item) => item === audio.mimetype )){
+        console.log('writing audio')
+        await new Promise((resolve, reject) => {
+          audio.createReadStream()
+          .pipe(createWriteStream(path.join(targetPath, audio.filename)))
+          .on('finish', () => {
+            console.log('finish')
+            resolve(true)
+          })
+          .on('error', () => {
+            console.log('error')
+            reject(false)
+          })
+        });
+        post.userAudio = path.join(basePath, audio.filename);
       }
   
 
@@ -143,27 +161,6 @@ export class PostResolver {
       throw e;
     }
 
-  
-   
-    // await new Promise((resolve, reject) => {
-    //   audio.createReadStream()
-    //   .pipe(createWriteStream(targetPathAudio))
-    //   .on('finish', () => {
-    //     console.log('finish')
-    //     resolve(true)
-    //   })
-    //   .on('error', () => {
-    //     console.log('error')
-    //     reject(false)
-    //   })
-    // })
-
-
-    // if (audioMimes.some((item) => item === audio.mimetype )){
-    //   console.log('imgMime')
-    //   post.userAudio = basePathAudio;
-      
-    // }
 
    
     

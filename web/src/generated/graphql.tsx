@@ -97,8 +97,9 @@ export type MutationCreateDeckArgs = {
 
 
 export type MutationCreatePostArgs = {
+  audio?: InputMaybe<Scalars['Upload']>;
   deckId: Scalars['Int'];
-  image: Scalars['Upload'];
+  image?: InputMaybe<Scalars['Upload']>;
   options: PostInput;
 };
 
@@ -173,8 +174,8 @@ export type PostInput = {
 
 export type PostResponse = {
   __typename?: 'PostResponse';
-  error: Scalars['String'];
-  post: Post;
+  error?: Maybe<Scalars['String']>;
+  post?: Maybe<Post>;
 };
 
 export type Query = {
@@ -262,11 +263,12 @@ export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __type
 export type CreatePostMutationVariables = Exact<{
   deckId: Scalars['Int'];
   options: PostInput;
-  image: Scalars['Upload'];
+  image?: InputMaybe<Scalars['Upload']>;
+  audio?: InputMaybe<Scalars['Upload']>;
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'PostResponse', error: string, post: { __typename?: 'Post', _id: number, sentence: string, word: string, image?: string | null, dictionaryAudio?: string | null, userAudio?: string | null, createdAt: string, updatedAt: string } } };
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'PostResponse', error?: string | null, post?: { __typename?: 'Post', _id: number, sentence: string, word: string, image?: string | null, dictionaryAudio?: string | null, userAudio?: string | null, createdAt: string, updatedAt: string } | null } };
 
 export type DeleteDeckMutationVariables = Exact<{
   _id: Scalars['Float'];
@@ -548,8 +550,8 @@ export type CreateDeckMutationHookResult = ReturnType<typeof useCreateDeckMutati
 export type CreateDeckMutationResult = Apollo.MutationResult<CreateDeckMutation>;
 export type CreateDeckMutationOptions = Apollo.BaseMutationOptions<CreateDeckMutation, CreateDeckMutationVariables>;
 export const CreatePostDocument = gql`
-    mutation CreatePost($deckId: Int!, $options: PostInput!, $image: Upload!) {
-  createPost(deckId: $deckId, options: $options, image: $image) {
+    mutation CreatePost($deckId: Int!, $options: PostInput!, $image: Upload, $audio: Upload) {
+  createPost(deckId: $deckId, options: $options, image: $image, audio: $audio) {
     error
     post {
       _id
@@ -582,6 +584,7 @@ export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, C
  *      deckId: // value for 'deckId'
  *      options: // value for 'options'
  *      image: // value for 'image'
+ *      audio: // value for 'audio'
  *   },
  * });
  */
