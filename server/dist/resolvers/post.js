@@ -59,21 +59,15 @@ let PostResolver = class PostResolver {
         return em.findOne(Post_1.Post, { _id });
     }
     async createPost(options, deckId, image, audio, { em }) {
-        if (image) {
-            console.log('mime', image.mimetype);
-        }
-        if (audio) {
-            console.log('mime', audio.mimetype);
-        }
         if (options.sentence.length < 1 || options.word.length < 1) {
             return {
-                error: "Input is too short"
+                error: "Input is too short",
             };
         }
         const currentDeck = await em.findOne(Deck_1.Deck, { _id: deckId });
         if (!currentDeck) {
             return {
-                error: "Couldn't find a current deck in Post/Resolver"
+                error: "Couldn't find a current deck in Post/Resolver",
             };
         }
         await em.begin();
@@ -81,7 +75,7 @@ let PostResolver = class PostResolver {
             const post = await em.create(Post_1.Post, {
                 sentence: options.sentence,
                 word: options.word,
-                deck: currentDeck
+                deck: currentDeck,
             });
             try {
                 await em.persistAndFlush(post);
@@ -89,42 +83,52 @@ let PostResolver = class PostResolver {
             catch (err) {
                 console.log(err);
             }
+            if (image) {
+                console.log("mime", image.mimetype);
+                image.filename = `image-${post._id}`;
+            }
+            if (audio) {
+                console.log("mime", audio.mimetype);
+                audio.filename = `audio-${post._id}`;
+            }
             const basePath = path_1.default.join(`userFiles/user-${currentDeck.user._id}/deck-${currentDeck._id}/post-${post._id}/`);
-            const targetPath = path_1.default.resolve('..', 'web', 'public', basePath);
+            const targetPath = path_1.default.resolve("..", "web", "public", basePath);
             await (0, fs_1.mkdir)(targetPath, (err) => {
                 return console.log(`error while creating a dir `, err);
             });
             console.log(`basePath: `, basePath);
             console.log(`targetPath: `, targetPath);
-            const imgMimes = [".jpeg", ".png", ".jpg", "image/jpeg"];
-            const audioMimes = [".mp3", ".wav", ".ogg", "audio/mp3"];
+            const imgMimes = ["image/jpeg", "image/png", "image/jpg", "image/jpeg"];
+            const audioMimes = ["audio/mp3", "audio/wav", "audio/ogg", "audio/mp3"];
             if (image && imgMimes.some((item) => item === image.mimetype)) {
-                console.log('writing image');
+                console.log("writing image");
                 await new Promise((resolve, reject) => {
-                    image.createReadStream()
+                    image
+                        .createReadStream()
                         .pipe((0, fs_1.createWriteStream)(path_1.default.join(targetPath, image.filename)))
-                        .on('finish', () => {
-                        console.log('finish');
+                        .on("finish", () => {
+                        console.log("finish");
                         resolve(true);
                     })
-                        .on('error', () => {
-                        console.log('error');
+                        .on("error", () => {
+                        console.log("error");
                         reject(false);
                     });
                 });
                 post.image = path_1.default.join(basePath, image.filename);
             }
             if (audio && audioMimes.some((item) => item === audio.mimetype)) {
-                console.log('writing audio');
+                console.log("writing audio");
                 await new Promise((resolve, reject) => {
-                    audio.createReadStream()
+                    audio
+                        .createReadStream()
                         .pipe((0, fs_1.createWriteStream)(path_1.default.join(targetPath, audio.filename)))
-                        .on('finish', () => {
-                        console.log('finish');
+                        .on("finish", () => {
+                        console.log("finish");
                         resolve(true);
                     })
-                        .on('error', () => {
-                        console.log('error');
+                        .on("error", () => {
+                        console.log("error");
                         reject(false);
                     });
                 });
@@ -132,7 +136,7 @@ let PostResolver = class PostResolver {
             }
             await em.commit();
             return {
-                post
+                post,
             };
         }
         catch (e) {

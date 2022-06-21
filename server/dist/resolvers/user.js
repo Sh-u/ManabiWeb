@@ -103,7 +103,7 @@ let UserResolver = class UserResolver {
         if (!currentUser) {
             return false;
         }
-        const basePath = path_1.default.join("userFiles", currentUser._id.toString(), filename);
+        const basePath = path_1.default.join("userFiles", `user-${currentUser._id}`, filename);
         console.log(`basepath`, basePath);
         const targetPath = path_1.default.resolve('..', 'web', 'public', basePath);
         if (currentUser.image) {

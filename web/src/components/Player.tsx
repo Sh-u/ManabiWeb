@@ -1,15 +1,22 @@
-import { Box, Button } from "@chakra-ui/react";
+import { CloseIcon } from "@chakra-ui/icons";
+import { Box, Button, Flex, Text } from "@chakra-ui/react";
+import { useState } from "react";
 import useAudio from "../hooks/useAudio";
 
 export type myInput = {
   url: string;
+  isUsers?: boolean;
+  marginTop?: string;
+
 };
 
-const Player = ({ url }: myInput) => {
-  const [playing, toggle] = useAudio(url);
+const Player = ({ url, isUsers, marginTop }: myInput) => {
+
+  const { playing, toggle, audio } = useAudio(url);
+
 
   return (
-    <Box>
+    <Flex position={"relative"} align="center" justify="start" mt={marginTop}>
       <Button
         onClick={() => {
           toggle();
@@ -17,7 +24,8 @@ const Player = ({ url }: myInput) => {
       >
         {playing ? "Pause" : "Play"}
       </Button>
-    </Box>
+      <Text ml="5">{isUsers ? "Your audio" : "Dictionary audio"}</Text>
+    </Flex>
   );
 };
 

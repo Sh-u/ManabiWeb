@@ -106,7 +106,7 @@ export class UserResolver {
 
     const basePath = path.join(
       "userFiles",
-      currentUser._id.toString(),
+      `user-${currentUser._id}`,
       filename
     );
     console.log(`basepath`, basePath)
