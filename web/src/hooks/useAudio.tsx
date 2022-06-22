@@ -8,7 +8,7 @@ const useAudio = (url: string): { audio: HTMLAudioElement, playing: Boolean, tog
     setPlaying(!playing);
   };
 
-  console.log('render')
+
 
   useEffect(() => {
     playing ? audio.play() : audio.pause();

@@ -80,7 +80,7 @@ let DeckResolver = class DeckResolver {
         };
     }
     async findDeck(_id, { em }) {
-        const deck = await em.findOne(Deck_1.Deck, { _id });
+        const deck = await em.findOne(Deck_1.Deck, { _id }, { populate: ['posts'] });
         if (!deck) {
             return {
                 errors: "Couldn't find the deck you searched for",
@@ -115,7 +115,7 @@ let DeckResolver = class DeckResolver {
         catch (err) {
             console.log(err);
         }
-        const targetPath = path_1.default.resolve('..', 'web', 'public', `userFiles/${user._id}/deck-${deck._id}`);
+        const targetPath = path_1.default.resolve('..', 'web', 'public', `userFiles/user-${user._id}/deck-${deck._id}`);
         (0, fs_1.mkdir)(targetPath, (err) => {
             if (err) {
                 return console.log(err);

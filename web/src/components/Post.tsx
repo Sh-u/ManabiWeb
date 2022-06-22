@@ -26,7 +26,6 @@ import { useCreatePostMutation } from "../generated/graphql";
 const Post = ({ currentDeck }: { currentDeck: number }) => {
   const [image, setImage] = useState({ url: null, image: null });
   const [audio, setAudio] = useState({ url: null, audio: null });
-  const [showDeleteIcon, setshowDeleteIcon] = useState(false);
   const [showCreatePost, setShowCreatePost] =
     useRecoilState(showCreatePostState);
   const { getColor } = useColors();
@@ -34,7 +33,6 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
 
   const [createPost] = useCreatePostMutation();
 
-  const currentRef = useRef();
   useEffect(() => {
     if (!showCreatePost) {
       return;
@@ -56,16 +54,6 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
     setAudio({ url, audio });
   };
 
-  const renderExitIcon = () => {
-    return <CloseIcon w={50} h={50} />;
-  };
-  const uploadToServer = async () => {
-    if (!image.image && !audio.audio) return;
-  };
-
-  const pauseAudio = (audio: HTMLMediaElement) => {
-    audio.pause();
-  };
   return (
     <>
       <Modal isOpen={isOpen} onClose={handleOnClose} autoFocus={false}>
@@ -81,7 +69,6 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
             <Formik
               initialValues={{ Sentence: "", Word: "" }}
               onSubmit={async (values, { setErrors }) => {
-                console.log(values);
 
                 const checkValues = () => {
                   const errObj = {};
@@ -95,6 +82,8 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
                   console.log(JSON.stringify(errObj));
                   return errObj;
                 };
+
+
                 const response = await createPost({
                   variables: {
                     audio: audio.audio,
@@ -119,6 +108,11 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
                 }
 
                 console.log("success ", response?.data?.createPost?.post);
+                setAudio(null);
+                setImage(null);
+                values.Sentence = "";
+                values.Word = "";
+
               }}
             >
               {({ values, handleChange, isSubmitting, errors }) => (
@@ -156,7 +150,7 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
                       flexDirection={"column"}
                     >
                       <Box mt="5">
-                        <Box ref={currentRef}>
+                        <Box>
                           <Dropzone
                             imageState={handleImageState}
                             audioState={handleAudioState}
@@ -176,7 +170,6 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
                               }}
                               maxH={"lg"}
                               src={image.url}
-                              onMouseEnter={() => renderExitIcon()}
                             />
                             <CloseIcon
                               margin={"auto"}
@@ -225,9 +218,11 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
                               _hover={{
                                 color: "red.500",
                               }}
-                              onClick={() => {setAudio({audio: null, url: null}) }}
+                              onClick={() => {
+                                setAudio({ audio: null, url: null });
+                              }}
                             />
-                            <Player url={audio.url} isUsers={true}/>
+                            <Player url={audio.url} isUsers={true} />
                           </Flex>
                         ) : null}
                       </Flex>

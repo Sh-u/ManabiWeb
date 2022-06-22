@@ -5,7 +5,8 @@ mutation CreateDeck($title: String!) {
       title,
       user {
         _id
-        username
+        username,
+        image
       }
       _id
     }

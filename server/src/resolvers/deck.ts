@@ -97,7 +97,7 @@ export class DeckResolver {
     @Arg("_id", () => Int) _id: number,
     @Ctx() { em }: MyContext
   ): Promise<DeckResponse> {
-    const deck = await em.findOne(Deck, { _id });
+    const deck = await em.findOne(Deck, { _id }, { populate: ['posts'] });
 
     if (!deck) {
       return {
@@ -125,6 +125,7 @@ export class DeckResolver {
   ): Promise<DeckResponse> {
     const user = await em.findOne(User, { _id: req.session.userId });
 
+    
     if (title.length < 4 || title.length > 30) {
       return {
         errors: "Invalid title length",
@@ -138,13 +139,18 @@ export class DeckResolver {
     }
 
     const deck = await em.create(Deck, { title, user: user });
+
+    // if (!deck?.posts?.isInitialized()){
+    //   deck.posts.init();
+      
+    // }
     try {
       await em.persistAndFlush(deck);
     } catch (err) {
       console.log(err);
     }
 
-    const targetPath = path.resolve('..', 'web', 'public', `userFiles/${user._id}/deck-${deck._id}`);
+    const targetPath = path.resolve('..', 'web', 'public', `userFiles/user-${user._id}/deck-${deck._id}`);
     mkdir(targetPath, (err) => {
       if (err) {
         return console.log(err);

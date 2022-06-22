@@ -258,7 +258,7 @@ export type CreateDeckMutationVariables = Exact<{
 }>;
 
 
-export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, user: { __typename?: 'User', _id: number, username: string } }> | null } };
+export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, user: { __typename?: 'User', _id: number, username: string, image?: string | null } }> | null } };
 
 export type CreatePostMutationVariables = Exact<{
   deckId: Scalars['Int'];
@@ -516,6 +516,7 @@ export const CreateDeckDocument = gql`
       user {
         _id
         username
+        image
       }
       _id
     }

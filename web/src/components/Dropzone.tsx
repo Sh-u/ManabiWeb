@@ -2,6 +2,7 @@ import {
   ForwardedRef,
   Ref,
   useCallback,
+  useLayoutEffect,
   useRef,
   useState,
   forwardRef,
@@ -13,6 +14,7 @@ import { AiFillFileAdd } from "react-icons/ai";
 import useColors from "../hooks/useColors";
 import { usePasteUpload } from "@rpldy/upload-paste";
 import withPasteUpload from "@rpldy/upload-paste";
+import usePaste from "../hooks/usePaste";
 
 const regex = /'.jpg'|'.png'/;
 
@@ -27,22 +29,13 @@ const Dropzone = ({
 }: DropzoneProps) => {
   const { getColor } = useColors();
 
-  const handleKeyPressed = useCallback((event) => {
-    if (event.clipboardData.files.length) {
-      const files = event.clipboardData.files;
-      onDrop(files);
-    }
-    // console.log('paste', event.target)
-  }, []);
+  const pressedKeys = async (event: ClipboardEvent) => {
+    console.log("pressedKeys callback");
+   
+   onDrop(event.clipboardData.files)
+  };
 
-
-  
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyPressed);
-    return () => {
-      document.removeEventListener("keydown", handleKeyPressed);
-    };
-  }, [handleKeyPressed]);
+  usePaste(pressedKeys);
 
   const onDrop = useCallback((acceptedFiles) => {
     console.log(acceptedFiles);

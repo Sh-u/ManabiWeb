@@ -12,7 +12,7 @@ const DeckBody = () => {
   const currentDeck = useRecoilValue(currentDeckBodyInfoState);
 
   const [createPost, setCreatePost] = useRecoilState(showCreatePostState);
-  console.log("deck body");
+
   const [showDeckBody, setShowDeckBody] =
     useRecoilState<boolean>(showDeckBodyState);
 
@@ -20,17 +20,24 @@ const DeckBody = () => {
 
   const [showCreatePost, setShowCreatePost] =
     useRecoilState<boolean>(showCreatePostState);
-  const { data, error, loading } = useFindDeckQuery({
+
+  console.log("deckbody render");
+  const { data, error, loading, refetch } = useFindDeckQuery({
     variables: {
       _id: currentDeck,
+    },
+    fetchPolicy: "no-cache",
+    onCompleted({}) {
+      console.log("completed");
     },
   });
 
   useEffect(() => {
-    console.log("find deck: ", data?.findDeck);
-    console.log("find deck error: ", error);
-  }, [loading]);
-
+    if (!loading && !showCreatePost){
+      console.log('refetch')
+      refetch();
+    }
+  }, [showCreatePost]);
   return (
     <Flex
       mt="5"
@@ -101,7 +108,7 @@ const DeckBody = () => {
         >
           <Flex flexDir={"column"} alignItems="start" justify={"center"}>
             <Flex>
-              New: <Text ml="5">0</Text>
+              New: <Text ml="5">{data?.findDeck?.decks[0]?.posts?.length}</Text>
             </Flex>
             <Flex>
               Learning: <Text ml="5">0</Text>
@@ -154,7 +161,7 @@ const DeckBody = () => {
           </Button>
         </Flex>
       </Flex>
-      
+
       {showCreatePost ? <Post currentDeck={currentDeck} /> : null}
     </Flex>
   );

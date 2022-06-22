@@ -36,9 +36,10 @@ const main = async () => {
   const orm = await MikroORM.init(mikroOrmConfig);
 
   // await orm.em.nativeDelete(DeckSubscriber, {});
+  // await orm.em.nativeDelete(Post, {});
   // await orm.em.nativeDelete(Deck, {});
 
-  // await orm.em.nativeDelete(User, {});
+
 
   
   await orm.getMigrator().up();
