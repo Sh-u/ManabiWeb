@@ -1,25 +1,26 @@
 import { Button, Flex, Text } from "@chakra-ui/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { currentDeckBodyInfoState } from "../atoms/currentDeckBodyInfoState";
 import { showCreatePostState } from "../atoms/showCreatePostState";
 import { showDeckBodyState } from "../atoms/showDeckBodyState";
 import { useFindDeckQuery } from "../generated/graphql";
 import useColors from "../hooks/useColors";
+import DeckOverview from "./DeckOverview";
 import Post from "./Post";
+import StudyCard from "./StudyCard";
 
 const DeckBody = () => {
   const currentDeck = useRecoilValue(currentDeckBodyInfoState);
 
-  const [createPost, setCreatePost] = useRecoilState(showCreatePostState);
-
   const [showDeckBody, setShowDeckBody] =
     useRecoilState<boolean>(showDeckBodyState);
-
-  const { getColor } = useColors();
-
   const [showCreatePost, setShowCreatePost] =
     useRecoilState<boolean>(showCreatePostState);
+
+  const [showStudyCard, setShowStudyCard] = useState(false);
+
+  const { getColor } = useColors();
 
   console.log("deckbody render");
   const { data, error, loading, refetch } = useFindDeckQuery({
@@ -33,11 +34,16 @@ const DeckBody = () => {
   });
 
   useEffect(() => {
-    if (!loading && !showCreatePost){
-      console.log('refetch')
+    if (!loading && !showCreatePost) {
+      console.log("refetch");
       refetch();
     }
   }, [showCreatePost]);
+
+  const handleStudyNowButton = () => {
+    setShowStudyCard(!showStudyCard);
+  };
+
   return (
     <Flex
       mt="5"
@@ -54,7 +60,7 @@ const DeckBody = () => {
       mx={{ base: "xl", md: "350px  " }}
       flexDir={"column"}
     >
-      <Flex h="auto" w="full" flexDir={"column"} rounded="2xl">
+      <Flex h="auto" w="full" flexDir={"column"} rounded="2xl" >
         <Flex
           align="center"
           justify={"space-evenly"}
@@ -87,79 +93,29 @@ const DeckBody = () => {
             fontSize={"lg"}
             variant={"unstyled"}
             onClick={() => {
-              setCreatePost(!createPost);
+              setShowCreatePost(!showCreatePost);
             }}
           >
             Add
           </Button>
         </Flex>
-        <Flex align="center" justify={"center"} mt="5">
-          <Text fontSize={"3xl"} fontWeight="bold">
-            {data?.findDeck?.decks[0]?.title}
-          </Text>
-        </Flex>
+        {showStudyCard ? null : (
+          <Flex align="center" justify={"center"} mt="5">
+            <Text fontSize={"3xl"} fontWeight="bold">
+              {data?.findDeck?.decks[0]?.title}
+            </Text>
+          </Flex>
+        )}
       </Flex>
       <Flex h="full" rounded="2xl">
-        <Flex
-          flexDir={"column"}
-          alignItems="center"
-          justify={"center"}
-          width={"50%"}
-        >
-          <Flex flexDir={"column"} alignItems="start" justify={"center"}>
-            <Flex>
-              New: <Text ml="5">{data?.findDeck?.decks[0]?.posts?.length}</Text>
-            </Flex>
-            <Flex>
-              Learning: <Text ml="5">0</Text>
-            </Flex>
-            <Flex>
-              To Review: <Text ml="5">0</Text>
-            </Flex>
-          </Flex>
-        </Flex>
-        <Flex
-          flexDir={"column"}
-          align="center"
-          justify={"center"}
-          width={"50%"}
-        >
-          <Button
-            opacity={0.9}
-            onClick={() => {
-              setShowCreatePost(showCreatePost);
-            }}
-            role="group"
-            p="0"
-            borderRadius={"12px"}
-            bg="red.800"
-            outlineOffset="4px"
-            border="none"
-            _hover={{
-              bg: "red.800",
-              opacity: 1,
-            }}
-            _active={{
-              bg: "red.800",
-            }}
-          >
-            <Text
-              transform={"translateY(-6px)"}
-              bg={"red.700"}
-              borderRadius={"12px"}
-              color="white"
-              display={"block"}
-              p="3"
-              fontWeight={"light"}
-              fontSize={"sm"}
-              _active={{
-                transform: "translateY(-2px)",
-              }}
-            >
-              Study Now
-            </Text>
-          </Button>
-        </Flex>
+        {showStudyCard ? (
+          <StudyCard data={data} />
+        ) : (
+          <DeckOverview
+            data={data}
+            handleStudyNowButton={handleStudyNowButton}
+          />
+        )}
       </Flex>
 
       {showCreatePost ? <Post currentDeck={currentDeck} /> : null}

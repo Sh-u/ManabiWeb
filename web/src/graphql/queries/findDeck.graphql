@@ -9,7 +9,11 @@ query FindDeck($_id: Int!) {
       },
       posts {
         _id,
-          
+          sentence,
+          word,
+          image,
+          userAudio
+          dictionaryAudio
       },
       title,
       createdAt,

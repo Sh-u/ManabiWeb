@@ -337,7 +337,7 @@ export type FindDeckQueryVariables = Exact<{
 }>;
 
 
-export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, user: { __typename?: 'User', _id: number, username: string, image?: string | null }, posts: Array<{ __typename?: 'Post', _id: number }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
+export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, user: { __typename?: 'User', _id: number, username: string, image?: string | null }, posts: Array<{ __typename?: 'Post', _id: number, sentence: string, word: string, image?: string | null, userAudio?: string | null, dictionaryAudio?: string | null }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
 
 export type GetAllDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -913,6 +913,11 @@ export const FindDeckDocument = gql`
       }
       posts {
         _id
+        sentence
+        word
+        image
+        userAudio
+        dictionaryAudio
       }
       title
       createdAt
