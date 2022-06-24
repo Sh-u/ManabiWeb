@@ -152,12 +152,103 @@ let PostResolver = class PostResolver {
         await em.persistAndFlush(post);
         return post;
     }
-    async removePost(_id, { em }) {
-        const post = await em.findOne(Post_1.Post, { _id });
+    async editPost(targetId, image, audio, options, { em }) {
+        if (options.sentence.length < 1 || options.word.length < 1) {
+            return {
+                error: "Input is too short",
+            };
+        }
+        const post = await em.findOne(Post_1.Post, { _id: targetId });
+        if (!post) {
+            return {
+                error: "Could not find a matching post",
+            };
+        }
+        await em.begin();
+        try {
+            post.sentence = options.sentence;
+            post.word = options.word;
+            if (image) {
+                console.log("mime", image.mimetype);
+                image.filename = `image-${post._id}`;
+            }
+            if (audio) {
+                console.log("mime", audio.mimetype);
+                audio.filename = `audio-${post._id}`;
+            }
+            const basePath = path_1.default.join(`userFiles/user-${post.deck.user._id}/deck-${post.deck._id}/post-${post._id}/`);
+            const targetPath = path_1.default.resolve("..", "web", "public", basePath);
+            const imgMimes = ["image/jpeg", "image/png", "image/jpg", "image/jpeg"];
+            const audioMimes = ["audio/mp3", "audio/wav", "audio/ogg", "audio/mp3"];
+            if (image && imgMimes.some((item) => item === image.mimetype)) {
+                console.log("writing image");
+                await new Promise((resolve, reject) => {
+                    image
+                        .createReadStream()
+                        .pipe((0, fs_1.createWriteStream)(path_1.default.join(targetPath, image.filename)))
+                        .on("finish", () => {
+                        console.log("finish");
+                        resolve(true);
+                    })
+                        .on("error", () => {
+                        console.log("error");
+                        reject(false);
+                    });
+                });
+                post.image = path_1.default.join(basePath, image.filename);
+            }
+            if (audio && audioMimes.some((item) => item === audio.mimetype)) {
+                console.log("writing audio");
+                await new Promise((resolve, reject) => {
+                    audio
+                        .createReadStream()
+                        .pipe((0, fs_1.createWriteStream)(path_1.default.join(targetPath, audio.filename)))
+                        .on("finish", () => {
+                        console.log("finish");
+                        resolve(true);
+                    })
+                        .on("error", () => {
+                        console.log("error");
+                        reject(false);
+                    });
+                });
+                post.userAudio = path_1.default.join(basePath, audio.filename);
+            }
+            em.persist(post);
+            await em.commit();
+            return {
+                post,
+            };
+        }
+        catch (e) {
+            await em.rollback();
+            throw e;
+        }
+    }
+    async deletePost(targetId, { em }) {
+        const post = await em.findOne(Post_1.Post, { _id: targetId });
         if (!post) {
             return false;
         }
-        await em.removeAndFlush(post);
+        const basePath = path_1.default.join(`userFiles/user-${post.deck.user._id}/deck-${post.deck._id}/post-${post._id}/`);
+        const targetPath = path_1.default.resolve("..", "web", "public", basePath);
+        await em.begin();
+        try {
+            em.remove(post);
+            if ((0, fs_1.existsSync)(targetPath)) {
+                (0, fs_1.rm)(targetPath, { recursive: true }, (err) => {
+                    if (err) {
+                        throw err;
+                    }
+                    console.log(`${targetPath} is deleted!`);
+                });
+            }
+            await em.commit();
+        }
+        catch (e) {
+            await em.rollback();
+            throw e;
+        }
         return true;
     }
 };
@@ -196,13 +287,24 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "updatePostTitle", null);
 __decorate([
+    (0, type_graphql_1.Mutation)(() => PostResponse),
+    __param(0, (0, type_graphql_1.Arg)("targetId", () => type_graphql_1.Int)),
+    __param(1, (0, type_graphql_1.Arg)("image", () => graphql_upload_1.GraphQLUpload, { nullable: true })),
+    __param(2, (0, type_graphql_1.Arg)("audio", () => graphql_upload_1.GraphQLUpload, { nullable: true })),
+    __param(3, (0, type_graphql_1.Arg)("options")),
+    __param(4, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object, Object, PostInput, Object]),
+    __metadata("design:returntype", Promise)
+], PostResolver.prototype, "editPost", null);
+__decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
-    __param(0, (0, type_graphql_1.Arg)("_id")),
+    __param(0, (0, type_graphql_1.Arg)("targetId", () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
-], PostResolver.prototype, "removePost", null);
+], PostResolver.prototype, "deletePost", null);
 PostResolver = __decorate([
     (0, type_graphql_1.Resolver)()
 ], PostResolver);

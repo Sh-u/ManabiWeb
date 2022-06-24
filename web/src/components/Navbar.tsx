@@ -3,6 +3,7 @@ import {
   Avatar,
   Box,
   Button,
+  Text,
   Center,
   Flex,
   IconButton,
@@ -30,7 +31,7 @@ import SearchBarButton from "./SearchBarButton";
 
 const Navbar = () => {
   const { isOpen, onToggle } = useDisclosure();
-  const {data: meData, loading: meLoading} = useMeQuery();
+  const { data: meData, loading: meLoading } = useMeQuery();
   const { getColor } = useColors();
 
   const [logout] = useLogoutMutation({
@@ -79,7 +80,7 @@ const Navbar = () => {
         >
           <NextLink href="/">
             <Link fontSize={"xl"} style={{ textDecoration: "none" }}>
-              ManabiWeb
+            ManabiWeb
             </Link>
           </NextLink>
         </Box>
@@ -89,7 +90,7 @@ const Navbar = () => {
           variant={"solid"}
           ml={{ base: "20px", md: "50px" }}
           color="white"
-          bgGradient="linear(to-l, #7928CA, #FF0080)"
+          bgGradient="linear(to-l, red.700, #FF0020)"
           rounded={"lg"}
           _hover={{
             transitionDuration: "100ms",
@@ -160,8 +161,10 @@ const Navbar = () => {
                       </NextLink>
                     </MenuItem>
                     <MenuItem>
-                      <NextLink  href='/settings/account'>
-                        <Link style={{ textDecoration: "none" }} w='full'>Settings</Link>
+                      <NextLink href="/settings/account">
+                        <Link style={{ textDecoration: "none" }} w="full">
+                          Settings
+                        </Link>
                       </NextLink>
                     </MenuItem>
                   </MenuGroup>

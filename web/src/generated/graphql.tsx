@@ -62,11 +62,12 @@ export type Mutation = {
   createDeck: DeckResponse;
   createPost: PostResponse;
   deleteDeck: Scalars['Boolean'];
+  deletePost: Scalars['Boolean'];
+  editPost: PostResponse;
   forgotPassword: Scalars['Boolean'];
   login: UserResponse;
   logout: Scalars['Boolean'];
   register: UserResponse;
-  removePost: Scalars['Boolean'];
   renameDeck?: Maybe<Deck>;
   subscribeToDeck: DeckResponse;
   unsubscribeToDeck: Scalars['Boolean'];
@@ -109,6 +110,19 @@ export type MutationDeleteDeckArgs = {
 };
 
 
+export type MutationDeletePostArgs = {
+  targetId: Scalars['Int'];
+};
+
+
+export type MutationEditPostArgs = {
+  audio?: InputMaybe<Scalars['Upload']>;
+  image?: InputMaybe<Scalars['Upload']>;
+  options: PostInput;
+  targetId: Scalars['Int'];
+};
+
+
 export type MutationForgotPasswordArgs = {
   username: Scalars['String'];
 };
@@ -121,11 +135,6 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   options: RegisterInput;
-};
-
-
-export type MutationRemovePostArgs = {
-  _id: Scalars['Float'];
 };
 
 
@@ -276,6 +285,23 @@ export type DeleteDeckMutationVariables = Exact<{
 
 
 export type DeleteDeckMutation = { __typename?: 'Mutation', deleteDeck: boolean };
+
+export type DeletePostMutationVariables = Exact<{
+  targetId: Scalars['Int'];
+}>;
+
+
+export type DeletePostMutation = { __typename?: 'Mutation', deletePost: boolean };
+
+export type EditPostMutationVariables = Exact<{
+  targetId: Scalars['Int'];
+  options: PostInput;
+  image?: InputMaybe<Scalars['Upload']>;
+  audio?: InputMaybe<Scalars['Upload']>;
+}>;
+
+
+export type EditPostMutation = { __typename?: 'Mutation', editPost: { __typename?: 'PostResponse', error?: string | null, post?: { __typename?: 'Post', _id: number, sentence: string, word: string, image?: string | null, dictionaryAudio?: string | null, userAudio?: string | null, createdAt: string, updatedAt: string } | null } };
 
 export type ForgotPasswordMutationVariables = Exact<{
   username: Scalars['String'];
@@ -627,6 +653,83 @@ export function useDeleteDeckMutation(baseOptions?: Apollo.MutationHookOptions<D
 export type DeleteDeckMutationHookResult = ReturnType<typeof useDeleteDeckMutation>;
 export type DeleteDeckMutationResult = Apollo.MutationResult<DeleteDeckMutation>;
 export type DeleteDeckMutationOptions = Apollo.BaseMutationOptions<DeleteDeckMutation, DeleteDeckMutationVariables>;
+export const DeletePostDocument = gql`
+    mutation DeletePost($targetId: Int!) {
+  deletePost(targetId: $targetId)
+}
+    `;
+export type DeletePostMutationFn = Apollo.MutationFunction<DeletePostMutation, DeletePostMutationVariables>;
+
+/**
+ * __useDeletePostMutation__
+ *
+ * To run a mutation, you first call `useDeletePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePostMutation, { data, loading, error }] = useDeletePostMutation({
+ *   variables: {
+ *      targetId: // value for 'targetId'
+ *   },
+ * });
+ */
+export function useDeletePostMutation(baseOptions?: Apollo.MutationHookOptions<DeletePostMutation, DeletePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeletePostMutation, DeletePostMutationVariables>(DeletePostDocument, options);
+      }
+export type DeletePostMutationHookResult = ReturnType<typeof useDeletePostMutation>;
+export type DeletePostMutationResult = Apollo.MutationResult<DeletePostMutation>;
+export type DeletePostMutationOptions = Apollo.BaseMutationOptions<DeletePostMutation, DeletePostMutationVariables>;
+export const EditPostDocument = gql`
+    mutation EditPost($targetId: Int!, $options: PostInput!, $image: Upload, $audio: Upload) {
+  editPost(targetId: $targetId, options: $options, image: $image, audio: $audio) {
+    error
+    post {
+      _id
+      sentence
+      word
+      image
+      dictionaryAudio
+      userAudio
+      createdAt
+      updatedAt
+    }
+  }
+}
+    `;
+export type EditPostMutationFn = Apollo.MutationFunction<EditPostMutation, EditPostMutationVariables>;
+
+/**
+ * __useEditPostMutation__
+ *
+ * To run a mutation, you first call `useEditPostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditPostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editPostMutation, { data, loading, error }] = useEditPostMutation({
+ *   variables: {
+ *      targetId: // value for 'targetId'
+ *      options: // value for 'options'
+ *      image: // value for 'image'
+ *      audio: // value for 'audio'
+ *   },
+ * });
+ */
+export function useEditPostMutation(baseOptions?: Apollo.MutationHookOptions<EditPostMutation, EditPostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditPostMutation, EditPostMutationVariables>(EditPostDocument, options);
+      }
+export type EditPostMutationHookResult = ReturnType<typeof useEditPostMutation>;
+export type EditPostMutationResult = Apollo.MutationResult<EditPostMutation>;
+export type EditPostMutationOptions = Apollo.BaseMutationOptions<EditPostMutation, EditPostMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($username: String!) {
   forgotPassword(username: $username)
@@ -1204,6 +1307,8 @@ export const namedOperations = {
     CreateDeck: 'CreateDeck',
     CreatePost: 'CreatePost',
     DeleteDeck: 'DeleteDeck',
+    DeletePost: 'DeletePost',
+    EditPost: 'EditPost',
     ForgotPassword: 'ForgotPassword',
     Login: 'Login',
     Logout: 'Logout',

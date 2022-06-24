@@ -1,0 +1,3 @@
+mutation DeletePost($targetId: Int!){
+    deletePost(targetId: $targetId)
+}

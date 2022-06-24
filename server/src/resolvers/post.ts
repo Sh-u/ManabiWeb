@@ -15,7 +15,7 @@ import { Deck } from "../entities/Deck";
 import { workerData } from "worker_threads";
 import { GraphQLUpload, FileUpload } from "graphql-upload";
 import path from "path";
-import { createWriteStream, mkdir } from "fs";
+import { createWriteStream, mkdir, rm, access, existsSync } from "fs";
 import { Length } from "class-validator";
 
 @InputType()
@@ -93,11 +93,11 @@ export class PostResolver {
 
       if (image) {
         console.log("mime", image.mimetype);
-        image.filename = `image-${post._id}`
+        image.filename = `image-${post._id}`;
       }
       if (audio) {
         console.log("mime", audio.mimetype);
-        audio.filename = `audio-${post._id}`
+        audio.filename = `audio-${post._id}`;
       }
 
       const basePath = path.join(
@@ -192,16 +192,137 @@ export class PostResolver {
     return post;
   }
 
+  @Mutation(() => PostResponse)
+  async editPost(
+    @Arg("targetId", () => Int) targetId: number,
+    @Arg("image", () => GraphQLUpload, { nullable: true }) image: FileUpload,
+    @Arg("audio", () => GraphQLUpload, { nullable: true }) audio: FileUpload,
+    @Arg("options") options: PostInput,
+    @Ctx() { em }: MyContext
+  ): Promise<PostResponse> {
+    if (options.sentence.length < 1 || options.word.length < 1) {
+      return {
+        error: "Input is too short",
+      };
+    }
+    const post = await em.findOne(Post, { _id: targetId });
+
+    if (!post) {
+      return {
+        error: "Could not find a matching post",
+      };
+    }
+
+
+    await em.begin();
+
+    try {
+
+      post.sentence = options.sentence;
+      post.word = options.word;
+  
+      if (image) {
+        console.log("mime", image.mimetype);
+        image.filename = `image-${post._id}`;
+      }
+      if (audio) {
+        console.log("mime", audio.mimetype);
+        audio.filename = `audio-${post._id}`;
+      }
+
+      const basePath = path.join(
+        `userFiles/user-${post.deck.user._id}/deck-${post.deck._id}/post-${post._id}/`
+      );
+      const targetPath = path.resolve("..", "web", "public", basePath);
+
+      const imgMimes = ["image/jpeg", "image/png", "image/jpg", "image/jpeg"];
+      const audioMimes = ["audio/mp3", "audio/wav", "audio/ogg", "audio/mp3"];
+      if (image && imgMimes.some((item) => item === image.mimetype)) {
+        console.log("writing image");
+        await new Promise((resolve, reject) => {
+          image
+            .createReadStream()
+            .pipe(createWriteStream(path.join(targetPath, image.filename)))
+            .on("finish", () => {
+              console.log("finish");
+              resolve(true);
+            })
+            .on("error", () => {
+              console.log("error");
+              reject(false);
+            });
+        });
+
+
+        post.image = path.join(basePath, image.filename);
+      }
+
+      if (audio && audioMimes.some((item) => item === audio.mimetype)) {
+        console.log("writing audio");
+        await new Promise((resolve, reject) => {
+          audio
+            .createReadStream()
+            .pipe(createWriteStream(path.join(targetPath, audio.filename)))
+            .on("finish", () => {
+              console.log("finish");
+              resolve(true);
+            })
+            .on("error", () => {
+              console.log("error");
+              reject(false);
+            });
+        });
+        post.userAudio = path.join(basePath, audio.filename);
+      }
+
+      em.persist(post);
+      await em.commit();
+
+      return {
+        post,
+      };
+    } catch (e) {
+      await em.rollback();
+      throw e;
+    }
+ 
+  }
+
   @Mutation(() => Boolean)
-  async removePost(
-    @Arg("_id") _id: number,
+  async deletePost(
+    @Arg("targetId", () => Int) targetId: number,
     @Ctx() { em }: MyContext
   ): Promise<Boolean> {
-    const post = await em.findOne(Post, { _id });
+    const post = await em.findOne(Post, { _id: targetId });
+
     if (!post) {
       return false;
     }
-    await em.removeAndFlush(post);
+
+    const basePath = path.join(
+      `userFiles/user-${post.deck.user._id}/deck-${post.deck._id}/post-${post._id}/`
+    );
+    const targetPath = path.resolve("..", "web", "public", basePath);
+
+    await em.begin();
+    try {
+      em.remove(post);
+
+      if (existsSync(targetPath)) {
+        rm(targetPath, { recursive: true }, (err) => {
+          if (err) {
+            throw err;
+          }
+
+          console.log(`${targetPath} is deleted!`);
+        });
+      }
+
+      await em.commit();
+    } catch (e) {
+      await em.rollback();
+      throw e;
+    }
 
     return true;
   }

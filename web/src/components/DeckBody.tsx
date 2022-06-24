@@ -27,7 +27,6 @@ const DeckBody = () => {
     variables: {
       _id: currentDeck,
     },
-    fetchPolicy: "no-cache",
     onCompleted({}) {
       console.log("completed");
     },
@@ -60,63 +59,50 @@ const DeckBody = () => {
       mx={{ base: "xl", md: "350px  " }}
       flexDir={"column"}
     >
-      <Flex h="auto" w="full" flexDir={"column"} rounded="2xl" >
-        <Flex
-          align="center"
-          justify={"space-evenly"}
-          mt="5"
-          textUnderlineOffset={"2px"}
+      <Flex
+        align="center"
+        justify={"space-around"}
+        mt="5"
+        textUnderlineOffset={"2px"}
+      >
+        <Button
+          fontSize={"lg"}
+          _hover={{
+            textDecoration: "underline",
+          }}
+          variant={"unstyled"}
+          onClick={() => setShowDeckBody(!showDeckBody)}
         >
-          <Button
-            fontSize={"lg"}
-            _hover={{
-              textDecoration: "underline",
-            }}
-            variant={"unstyled"}
-            onClick={() => setShowDeckBody(!showDeckBody)}
-          >
-            Decks
-          </Button>
-          <Button
-            _hover={{
-              textDecoration: "underline",
-            }}
-            fontSize={"lg"}
-            variant={"unstyled"}
-          >
-            Stats
-          </Button>
-          <Button
-            _hover={{
-              textDecoration: "underline",
-            }}
-            fontSize={"lg"}
-            variant={"unstyled"}
-            onClick={() => {
-              setShowCreatePost(!showCreatePost);
-            }}
-          >
-            Add
-          </Button>
-        </Flex>
-        {showStudyCard ? null : (
-          <Flex align="center" justify={"center"} mt="5">
-            <Text fontSize={"3xl"} fontWeight="bold">
-              {data?.findDeck?.decks[0]?.title}
-            </Text>
-          </Flex>
-        )}
+          Decks
+        </Button>
+        <Button
+          _hover={{
+            textDecoration: "underline",
+          }}
+          fontSize={"lg"}
+          variant={"unstyled"}
+        >
+          Stats
+        </Button>
+        <Button
+          _hover={{
+            textDecoration: "underline",
+          }}
+          fontSize={"lg"}
+          variant={"unstyled"}
+          onClick={() => {
+            setShowCreatePost(!showCreatePost);
+          }}
+        >
+          Add
+        </Button>
       </Flex>
-      <Flex h="full" rounded="2xl">
-        {showStudyCard ? (
-          <StudyCard data={data} />
-        ) : (
-          <DeckOverview
-            data={data}
-            handleStudyNowButton={handleStudyNowButton}
-          />
-        )}
-      </Flex>
+
+      {showStudyCard ? (
+        <StudyCard data={data} />
+      ) : (
+        <DeckOverview data={data} handleStudyNowButton={handleStudyNowButton} />
+      )}
 
       {showCreatePost ? <Post currentDeck={currentDeck} /> : null}
     </Flex>
