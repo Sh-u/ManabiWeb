@@ -1,0 +1,17 @@
+mutation EditCard($targetId: Int!, $options: CardInput!, $image: Upload, $audio: Upload) {
+  editCard(targetId: $targetId, options: $options, image: $image, audio: $audio) {
+    error,
+    card {
+      _id,
+      sentence,
+      word,
+      image,
+      dictionaryAudio,
+      userAudio,
+      createdAt,
+      updatedAt
+    }
+  }
+}
+
+

@@ -1,7 +1,7 @@
 import { Flex, Text, Button } from "@chakra-ui/react";
 import React from "react";
 import { Deck, DeckResponse, FindDeckQuery, Maybe } from "../generated/graphql";
-import Post from "./Post";
+import AddCard from "./AddCard";
 
 interface DeckOverviewProps {
   data: FindDeckQuery;
@@ -32,7 +32,7 @@ const DeckOverview = ({ data, handleStudyNowButton }: DeckOverviewProps) => {
             h="full"
           >
             <Flex>
-              New: <Text ml="5">{data?.findDeck?.decks[0]?.posts?.length}</Text>
+              New: <Text ml="5">{data?.findDeck?.decks[0]?.cards?.length}</Text>
             </Flex>
             <Flex>
               Learning: <Text ml="5">0</Text>

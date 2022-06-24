@@ -7,7 +7,7 @@ import { showDeckBodyState } from "../atoms/showDeckBodyState";
 import { useFindDeckQuery } from "../generated/graphql";
 import useColors from "../hooks/useColors";
 import DeckOverview from "./DeckOverview";
-import Post from "./Post";
+import AddCard from "./AddCard";
 import StudyCard from "./StudyCard";
 
 const DeckBody = () => {
@@ -104,7 +104,7 @@ const DeckBody = () => {
         <DeckOverview data={data} handleStudyNowButton={handleStudyNowButton} />
       )}
 
-      {showCreatePost ? <Post currentDeck={currentDeck} /> : null}
+      {showCreatePost ? <AddCard currentDeck={currentDeck} /> : null}
     </Flex>
   );
 };

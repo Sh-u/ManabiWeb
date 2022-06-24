@@ -1,7 +1,7 @@
 query GetAllDecks{
   getAllDecks {
     _id,
-    posts {
+    cards {
       _id
     }
     subscribers {

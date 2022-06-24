@@ -21,9 +21,9 @@ import Player from "./Player";
 
 import { showCreatePostState } from "../atoms/showCreatePostState";
 import useColors from "../hooks/useColors";
-import { useCreatePostMutation } from "../generated/graphql";
+import { useCreateCardMutation } from "../generated/graphql";
 
-const Post = ({ currentDeck }: { currentDeck: number }) => {
+const AddCard = ({ currentDeck }: { currentDeck: number }) => {
   const [image, setImage] = useState({ url: null, image: null });
   const [audio, setAudio] = useState({ url: null, audio: null });
   const [showCreatePost, setShowCreatePost] =
@@ -31,7 +31,7 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
   const { getColor } = useColors();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const [createPost] = useCreatePostMutation();
+  const [createCard] = useCreateCardMutation();
 
   useEffect(() => {
     if (!showCreatePost) {
@@ -84,7 +84,7 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
                 };
 
 
-                const response = await createPost({
+                const response = await createCard({
                   variables: {
                     audio: audio.audio,
                     deckId: currentDeck,
@@ -98,16 +98,16 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
 
                 if (
                   !response ||
-                  response?.data?.createPost?.error ||
+                  response?.data?.createCard?.error ||
                   response?.errors
                 ) {
-                  console.log("error", response?.data?.createPost?.error);
+                  console.log("error", response?.data?.createCard?.error);
 
                   setErrors(checkValues());
                   return;
                 }
 
-                console.log("success ", response?.data?.createPost?.post);
+                console.log("success ", response?.data?.createCard?.card);
                 setAudio(null);
                 setImage(null);
                 values.Sentence = "";
@@ -257,4 +257,4 @@ const Post = ({ currentDeck }: { currentDeck: number }) => {
   );
 };
 
-export default Post;
+export default AddCard;

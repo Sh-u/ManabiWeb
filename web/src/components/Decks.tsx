@@ -19,7 +19,6 @@ import {
 import { Field, Form, Formik } from "formik";
 import router from "next/router";
 import React from "react";
-import { IoMdAdd } from "react-icons/io";
 import { useRecoilState } from "recoil";
 import { currentDeckBodyInfoState } from "../atoms/currentDeckBodyInfoState";
 import { showDeckBodyState } from "../atoms/showDeckBodyState";
@@ -95,19 +94,19 @@ const Decks = () => {
         flexDirection={"column"}
       >
         <Flex
+        colorScheme="red"
+        
           alignItems={"center"}
-          
           justifyContent={"center"}
           mt={"3"}
           as={Button}
+        
           cursor={"pointer"}
           onClick={handleDeckCreation}
           transition={"ease-in-out"}
           transitionDuration="100ms"
-         
         >
           Create Deck
-          
           {isOpen ? (
             <Modal
               initialFocusRef={initialRef}
@@ -179,30 +178,35 @@ const Decks = () => {
                       <ModalBody pb={6}>
                         <Field name="title">
                           {({ field, form }) => (
-                            <FormControl isInvalid={form.errors.title}>
-                              <FormLabel htmlFor="title">Deck Title</FormLabel>
-                              <Input
-                                {...field}
-                                id="title"
-                                placeholder="New deck title"
-                                ref={initialRef}
-                              />
-                              {form.errors ? (
-                                <FormErrorMessage>
-                                  {form.errors.title}
-                                </FormErrorMessage>
-                              ) : null}
-                              <Checkbox mt={"5"} defaultChecked>
+                            <>
+                              <FormControl isInvalid={form.errors.title}>
+                                <FormLabel htmlFor="title">
+                                  Deck Title
+                                </FormLabel>
+                                <Input
+                                  focusBorderColor="red.800"
+                                  {...field}
+                                  id="title"
+                                  placeholder="New deck title"
+                                  ref={initialRef}
+                                />
+                                {form.errors ? (
+                                  <FormErrorMessage>
+                                    {form.errors.title}
+                                  </FormErrorMessage>
+                                ) : null}
+                              </FormControl>
+                              <Checkbox mt={"5"} defaultChecked colorScheme={'red'}>
                                 Japanese Template
                               </Checkbox>
-                            </FormControl>
+                            </>
                           )}
                         </Field>
                       </ModalBody>
 
                       <ModalFooter>
                         <Button
-                          colorScheme="blue"
+                          colorScheme="red"
                           mr={3}
                           type="submit"
                           isLoading={isSubmitting}

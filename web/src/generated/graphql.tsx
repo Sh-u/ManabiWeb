@@ -19,11 +19,35 @@ export type Scalars = {
   Upload: any;
 };
 
+export type Card = {
+  __typename?: 'Card';
+  _id: Scalars['Int'];
+  createdAt: Scalars['String'];
+  deck: Deck;
+  dictionaryAudio?: Maybe<Scalars['String']>;
+  image?: Maybe<Scalars['String']>;
+  sentence: Scalars['String'];
+  updatedAt: Scalars['String'];
+  userAudio?: Maybe<Scalars['String']>;
+  word: Scalars['String'];
+};
+
+export type CardInput = {
+  sentence: Scalars['String'];
+  word: Scalars['String'];
+};
+
+export type CardResponse = {
+  __typename?: 'CardResponse';
+  card?: Maybe<Card>;
+  error?: Maybe<Scalars['String']>;
+};
+
 export type Deck = {
   __typename?: 'Deck';
   _id: Scalars['Int'];
+  cards: Array<Card>;
   createdAt: Scalars['String'];
-  posts: Array<Post>;
   subscribers: Array<DeckSubscriber>;
   title: Scalars['String'];
   updatedAt: Scalars['String'];
@@ -59,11 +83,11 @@ export type Mutation = {
   changeEmail: UserResponse;
   changePassword: UserResponse;
   changeUsername: UserResponse;
+  createCard: CardResponse;
   createDeck: DeckResponse;
-  createPost: PostResponse;
+  deleteCard: Scalars['Boolean'];
   deleteDeck: Scalars['Boolean'];
-  deletePost: Scalars['Boolean'];
-  editPost: PostResponse;
+  editCard: CardResponse;
   forgotPassword: Scalars['Boolean'];
   login: UserResponse;
   logout: Scalars['Boolean'];
@@ -71,7 +95,7 @@ export type Mutation = {
   renameDeck?: Maybe<Deck>;
   subscribeToDeck: DeckResponse;
   unsubscribeToDeck: Scalars['Boolean'];
-  updatePostTitle?: Maybe<Post>;
+  updateCardTitle?: Maybe<Card>;
   uploadAvatar: Scalars['Boolean'];
 };
 
@@ -92,16 +116,21 @@ export type MutationChangeUsernameArgs = {
 };
 
 
+export type MutationCreateCardArgs = {
+  audio?: InputMaybe<Scalars['Upload']>;
+  deckId: Scalars['Int'];
+  image?: InputMaybe<Scalars['Upload']>;
+  options: CardInput;
+};
+
+
 export type MutationCreateDeckArgs = {
   title: Scalars['String'];
 };
 
 
-export type MutationCreatePostArgs = {
-  audio?: InputMaybe<Scalars['Upload']>;
-  deckId: Scalars['Int'];
-  image?: InputMaybe<Scalars['Upload']>;
-  options: PostInput;
+export type MutationDeleteCardArgs = {
+  targetId: Scalars['Int'];
 };
 
 
@@ -110,15 +139,10 @@ export type MutationDeleteDeckArgs = {
 };
 
 
-export type MutationDeletePostArgs = {
-  targetId: Scalars['Int'];
-};
-
-
-export type MutationEditPostArgs = {
+export type MutationEditCardArgs = {
   audio?: InputMaybe<Scalars['Upload']>;
   image?: InputMaybe<Scalars['Upload']>;
-  options: PostInput;
+  options: CardInput;
   targetId: Scalars['Int'];
 };
 
@@ -154,7 +178,7 @@ export type MutationUnsubscribeToDeckArgs = {
 };
 
 
-export type MutationUpdatePostTitleArgs = {
+export type MutationUpdateCardTitleArgs = {
   _id: Scalars['Float'];
 };
 
@@ -163,50 +187,26 @@ export type MutationUploadAvatarArgs = {
   image: Scalars['Upload'];
 };
 
-export type Post = {
-  __typename?: 'Post';
-  _id: Scalars['Int'];
-  createdAt: Scalars['String'];
-  deck: Deck;
-  dictionaryAudio?: Maybe<Scalars['String']>;
-  image?: Maybe<Scalars['String']>;
-  sentence: Scalars['String'];
-  updatedAt: Scalars['String'];
-  userAudio?: Maybe<Scalars['String']>;
-  word: Scalars['String'];
-};
-
-export type PostInput = {
-  sentence: Scalars['String'];
-  word: Scalars['String'];
-};
-
-export type PostResponse = {
-  __typename?: 'PostResponse';
-  error?: Maybe<Scalars['String']>;
-  post?: Maybe<Post>;
-};
-
 export type Query = {
   __typename?: 'Query';
+  card?: Maybe<Card>;
   findDeck: DeckResponse;
   getAllDecks: Array<Deck>;
+  getCards: Array<Card>;
   getMyDecks: DeckResponse;
   getUsers: Array<User>;
   hello: Scalars['String'];
   me?: Maybe<User>;
-  post?: Maybe<Post>;
-  posts: Array<Post>;
   searchForDeck: Array<Deck>;
 };
 
 
-export type QueryFindDeckArgs = {
+export type QueryCardArgs = {
   _id: Scalars['Int'];
 };
 
 
-export type QueryPostArgs = {
+export type QueryFindDeckArgs = {
   _id: Scalars['Int'];
 };
 
@@ -262,6 +262,16 @@ export type ChangeUsernameMutationVariables = Exact<{
 
 export type ChangeUsernameMutation = { __typename?: 'Mutation', changeUsername: { __typename?: 'UserResponse', user?: { __typename?: 'User', _id: number, username: string, email: string } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
 
+export type CreateCardMutationVariables = Exact<{
+  deckId: Scalars['Int'];
+  options: CardInput;
+  image?: InputMaybe<Scalars['Upload']>;
+  audio?: InputMaybe<Scalars['Upload']>;
+}>;
+
+
+export type CreateCardMutation = { __typename?: 'Mutation', createCard: { __typename?: 'CardResponse', error?: string | null, card?: { __typename?: 'Card', _id: number, sentence: string, word: string, image?: string | null, dictionaryAudio?: string | null, userAudio?: string | null, createdAt: string, updatedAt: string } | null } };
+
 export type CreateDeckMutationVariables = Exact<{
   title: Scalars['String'];
 }>;
@@ -269,15 +279,12 @@ export type CreateDeckMutationVariables = Exact<{
 
 export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, user: { __typename?: 'User', _id: number, username: string, image?: string | null } }> | null } };
 
-export type CreatePostMutationVariables = Exact<{
-  deckId: Scalars['Int'];
-  options: PostInput;
-  image?: InputMaybe<Scalars['Upload']>;
-  audio?: InputMaybe<Scalars['Upload']>;
+export type DeleteCardMutationVariables = Exact<{
+  targetId: Scalars['Int'];
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'PostResponse', error?: string | null, post?: { __typename?: 'Post', _id: number, sentence: string, word: string, image?: string | null, dictionaryAudio?: string | null, userAudio?: string | null, createdAt: string, updatedAt: string } | null } };
+export type DeleteCardMutation = { __typename?: 'Mutation', deleteCard: boolean };
 
 export type DeleteDeckMutationVariables = Exact<{
   _id: Scalars['Float'];
@@ -286,22 +293,15 @@ export type DeleteDeckMutationVariables = Exact<{
 
 export type DeleteDeckMutation = { __typename?: 'Mutation', deleteDeck: boolean };
 
-export type DeletePostMutationVariables = Exact<{
+export type EditCardMutationVariables = Exact<{
   targetId: Scalars['Int'];
-}>;
-
-
-export type DeletePostMutation = { __typename?: 'Mutation', deletePost: boolean };
-
-export type EditPostMutationVariables = Exact<{
-  targetId: Scalars['Int'];
-  options: PostInput;
+  options: CardInput;
   image?: InputMaybe<Scalars['Upload']>;
   audio?: InputMaybe<Scalars['Upload']>;
 }>;
 
 
-export type EditPostMutation = { __typename?: 'Mutation', editPost: { __typename?: 'PostResponse', error?: string | null, post?: { __typename?: 'Post', _id: number, sentence: string, word: string, image?: string | null, dictionaryAudio?: string | null, userAudio?: string | null, createdAt: string, updatedAt: string } | null } };
+export type EditCardMutation = { __typename?: 'Mutation', editCard: { __typename?: 'CardResponse', error?: string | null, card?: { __typename?: 'Card', _id: number, sentence: string, word: string, image?: string | null, dictionaryAudio?: string | null, userAudio?: string | null, createdAt: string, updatedAt: string } | null } };
 
 export type ForgotPasswordMutationVariables = Exact<{
   username: Scalars['String'];
@@ -363,12 +363,17 @@ export type FindDeckQueryVariables = Exact<{
 }>;
 
 
-export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, user: { __typename?: 'User', _id: number, username: string, image?: string | null }, posts: Array<{ __typename?: 'Post', _id: number, sentence: string, word: string, image?: string | null, userAudio?: string | null, dictionaryAudio?: string | null }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
+export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, user: { __typename?: 'User', _id: number, username: string, image?: string | null }, cards: Array<{ __typename?: 'Card', _id: number, sentence: string, word: string, image?: string | null, userAudio?: string | null, dictionaryAudio?: string | null }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
 
 export type GetAllDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAllDecksQuery = { __typename?: 'Query', getAllDecks: Array<{ __typename?: 'Deck', _id: number, posts: Array<{ __typename?: 'Post', _id: number }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> };
+export type GetAllDecksQuery = { __typename?: 'Query', getAllDecks: Array<{ __typename?: 'Deck', _id: number, cards: Array<{ __typename?: 'Card', _id: number }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> };
+
+export type GetCardsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetCardsQuery = { __typename?: 'Query', getCards: Array<{ __typename?: 'Card', _id: number, sentence: string, word: string, createdAt: string, updatedAt: string }> };
 
 export type GetMyDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -384,11 +389,6 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null };
-
-export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', _id: number, sentence: string, word: string, createdAt: string, updatedAt: string }> };
 
 export type SearchForDeckQueryVariables = Exact<{
   input: Scalars['String'];
@@ -533,6 +533,52 @@ export function useChangeUsernameMutation(baseOptions?: Apollo.MutationHookOptio
 export type ChangeUsernameMutationHookResult = ReturnType<typeof useChangeUsernameMutation>;
 export type ChangeUsernameMutationResult = Apollo.MutationResult<ChangeUsernameMutation>;
 export type ChangeUsernameMutationOptions = Apollo.BaseMutationOptions<ChangeUsernameMutation, ChangeUsernameMutationVariables>;
+export const CreateCardDocument = gql`
+    mutation CreateCard($deckId: Int!, $options: CardInput!, $image: Upload, $audio: Upload) {
+  createCard(deckId: $deckId, options: $options, image: $image, audio: $audio) {
+    error
+    card {
+      _id
+      sentence
+      word
+      image
+      dictionaryAudio
+      userAudio
+      createdAt
+      updatedAt
+    }
+  }
+}
+    `;
+export type CreateCardMutationFn = Apollo.MutationFunction<CreateCardMutation, CreateCardMutationVariables>;
+
+/**
+ * __useCreateCardMutation__
+ *
+ * To run a mutation, you first call `useCreateCardMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCardMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCardMutation, { data, loading, error }] = useCreateCardMutation({
+ *   variables: {
+ *      deckId: // value for 'deckId'
+ *      options: // value for 'options'
+ *      image: // value for 'image'
+ *      audio: // value for 'audio'
+ *   },
+ * });
+ */
+export function useCreateCardMutation(baseOptions?: Apollo.MutationHookOptions<CreateCardMutation, CreateCardMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateCardMutation, CreateCardMutationVariables>(CreateCardDocument, options);
+      }
+export type CreateCardMutationHookResult = ReturnType<typeof useCreateCardMutation>;
+export type CreateCardMutationResult = Apollo.MutationResult<CreateCardMutation>;
+export type CreateCardMutationOptions = Apollo.BaseMutationOptions<CreateCardMutation, CreateCardMutationVariables>;
 export const CreateDeckDocument = gql`
     mutation CreateDeck($title: String!) {
   createDeck(title: $title) {
@@ -576,52 +622,37 @@ export function useCreateDeckMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreateDeckMutationHookResult = ReturnType<typeof useCreateDeckMutation>;
 export type CreateDeckMutationResult = Apollo.MutationResult<CreateDeckMutation>;
 export type CreateDeckMutationOptions = Apollo.BaseMutationOptions<CreateDeckMutation, CreateDeckMutationVariables>;
-export const CreatePostDocument = gql`
-    mutation CreatePost($deckId: Int!, $options: PostInput!, $image: Upload, $audio: Upload) {
-  createPost(deckId: $deckId, options: $options, image: $image, audio: $audio) {
-    error
-    post {
-      _id
-      sentence
-      word
-      image
-      dictionaryAudio
-      userAudio
-      createdAt
-      updatedAt
-    }
-  }
+export const DeleteCardDocument = gql`
+    mutation DeleteCard($targetId: Int!) {
+  deleteCard(targetId: $targetId)
 }
     `;
-export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
+export type DeleteCardMutationFn = Apollo.MutationFunction<DeleteCardMutation, DeleteCardMutationVariables>;
 
 /**
- * __useCreatePostMutation__
+ * __useDeleteCardMutation__
  *
- * To run a mutation, you first call `useCreatePostMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreatePostMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useDeleteCardMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCardMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
+ * const [deleteCardMutation, { data, loading, error }] = useDeleteCardMutation({
  *   variables: {
- *      deckId: // value for 'deckId'
- *      options: // value for 'options'
- *      image: // value for 'image'
- *      audio: // value for 'audio'
+ *      targetId: // value for 'targetId'
  *   },
  * });
  */
-export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<CreatePostMutation, CreatePostMutationVariables>) {
+export function useDeleteCardMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCardMutation, DeleteCardMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument, options);
+        return Apollo.useMutation<DeleteCardMutation, DeleteCardMutationVariables>(DeleteCardDocument, options);
       }
-export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
-export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
-export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export type DeleteCardMutationHookResult = ReturnType<typeof useDeleteCardMutation>;
+export type DeleteCardMutationResult = Apollo.MutationResult<DeleteCardMutation>;
+export type DeleteCardMutationOptions = Apollo.BaseMutationOptions<DeleteCardMutation, DeleteCardMutationVariables>;
 export const DeleteDeckDocument = gql`
     mutation DeleteDeck($_id: Float!) {
   deleteDeck(_id: $_id)
@@ -653,42 +684,11 @@ export function useDeleteDeckMutation(baseOptions?: Apollo.MutationHookOptions<D
 export type DeleteDeckMutationHookResult = ReturnType<typeof useDeleteDeckMutation>;
 export type DeleteDeckMutationResult = Apollo.MutationResult<DeleteDeckMutation>;
 export type DeleteDeckMutationOptions = Apollo.BaseMutationOptions<DeleteDeckMutation, DeleteDeckMutationVariables>;
-export const DeletePostDocument = gql`
-    mutation DeletePost($targetId: Int!) {
-  deletePost(targetId: $targetId)
-}
-    `;
-export type DeletePostMutationFn = Apollo.MutationFunction<DeletePostMutation, DeletePostMutationVariables>;
-
-/**
- * __useDeletePostMutation__
- *
- * To run a mutation, you first call `useDeletePostMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeletePostMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deletePostMutation, { data, loading, error }] = useDeletePostMutation({
- *   variables: {
- *      targetId: // value for 'targetId'
- *   },
- * });
- */
-export function useDeletePostMutation(baseOptions?: Apollo.MutationHookOptions<DeletePostMutation, DeletePostMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeletePostMutation, DeletePostMutationVariables>(DeletePostDocument, options);
-      }
-export type DeletePostMutationHookResult = ReturnType<typeof useDeletePostMutation>;
-export type DeletePostMutationResult = Apollo.MutationResult<DeletePostMutation>;
-export type DeletePostMutationOptions = Apollo.BaseMutationOptions<DeletePostMutation, DeletePostMutationVariables>;
-export const EditPostDocument = gql`
-    mutation EditPost($targetId: Int!, $options: PostInput!, $image: Upload, $audio: Upload) {
-  editPost(targetId: $targetId, options: $options, image: $image, audio: $audio) {
+export const EditCardDocument = gql`
+    mutation EditCard($targetId: Int!, $options: CardInput!, $image: Upload, $audio: Upload) {
+  editCard(targetId: $targetId, options: $options, image: $image, audio: $audio) {
     error
-    post {
+    card {
       _id
       sentence
       word
@@ -701,20 +701,20 @@ export const EditPostDocument = gql`
   }
 }
     `;
-export type EditPostMutationFn = Apollo.MutationFunction<EditPostMutation, EditPostMutationVariables>;
+export type EditCardMutationFn = Apollo.MutationFunction<EditCardMutation, EditCardMutationVariables>;
 
 /**
- * __useEditPostMutation__
+ * __useEditCardMutation__
  *
- * To run a mutation, you first call `useEditPostMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useEditPostMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useEditCardMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditCardMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [editPostMutation, { data, loading, error }] = useEditPostMutation({
+ * const [editCardMutation, { data, loading, error }] = useEditCardMutation({
  *   variables: {
  *      targetId: // value for 'targetId'
  *      options: // value for 'options'
@@ -723,13 +723,13 @@ export type EditPostMutationFn = Apollo.MutationFunction<EditPostMutation, EditP
  *   },
  * });
  */
-export function useEditPostMutation(baseOptions?: Apollo.MutationHookOptions<EditPostMutation, EditPostMutationVariables>) {
+export function useEditCardMutation(baseOptions?: Apollo.MutationHookOptions<EditCardMutation, EditCardMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<EditPostMutation, EditPostMutationVariables>(EditPostDocument, options);
+        return Apollo.useMutation<EditCardMutation, EditCardMutationVariables>(EditCardDocument, options);
       }
-export type EditPostMutationHookResult = ReturnType<typeof useEditPostMutation>;
-export type EditPostMutationResult = Apollo.MutationResult<EditPostMutation>;
-export type EditPostMutationOptions = Apollo.BaseMutationOptions<EditPostMutation, EditPostMutationVariables>;
+export type EditCardMutationHookResult = ReturnType<typeof useEditCardMutation>;
+export type EditCardMutationResult = Apollo.MutationResult<EditCardMutation>;
+export type EditCardMutationOptions = Apollo.BaseMutationOptions<EditCardMutation, EditCardMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($username: String!) {
   forgotPassword(username: $username)
@@ -1014,7 +1014,7 @@ export const FindDeckDocument = gql`
         username
         image
       }
-      posts {
+      cards {
         _id
         sentence
         word
@@ -1064,7 +1064,7 @@ export const GetAllDecksDocument = gql`
     query GetAllDecks {
   getAllDecks {
     _id
-    posts {
+    cards {
       _id
     }
     subscribers {
@@ -1100,6 +1100,44 @@ export function useGetAllDecksLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type GetAllDecksQueryHookResult = ReturnType<typeof useGetAllDecksQuery>;
 export type GetAllDecksLazyQueryHookResult = ReturnType<typeof useGetAllDecksLazyQuery>;
 export type GetAllDecksQueryResult = Apollo.QueryResult<GetAllDecksQuery, GetAllDecksQueryVariables>;
+export const GetCardsDocument = gql`
+    query GetCards {
+  getCards {
+    _id
+    sentence
+    word
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useGetCardsQuery__
+ *
+ * To run a query within a React component, call `useGetCardsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCardsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCardsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetCardsQuery(baseOptions?: Apollo.QueryHookOptions<GetCardsQuery, GetCardsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCardsQuery, GetCardsQueryVariables>(GetCardsDocument, options);
+      }
+export function useGetCardsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCardsQuery, GetCardsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCardsQuery, GetCardsQueryVariables>(GetCardsDocument, options);
+        }
+export type GetCardsQueryHookResult = ReturnType<typeof useGetCardsQuery>;
+export type GetCardsLazyQueryHookResult = ReturnType<typeof useGetCardsLazyQuery>;
+export type GetCardsQueryResult = Apollo.QueryResult<GetCardsQuery, GetCardsQueryVariables>;
 export const GetMyDecksDocument = gql`
     query GetMyDecks {
   getMyDecks {
@@ -1212,44 +1250,6 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
-export const PostsDocument = gql`
-    query Posts {
-  posts {
-    _id
-    sentence
-    word
-    createdAt
-    updatedAt
-  }
-}
-    `;
-
-/**
- * __usePostsQuery__
- *
- * To run a query within a React component, call `usePostsQuery` and pass it any options that fit your needs.
- * When your component renders, `usePostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = usePostsQuery({
- *   variables: {
- *   },
- * });
- */
-export function usePostsQuery(baseOptions?: Apollo.QueryHookOptions<PostsQuery, PostsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PostsQuery, PostsQueryVariables>(PostsDocument, options);
-      }
-export function usePostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostsQuery, PostsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PostsQuery, PostsQueryVariables>(PostsDocument, options);
-        }
-export type PostsQueryHookResult = ReturnType<typeof usePostsQuery>;
-export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
-export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
 export const SearchForDeckDocument = gql`
     query SearchForDeck($input: String!) {
   searchForDeck(input: $input) {
@@ -1294,21 +1294,21 @@ export const namedOperations = {
   Query: {
     FindDeck: 'FindDeck',
     GetAllDecks: 'GetAllDecks',
+    GetCards: 'GetCards',
     GetMyDecks: 'GetMyDecks',
     GetUsers: 'GetUsers',
     Me: 'Me',
-    Posts: 'Posts',
     SearchForDeck: 'SearchForDeck'
   },
   Mutation: {
     ChangeEmail: 'ChangeEmail',
     ChangePassword: 'ChangePassword',
     ChangeUsername: 'ChangeUsername',
+    CreateCard: 'CreateCard',
     CreateDeck: 'CreateDeck',
-    CreatePost: 'CreatePost',
+    DeleteCard: 'DeleteCard',
     DeleteDeck: 'DeleteDeck',
-    DeletePost: 'DeletePost',
-    EditPost: 'EditPost',
+    EditCard: 'EditCard',
     ForgotPassword: 'ForgotPassword',
     Login: 'Login',
     Logout: 'Logout',

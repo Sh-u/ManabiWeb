@@ -16,13 +16,13 @@ import { Formik, Form, Field } from "formik";
 
 import React, { useEffect, useState } from "react";
 import Dropzone from "../components/Dropzone";
-import { useEditPostMutation } from "../generated/graphql";
+import { useEditCardMutation } from "../generated/graphql";
 import useColors from "../hooks/useColors";
 import Player from "./Player";
 import { CardStateEnum } from "./StudyCard";
 
 interface EditCardModalProps {
-  postId: number;
+  cardId: number;
   sentence: string;
   word: string;
   cardState: string;
@@ -36,13 +36,13 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
   sentence,
   word,
   cardState,
-  postId,
+  cardId,
   dictionaryAudio,
   userAudio,
   userImage,
-  setCardState
+  setCardState,
 }) => {
-  const [editPost] = useEditPostMutation();
+  const [editPost] = useEditCardMutation();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [image, setImage] = useState({ url: null, image: null });
   const [audio, setAudio] = useState({ url: null, audio: null });
@@ -65,21 +65,30 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
     }
   }, [cardState]);
 
+  useEffect(() => {
+    if (!image.url) {
+      setImage({ url: userImage, image: null });
+    }
+    if (!audio.url){
+        setAudio({ url: userAudio, audio: null });
+    }
+  }, [userImage, userAudio]);
+
   const handleDeletingImage = () => {
+    setImage({ url: null, image: null });
+
     userImage = null;
-    setImage(null);
   };
 
   const handleDeletingAudio = () => {
     userAudio = null;
-    setAudio(null);
+    setAudio({ url: null, audio: null });
   };
 
   const handleClosingModal = () => {
-
-    setCardState('STUDY');
+    setCardState("STUDY");
     onClose();
-  }
+  };
 
   return (
     <>
@@ -111,7 +120,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
 
                 const response = await editPost({
                   variables: {
-                    targetId: postId,
+                    targetId: cardId,
                     audio: audio.audio,
                     image: image.image,
                     options: {
@@ -123,16 +132,16 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
 
                 if (
                   !response ||
-                  response?.data?.editPost?.error ||
+                  response?.data?.editCard?.error ||
                   response?.errors
                 ) {
-                  console.log("error", response?.data?.editPost?.error);
+                  console.log("error", response?.data?.editCard?.error);
 
                   setErrors(checkValues());
                   return;
                 }
 
-                console.log("success ", response?.data?.editPost?.post);
+                console.log("success ", response?.data?.editCard?.card);
                 setAudio(null);
                 setImage(null);
                 values.Sentence = "";
@@ -180,7 +189,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
                             audioState={handleAudioState}
                           />
                         </Box>
-                        {userImage || image?.url ? (
+                        {image?.url ? (
                           <Flex
                             role="group"
                             mt="5"
@@ -193,7 +202,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
                                 opacity: "0.5",
                               }}
                               maxH={"lg"}
-                              src={image?.url ?? userImage}
+                              src={image?.url}
                             />
                             <CloseIcon
                               margin={"auto"}
@@ -215,7 +224,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
                       </Box>
 
                       <Flex flexDir={"column"} justify="center" align="start">
-                        {userAudio ? (
+                        {audio?.url ? (
                           <Flex
                             position="relative"
                             justify={"center"}

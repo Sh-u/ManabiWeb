@@ -7,7 +7,7 @@ import { showDeckBodyState } from "../atoms/showDeckBodyState";
 import DeckBody from "../components/DeckBody";
 import Decks from "../components/Decks";
 import Navbar from "../components/Navbar";
-import Post from "../components/Post";
+import AddCard from "../components/AddCard";
 import { useMeQuery } from "../generated/graphql";
 
 const Learn = () => {

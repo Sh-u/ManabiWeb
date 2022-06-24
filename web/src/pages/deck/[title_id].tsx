@@ -143,7 +143,7 @@ const DeckPage = ({ decks }: DeckResponse) => {
           <Text fontSize={"xl"}>description</Text>
         </Flex>
         <Flex align={"center"} justify={"center"} mt="5">
-          <Text fontSize={"lg"}>Cards: {decks[0].posts.length}</Text>
+          <Text fontSize={"lg"}>Cards: {decks[0].cards?.length}</Text>
         </Flex>
         {isOwnerOfDeck() ? (
           <Text font->You are the owner of this deck</Text>

@@ -7,7 +7,7 @@ query FindDeck($_id: Int!) {
         username,
         image
       },
-      posts {
+      cards {
         _id,
           sentence,
           word,

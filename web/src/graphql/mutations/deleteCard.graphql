@@ -1,0 +1,3 @@
+mutation DeleteCard($targetId: Int!){
+    deleteCard(targetId: $targetId)
+}
