@@ -1,4 +1,4 @@
-import { Post } from "../entities/Post";
+import { Card } from "../entities/Card";
 import { MyContext } from "../types";
 import {
   Arg,
@@ -17,9 +17,10 @@ import { GraphQLUpload, FileUpload } from "graphql-upload";
 import path from "path";
 import { createWriteStream, mkdir, rm, access, existsSync } from "fs";
 import { Length } from "class-validator";
+import { CardProgress } from "../entities/CardProgress";
 
 @InputType()
-class PostInput {
+class CardInput {
   @Field(() => String)
   @Length(5, 50)
   sentence!: string;
@@ -30,38 +31,38 @@ class PostInput {
 }
 
 @ObjectType()
-class PostResponse {
+class CardResponse {
   @Field(() => String, { nullable: true })
   error?: string;
 
-  @Field(() => Post, { nullable: true })
-  post?: Post;
+  @Field(() => Card, { nullable: true })
+  card?: Card;
 }
 
 @Resolver()
-export class PostResolver {
-  @Query(() => [Post])
-  async posts(@Ctx() { em }: MyContext): Promise<Post[]> {
-    return em.find(Post, {});
+export class CardResolver {
+  @Query(() => [Card])
+  async getCards(@Ctx() { em }: MyContext): Promise<Card[]> {
+    return em.find(Card, {});
   }
 
-  @Query(() => Post, { nullable: true })
-  post(
+  @Query(() => Card, { nullable: true })
+  card(
     @Arg("_id", () => Int) _id: number,
     @Ctx() { em }: MyContext
-  ): Promise<Post | null> {
-    return em.findOne(Post, { _id });
+  ): Promise<Card | null> {
+    return em.findOne(Card, { _id });
   }
 
-  @Mutation(() => PostResponse)
-  async createPost(
-    @Arg("options") options: PostInput,
+  @Mutation(() => CardResponse)
+  async createCard(
+    @Arg("options") options: CardInput,
     @Arg("deckId", () => Int) deckId: number,
     // @Arg("audio", () =>GraphQLUpload ) audio: FileUpload,
     @Arg("image", () => GraphQLUpload, { nullable: true }) image: FileUpload,
     @Arg("audio", () => GraphQLUpload, { nullable: true }) audio: FileUpload,
     @Ctx() { em }: MyContext
-  ): Promise<PostResponse> {
+  ): Promise<CardResponse> {
     if (options.sentence.length < 1 || options.word.length < 1) {
       return {
         error: "Input is too short",
@@ -71,7 +72,7 @@ export class PostResolver {
 
     if (!currentDeck) {
       return {
-        error: "Couldn't find a current deck in Post/Resolver",
+        error: "Couldn't find a current deck in Card/Resolver",
       };
     }
 
@@ -79,29 +80,38 @@ export class PostResolver {
 
     try {
       //... do some work
-      const post = await em.create(Post, {
+   
+     
+
+
+
+      const card = await em.create(Card, {
         sentence: options.sentence,
         word: options.word,
         deck: currentDeck,
       });
 
+      const progress = await em.create(CardProgress, { card: card, user: card.deck.user._id,})
+
+      await em.persist(progress);
+
       try {
-        await em.persistAndFlush(post);
+        await em.persistAndFlush(card);
       } catch (err) {
         console.log(err);
       }
 
       if (image) {
         console.log("mime", image.mimetype);
-        image.filename = `image-${post._id}`;
+        image.filename = `image-${card._id}`;
       }
       if (audio) {
         console.log("mime", audio.mimetype);
-        audio.filename = `audio-${post._id}`;
+        audio.filename = `audio-${card._id}`;
       }
 
       const basePath = path.join(
-        `userFiles/user-${currentDeck.user._id}/deck-${currentDeck._id}/post-${post._id}/`
+        `userFiles/user-${currentDeck.user._id}/deck-${currentDeck._id}/card-${card._id}/`
       );
       const targetPath = path.resolve("..", "web", "public", basePath);
 
@@ -129,7 +139,7 @@ export class PostResolver {
               reject(false);
             });
         });
-        post.image = path.join(basePath, image.filename);
+        card.image = path.join(basePath, image.filename);
       }
 
       if (audio && audioMimes.some((item) => item === audio.mimetype)) {
@@ -147,13 +157,13 @@ export class PostResolver {
               reject(false);
             });
         });
-        post.userAudio = path.join(basePath, audio.filename);
+        card.userAudio = path.join(basePath, audio.filename);
       }
 
       await em.commit(); // will flush before making the actual commit query
 
       return {
-        post,
+        card: card,
       };
     } catch (e) {
       await em.rollback();
@@ -176,40 +186,40 @@ export class PostResolver {
     // currentDeck.posts[postsAmount] = post;
   }
 
-  @Mutation(() => Post, { nullable: true })
-  async updatePostTitle(
+  @Mutation(() => Card, { nullable: true })
+  async updateCardTitle(
     @Arg("_id") _id: number,
     @Ctx() { em }: MyContext
-  ): Promise<Post | null> {
-    const post = await em.findOne(Post, { _id });
-    if (!post) {
+  ): Promise<Card | null> {
+    const card = await em.findOne(Card, { _id });
+    if (!card) {
       return null;
     }
 
     // post.title = title;
-    await em.persistAndFlush(post);
+    await em.persistAndFlush(card);
 
-    return post;
+    return card;
   }
 
-  @Mutation(() => PostResponse)
-  async editPost(
+  @Mutation(() => CardResponse)
+  async editCard(
     @Arg("targetId", () => Int) targetId: number,
     @Arg("image", () => GraphQLUpload, { nullable: true }) image: FileUpload,
     @Arg("audio", () => GraphQLUpload, { nullable: true }) audio: FileUpload,
-    @Arg("options") options: PostInput,
+    @Arg("options") options: CardInput,
     @Ctx() { em }: MyContext
-  ): Promise<PostResponse> {
+  ): Promise<CardResponse> {
     if (options.sentence.length < 1 || options.word.length < 1) {
       return {
         error: "Input is too short",
       };
     }
-    const post = await em.findOne(Post, { _id: targetId });
+    const card = await em.findOne(Card, { _id: targetId });
 
-    if (!post) {
+    if (!card) {
       return {
-        error: "Could not find a matching post",
+        error: "Could not find a matching card",
       };
     }
 
@@ -218,20 +228,20 @@ export class PostResolver {
 
     try {
 
-      post.sentence = options.sentence;
-      post.word = options.word;
+      card.sentence = options.sentence;
+      card.word = options.word;
   
       if (image) {
         console.log("mime", image.mimetype);
-        image.filename = `image-${post._id}`;
+        image.filename = `image-${card._id}`;
       }
       if (audio) {
         console.log("mime", audio.mimetype);
-        audio.filename = `audio-${post._id}`;
+        audio.filename = `audio-${card._id}`;
       }
 
       const basePath = path.join(
-        `userFiles/user-${post.deck.user._id}/deck-${post.deck._id}/post-${post._id}/`
+        `userFiles/user-${card.deck.user._id}/deck-${card.deck._id}/card-${card._id}/`
       );
       const targetPath = path.resolve("..", "web", "public", basePath);
 
@@ -254,7 +264,7 @@ export class PostResolver {
         });
 
 
-        post.image = path.join(basePath, image.filename);
+        card.image = path.join(basePath, image.filename);
       }
 
       if (audio && audioMimes.some((item) => item === audio.mimetype)) {
@@ -272,14 +282,14 @@ export class PostResolver {
               reject(false);
             });
         });
-        post.userAudio = path.join(basePath, audio.filename);
+        card.userAudio = path.join(basePath, audio.filename);
       }
 
-      em.persist(post);
+      em.persist(card);
       await em.commit();
 
       return {
-        post,
+        card: card,
       };
     } catch (e) {
       await em.rollback();
@@ -289,24 +299,24 @@ export class PostResolver {
   }
 
   @Mutation(() => Boolean)
-  async deletePost(
+  async deleteCard(
     @Arg("targetId", () => Int) targetId: number,
     @Ctx() { em }: MyContext
   ): Promise<Boolean> {
-    const post = await em.findOne(Post, { _id: targetId });
+    const card = await em.findOne(Card, { _id: targetId });
 
-    if (!post) {
+    if (!card) {
       return false;
     }
 
     const basePath = path.join(
-      `userFiles/user-${post.deck.user._id}/deck-${post.deck._id}/post-${post._id}/`
+      `userFiles/user-${card.deck.user._id}/deck-${card.deck._id}/card-${card._id}/`
     );
     const targetPath = path.resolve("..", "web", "public", basePath);
 
     await em.begin();
     try {
-      em.remove(post);
+      em.remove(card);
 
       if (existsSync(targetPath)) {
         rm(targetPath, { recursive: true }, (err) => {

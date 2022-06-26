@@ -80,11 +80,14 @@ let DeckResolver = class DeckResolver {
         };
     }
     async findDeck(_id, { em }) {
-        const deck = await em.findOne(Deck_1.Deck, { _id }, { populate: ['posts'] });
+        const deck = await em.findOne(Deck_1.Deck, { _id }, { populate: ["cards"], });
         if (!deck) {
             return {
                 errors: "Couldn't find the deck you searched for",
             };
+        }
+        if (!deck.cards[0].cardProgresses.isInitialized()) {
+            await deck.cards[0].cardProgresses.init();
         }
         const user = await em.findOne(User_1.User, { _id: deck === null || deck === void 0 ? void 0 : deck.user._id });
         if (!user) {
@@ -96,8 +99,9 @@ let DeckResolver = class DeckResolver {
             decks: [deck],
         };
     }
-    async createDeck(title, { em, req }) {
+    async createDeck(title, JP, { em, req }) {
         const user = await em.findOne(User_1.User, { _id: req.session.userId });
+        console.log(user);
         if (title.length < 4 || title.length > 30) {
             return {
                 errors: "Invalid title length",
@@ -108,22 +112,28 @@ let DeckResolver = class DeckResolver {
                 errors: "Cannot Create Deck: USER NOT FOUND",
             };
         }
-        const deck = await em.create(Deck_1.Deck, { title, user: user });
+        await em.begin();
         try {
+            const deck = em.create(Deck_1.Deck, { title, user: user, japaneseTemplate: JP });
             await em.persistAndFlush(deck);
-        }
-        catch (err) {
-            console.log(err);
-        }
-        const targetPath = path_1.default.resolve('..', 'web', 'public', `userFiles/user-${user._id}/deck-${deck._id}`);
-        (0, fs_1.mkdir)(targetPath, (err) => {
-            if (err) {
-                return console.log(err);
+            console.log('id', deck._id);
+            const targetPath = path_1.default.resolve("..", "web", "public", `userFiles/user-${user._id}/deck-${deck._id}`);
+            if (!(0, fs_1.existsSync)(targetPath)) {
+                (0, fs_1.mkdir)(targetPath, (err) => {
+                    if (err) {
+                        return console.log(err);
+                    }
+                });
             }
-        });
-        return {
-            decks: [deck],
-        };
+            await em.commit();
+            return {
+                decks: [deck],
+            };
+        }
+        catch (e) {
+            await em.rollback();
+            throw e;
+        }
     }
     async subscribeToDeck(deckId, { em, req }) {
         const currentUser = await em.findOne(User_1.User, { _id: req.session.userId });
@@ -213,11 +223,11 @@ let DeckResolver = class DeckResolver {
         }
         if (deck.user._id === (currentUser === null || currentUser === void 0 ? void 0 : currentUser._id)) {
             if (deck.subscribers.count() > 0) {
-                console.log('removing subs');
+                console.log("removing subs");
                 const deckSubs = await em.find(DeckSubscriber_1.DeckSubscriber, { deck: deck });
                 await em.removeAndFlush(deckSubs);
             }
-            console.log('removing owner deck');
+            console.log("removing owner deck");
             await em.removeAndFlush(deck);
         }
         else if (deck.subscribers.toArray().some((user) => user._id === currentUser._id)) {
@@ -260,9 +270,10 @@ __decorate([
 __decorate([
     (0, type_graphql_1.Mutation)(() => DeckResponse),
     __param(0, (0, type_graphql_1.Arg)("title")),
-    __param(1, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)("JP")),
+    __param(2, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, Boolean, Object]),
     __metadata("design:returntype", Promise)
 ], DeckResolver.prototype, "createDeck", null);
 __decorate([

@@ -1,5 +1,4 @@
 import { MikroORM } from "@mikro-orm/core";
-import { PostgreSqlDriver } from "@mikro-orm/postgresql/PostgreSqlDriver";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import { ApolloServer } from "apollo-server-express";
 import connectRedis from "connect-redis";
@@ -7,22 +6,21 @@ import "cross-fetch/polyfill";
 import express from "express";
 import session from "express-session";
 
+import { graphqlUploadExpress } from 'graphql-upload';
 import Redis from "ioredis";
-import { emit } from "process";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import { COOKIE_NAME } from "./constants";
+import { Card } from "./entities/Card";
 import { Deck } from "./entities/Deck";
 import { DeckSubscriber } from "./entities/DeckSubscriber";
-import { Post } from "./entities/Post";
-import { User } from "./entities/User";
 import mikroOrmConfig from "./mikro-orm.config";
+import { CardResolver } from "./resolvers/card";
+import { CardProgressResolver } from "./resolvers/cardProgress";
 import { DeckResolver } from "./resolvers/deck";
 import { HelloResolver } from "./resolvers/hello";
-import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import { MyContext } from "./types";
-import {graphqlUploadExpress} from 'graphql-upload'
 const corsOptions = {
   origin: [
     "http://localhost:4000",
@@ -36,7 +34,7 @@ const main = async () => {
   const orm = await MikroORM.init(mikroOrmConfig);
 
   // await orm.em.nativeDelete(DeckSubscriber, {});
-  // await orm.em.nativeDelete(Post, {});
+  // await orm.em.nativeDelete(Card, {});
   // await orm.em.nativeDelete(Deck, {});
 
 
@@ -78,8 +76,9 @@ const main = async () => {
   const apolloServer = new ApolloServer({
     
     schema: await buildSchema({
-      resolvers: [HelloResolver, PostResolver, UserResolver, DeckResolver],
+      resolvers: [HelloResolver, CardResolver, UserResolver, DeckResolver, CardProgressResolver],
       validate: false,
+      dateScalarMode: "isoDate",
     }),
     plugins: [
       ApolloServerPluginLandingPageGraphQLPlayground({

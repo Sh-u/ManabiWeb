@@ -8,7 +8,7 @@ import { User } from "./User";
 export class DeckSubscriber {
   @Field(() => Int)
   @PrimaryKey()
-  _id: Number;
+  _id!: Number;
 
   @Field(() => User)
   @ManyToOne(() => User)

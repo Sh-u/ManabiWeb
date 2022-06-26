@@ -20,9 +20,8 @@ import { Deck } from "../entities/Deck";
 import mv from "mv";
 import { finished, Stream } from "stream";
 import { GraphQLUpload, FileUpload } from "graphql-upload";
-import { createWriteStream, mkdir, unlink } from "fs";
+import { createWriteStream, mkdir, unlink, existsSync } from "fs";
 import path from "path";
-
 
 @InputType()
 class RegisterInput {
@@ -107,14 +106,17 @@ export class UserResolver {
     const basePath = path.join(
       "userFiles",
       `user-${currentUser._id}`,
-      filename
+      `avatar-${currentUser._id}`
     );
-    console.log(`basepath`, basePath)
-    const targetPath = path.resolve('..', 'web', 'public', basePath);
+    console.log(`basepath`, basePath);
+    const targetPath = path.resolve("..", "web", "public", basePath);
 
     if (currentUser.image) {
-      
-      await unlink(targetPath, (err) => {if (err) {console.log(err)}});
+      await unlink(targetPath, (err) => {
+        if (err) {
+          console.log(err);
+        }
+      });
     }
 
     console.log(`target`, targetPath);
@@ -432,6 +434,7 @@ export class UserResolver {
       username: options.username,
       password: hashedPassword,
       email: options.email,
+
     });
 
     if (!user) {
@@ -444,12 +447,21 @@ export class UserResolver {
         ],
       };
     }
-    const targetPath = path.resolve('..', 'web', 'public', `userFiles/${user._id}`);
-    mkdir(targetPath, (err) => {
-      if (err) {
-        return console.log(err);
-      }
-    });
+    const targetPath = path.resolve(
+      "..",
+      "web",
+      "public",
+      "userFiles",
+      `user-${user._id}`
+    );
+
+    if (!existsSync(targetPath)) {
+      mkdir(targetPath, (err) => {
+        if (err) {
+          return console.log(err);
+        }
+      });
+    }
 
     try {
       await em.persistAndFlush(user);
@@ -466,7 +478,7 @@ export class UserResolver {
         };
       }
     }
-
+    console.log(user._id)
     req.session.userId = user._id;
     return {
       user,

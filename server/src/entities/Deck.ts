@@ -9,16 +9,31 @@ import {
   ManyToMany,
   Filter,
   Cascade,
+  OneToOne,
 } from "@mikro-orm/core";
-import { Field, Int, ObjectType } from "type-graphql";
+import { Field, Float, Int, ObjectType } from "type-graphql";
 import { DeckSubscriber } from "./DeckSubscriber";
-import { Post } from "./Post";
+import { Card } from "./Card";
 import { User } from "./User";
+import { type } from "os";
+import { CardProgress } from "./CardProgress";
 
 @ObjectType()
 @Entity()
 export class Deck {
-  [OptionalProps]?: "createdAt" | "updatedAt" | "_id" | "posts";
+  [OptionalProps]?:
+    | "createdAt"
+    | "updatedAt"
+    | "cards"
+    | "japaneseTemplate"
+    | "steps"
+    | "graduatingInterval"
+    | "startingEase"
+    | "cardProgress"
+
+  @Field(() => Int)
+  @PrimaryKey()
+  _id!: Number;
 
   @Field(() => String)
   @Property({ type: "text" })
@@ -28,20 +43,29 @@ export class Deck {
   @ManyToOne(() => User)
   user!: User;
 
+  @Field(() => Boolean, { nullable: true })
+  @Property({ nullable: true })
+  japaneseTemplate?: boolean;
 
   @Field(() => [DeckSubscriber])
-  @ManyToMany({ entity: () => User, pivotEntity: () => DeckSubscriber})
+  @ManyToMany({ entity: () => User, pivotEntity: () => DeckSubscriber })
   subscribers = new Collection<User>(this);
 
-
+  @Field(() => [Int])
+  @Property()
+  steps: Array<number> = [1, 10, 1400];
 
   @Field(() => Int)
-  @PrimaryKey()
-  _id: Number;
+  @Property()
+  graduatingInterval: number = 1;
 
-  @Field(() => [Post])
-  @OneToMany(() => Post, (post) => post.deck)
-  posts: Collection<Post> = new Collection<Post>(this);
+  @Field(() => Float)
+  @Property()
+  startingEase: number = 2.5;
+
+  @Field(() => [Card])
+  @OneToMany(() => Card, (card) => card.deck)
+  cards: Collection<Card> = new Collection<Card>(this);
 
   @Field(() => String)
   @Property({ type: "date" })

@@ -1,29 +1,47 @@
 import {
   Cascade,
-    Collection, Entity, OneToMany, OptionalProps, PrimaryKey, Property
+  Collection,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  OneToOne,
+  OptionalProps,
+  PrimaryKey,
+  Property,
 } from "@mikro-orm/core";
 import { Field, Int, ObjectType } from "type-graphql";
+import { CardProgress } from "./CardProgress";
 import { Deck } from "./Deck";
 
 @ObjectType()
 @Entity()
 export class User {
-  [OptionalProps]?: "createdAt" | "updatedAt" | "_id" | "password" | "image";;
+  [OptionalProps]?:
+    | "createdAt"
+    | "updatedAt"
+    | "password"
+    | "image"
+    | "cardProgress";
+    
   @Field(() => Int)
   @PrimaryKey()
-  _id: Number;
+  _id!: Number;
 
   @Field(() => [Deck])
-  @OneToMany(() => Deck, (deck) => deck.user, {orphanRemoval: true})
+  @OneToMany(() => Deck, (deck) => deck.user, { orphanRemoval: true })
   decks = new Collection<Deck>(this);
 
-  @Field(() => String, {nullable: true})
-  @Property({type: 'text', nullable: true})
+  @Field(() => String, { nullable: true })
+  @Property({ type: "text", nullable: true })
   image?: string;
 
   @Field(() => String)
   @Property({ type: "text", unique: true })
   username!: string;
+
+  @Field(() => [CardProgress], { nullable: true })
+  @OneToMany(() => CardProgress, (progress) => progress.user, { orphanRemoval: true }, )
+  cardProgresses = new Collection<CardProgress>(this);
 
   @Property({ type: "text" })
   password!: string;

@@ -13,7 +13,7 @@ import {
 import { Deck } from "../entities/Deck";
 import { User } from "../entities/User";
 import { MyContext } from "../types";
-import { mkdir } from "fs";
+import { existsSync, mkdir } from "fs";
 import path from "path";
 
 @ObjectType()
@@ -32,13 +32,14 @@ export class DeckResolver {
     @Arg("input", () => String) input: string,
     @Ctx() { em }: MyContext
   ): Promise<Deck[]> {
-
     const allDecks = await em.find(Deck, {});
 
-    console.log(input)
-    const decks = allDecks.filter((deck) => deck.title.toLowerCase().includes(input.toLowerCase()))
+    console.log(input);
+    const decks = allDecks.filter((deck) =>
+      deck.title.toLowerCase().includes(input.toLowerCase())
+    );
     // console.log('decks: ', decks)
-    if (decks.length < 1){
+    if (decks.length < 1) {
       return [];
     }
 
@@ -97,13 +98,18 @@ export class DeckResolver {
     @Arg("_id", () => Int) _id: number,
     @Ctx() { em }: MyContext
   ): Promise<DeckResponse> {
-    const deck = await em.findOne(Deck, { _id }, { populate: ['posts'] });
+    const deck = await em.findOne(Deck, { _id }, { populate: ["cards"], });
 
     if (!deck) {
       return {
         errors: "Couldn't find the deck you searched for",
       };
     }
+    
+    if (!deck.cards[0].cardProgresses.isInitialized()){
+      await deck.cards[0].cardProgresses.init();
+    }
+
 
     const user = await em.findOne(User, { _id: deck?.user._id });
 
@@ -121,11 +127,11 @@ export class DeckResolver {
   @Mutation(() => DeckResponse)
   async createDeck(
     @Arg("title") title: string,
+    @Arg("JP") JP: boolean,
     @Ctx() { em, req }: MyContext
   ): Promise<DeckResponse> {
     const user = await em.findOne(User, { _id: req.session.userId });
-
-    
+    console.log(user)
     if (title.length < 4 || title.length > 30) {
       return {
         errors: "Invalid title length",
@@ -138,28 +144,34 @@ export class DeckResolver {
       };
     }
 
-    const deck = await em.create(Deck, { title, user: user });
-
-    // if (!deck?.posts?.isInitialized()){
-    //   deck.posts.init();
-      
-    // }
+    await em.begin();
     try {
+      const deck = em.create(Deck, { title, user: user, japaneseTemplate: JP });
       await em.persistAndFlush(deck);
-    } catch (err) {
-      console.log(err);
-    }
-
-    const targetPath = path.resolve('..', 'web', 'public', `userFiles/user-${user._id}/deck-${deck._id}`);
-    mkdir(targetPath, (err) => {
-      if (err) {
-        return console.log(err);
+      console.log('id', deck._id)
+      const targetPath = path.resolve(
+        "..",
+        "web",
+        "public",
+        `userFiles/user-${user._id}/deck-${deck._id}`
+      );
+      if (!existsSync(targetPath)) {
+        mkdir(targetPath, (err) => {
+          if (err) {
+            return console.log(err);
+          }
+        });
       }
-    });
 
-    return {
-      decks: [deck],
-    };
+   
+      await em.commit();
+      return {
+        decks: [deck],
+      };
+    } catch (e) {
+      await em.rollback();
+      throw e;
+    }
   }
 
   @Mutation(() => DeckResponse)
@@ -288,15 +300,13 @@ export class DeckResolver {
       await deck.subscribers.init();
     }
     if (deck.user._id === currentUser?._id) {
-
       if (deck.subscribers.count() > 0) {
-        console.log('removing subs')
-        const deckSubs = await em.find(DeckSubscriber, {deck: deck})
-        await em.removeAndFlush(deckSubs)
+        console.log("removing subs");
+        const deckSubs = await em.find(DeckSubscriber, { deck: deck });
+        await em.removeAndFlush(deckSubs);
       }
-      console.log('removing owner deck')
+      console.log("removing owner deck");
       await em.removeAndFlush(deck);
- 
     } else if (
       deck.subscribers.toArray().some((user) => user._id === currentUser._id)
     ) {

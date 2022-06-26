@@ -10,16 +10,17 @@ const connect_redis_1 = __importDefault(require("connect-redis"));
 require("cross-fetch/polyfill");
 const express_1 = __importDefault(require("express"));
 const express_session_1 = __importDefault(require("express-session"));
+const graphql_upload_1 = require("graphql-upload");
 const ioredis_1 = __importDefault(require("ioredis"));
 require("reflect-metadata");
 const type_graphql_1 = require("type-graphql");
 const constants_1 = require("./constants");
 const mikro_orm_config_1 = __importDefault(require("./mikro-orm.config"));
+const card_1 = require("./resolvers/card");
+const cardProgress_1 = require("./resolvers/cardProgress");
 const deck_1 = require("./resolvers/deck");
 const hello_1 = require("./resolvers/hello");
-const post_1 = require("./resolvers/post");
 const user_1 = require("./resolvers/user");
-const graphql_upload_1 = require("graphql-upload");
 const corsOptions = {
     origin: [
         "http://localhost:4000",
@@ -55,8 +56,9 @@ const main = async () => {
     }), (0, graphql_upload_1.graphqlUploadExpress)({ maxFileSize: 10000000, maxFiles: 4 }));
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: await (0, type_graphql_1.buildSchema)({
-            resolvers: [hello_1.HelloResolver, post_1.PostResolver, user_1.UserResolver, deck_1.DeckResolver],
+            resolvers: [hello_1.HelloResolver, card_1.CardResolver, user_1.UserResolver, deck_1.DeckResolver, cardProgress_1.CardProgressResolver],
             validate: false,
+            dateScalarMode: "isoDate",
         }),
         plugins: [
             (0, apollo_server_core_1.ApolloServerPluginLandingPageGraphQLPlayground)({

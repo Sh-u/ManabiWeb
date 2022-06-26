@@ -135,6 +135,42 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "japanese_template": {
+          "name": "japanese_template",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "boolean"
+        },
+        "steps": {
+          "name": "steps",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "array"
+        },
+        "graduating_interval": {
+          "name": "graduating_interval",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "starting_ease": {
+          "name": "starting_ease",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz(0)",
@@ -342,11 +378,11 @@
           "mappedType": "datetime"
         }
       },
-      "name": "post",
+      "name": "card",
       "schema": "public",
       "indexes": [
         {
-          "keyName": "post_pkey",
+          "keyName": "card_pkey",
           "columnNames": [
             "_id"
           ],
@@ -357,16 +393,135 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "post_deck__id_foreign": {
-          "constraintName": "post_deck__id_foreign",
+        "card_deck__id_foreign": {
+          "constraintName": "card_deck__id_foreign",
           "columnNames": [
             "deck__id"
           ],
-          "localTableName": "public.post",
+          "localTableName": "public.card",
           "referencedColumnNames": [
             "_id"
           ],
           "referencedTableName": "public.deck",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "_id": {
+          "name": "_id",
+          "type": "serial",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "user__id": {
+          "name": "user__id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "card__id": {
+          "name": "card__id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "state": {
+          "name": "state",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
+        },
+        "steps": {
+          "name": "steps",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "next_revision": {
+          "name": "next_revision",
+          "type": "timestamptz(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        }
+      },
+      "name": "card_progress",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "card_progress_pkey",
+          "columnNames": [
+            "_id"
+          ],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "card_progress_user__id_foreign": {
+          "constraintName": "card_progress_user__id_foreign",
+          "columnNames": [
+            "user__id"
+          ],
+          "localTableName": "public.card_progress",
+          "referencedColumnNames": [
+            "_id"
+          ],
+          "referencedTableName": "public.user",
+          "updateRule": "cascade"
+        },
+        "card_progress_card__id_foreign": {
+          "constraintName": "card_progress_card__id_foreign",
+          "columnNames": [
+            "card__id"
+          ],
+          "localTableName": "public.card_progress",
+          "referencedColumnNames": [
+            "_id"
+          ],
+          "referencedTableName": "public.card",
           "updateRule": "cascade"
         }
       }

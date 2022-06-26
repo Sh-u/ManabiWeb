@@ -4,34 +4,41 @@ import {
   PrimaryKey,
   OptionalProps,
   ManyToOne,
+  OneToMany,
+  Collection,
+  ManyToMany,
 } from "@mikro-orm/core";
 import { Field, Int, ObjectType } from "type-graphql";
 import { Deck } from "./Deck";
 
+import {CardProgress} from "./CardProgress"
 
 @ObjectType()
 @Entity()
-export class Post {
+export class Card {
   [OptionalProps]?:
     | "createdAt"
     | "updatedAt"
-    | "_id"
+
     | "image"
     | "dictionaryAudio"
     | "userAudio";
 
+  @Field(() => Int)
+  @PrimaryKey()
+  _id!: Number;
+
   @Field(() => String)
-  @Property({ type: "text"})
+  @Property({ type: "text" })
   sentence!: string;
 
   @Field(() => String)
   @Property({ type: "text" })
   word!: string;
 
-  @Field(() => Int)
-
-  @PrimaryKey()
-  _id: Number;
+  @Field(() => [CardProgress])
+  @OneToMany(() => CardProgress, (cardProgress) => cardProgress.card)
+  cardProgresses = new Collection<CardProgress>(this);
 
   @Field(() => String, { nullable: true })
   @Property({ type: "text", nullable: true })

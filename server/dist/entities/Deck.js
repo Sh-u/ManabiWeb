@@ -13,16 +13,24 @@ exports.Deck = void 0;
 const core_1 = require("@mikro-orm/core");
 const type_graphql_1 = require("type-graphql");
 const DeckSubscriber_1 = require("./DeckSubscriber");
-const Post_1 = require("./Post");
+const Card_1 = require("./Card");
 const User_1 = require("./User");
 let Deck = class Deck {
     constructor() {
         this.subscribers = new core_1.Collection(this);
-        this.posts = new core_1.Collection(this);
+        this.steps = [1, 10, 1400];
+        this.graduatingInterval = 1;
+        this.startingEase = 2.5;
+        this.cards = new core_1.Collection(this);
         this.createdAt = new Date();
         this.updatedAt = new Date();
     }
 };
+__decorate([
+    (0, type_graphql_1.Field)(() => type_graphql_1.Int),
+    (0, core_1.PrimaryKey)(),
+    __metadata("design:type", Number)
+], Deck.prototype, "_id", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
     (0, core_1.Property)({ type: "text" }),
@@ -34,20 +42,35 @@ __decorate([
     __metadata("design:type", User_1.User)
 ], Deck.prototype, "user", void 0);
 __decorate([
+    (0, type_graphql_1.Field)(() => Boolean, { nullable: true }),
+    (0, core_1.Property)({ nullable: true }),
+    __metadata("design:type", Boolean)
+], Deck.prototype, "japaneseTemplate", void 0);
+__decorate([
     (0, type_graphql_1.Field)(() => [DeckSubscriber_1.DeckSubscriber]),
     (0, core_1.ManyToMany)({ entity: () => User_1.User, pivotEntity: () => DeckSubscriber_1.DeckSubscriber }),
     __metadata("design:type", Object)
 ], Deck.prototype, "subscribers", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => type_graphql_1.Int),
-    (0, core_1.PrimaryKey)(),
-    __metadata("design:type", Number)
-], Deck.prototype, "_id", void 0);
+    (0, type_graphql_1.Field)(() => [type_graphql_1.Int]),
+    (0, core_1.Property)(),
+    __metadata("design:type", Array)
+], Deck.prototype, "steps", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => [Post_1.Post]),
-    (0, core_1.OneToMany)(() => Post_1.Post, (post) => post.deck),
+    (0, type_graphql_1.Field)(() => type_graphql_1.Int),
+    (0, core_1.Property)(),
+    __metadata("design:type", Number)
+], Deck.prototype, "graduatingInterval", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => type_graphql_1.Float),
+    (0, core_1.Property)(),
+    __metadata("design:type", Number)
+], Deck.prototype, "startingEase", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => [Card_1.Card]),
+    (0, core_1.OneToMany)(() => Card_1.Card, (card) => card.deck),
     __metadata("design:type", core_1.Collection)
-], Deck.prototype, "posts", void 0);
+], Deck.prototype, "cards", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
     (0, core_1.Property)({ type: "date" }),

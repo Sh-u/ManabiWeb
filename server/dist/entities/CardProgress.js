@@ -9,15 +9,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.User = void 0;
+exports.CardProgress = void 0;
 const core_1 = require("@mikro-orm/core");
 const type_graphql_1 = require("type-graphql");
-const CardProgress_1 = require("./CardProgress");
-const Deck_1 = require("./Deck");
-let User = class User {
+const Card_1 = require("./Card");
+const User_1 = require("./User");
+let CardProgress = class CardProgress {
     constructor() {
-        this.decks = new core_1.Collection(this);
-        this.cardProgresses = new core_1.Collection(this);
+        this.state = "Learn";
+        this.steps = 0;
+        this.nextRevision = new Date();
         this.createdAt = new Date();
         this.updatedAt = new Date();
     }
@@ -26,49 +27,45 @@ __decorate([
     (0, type_graphql_1.Field)(() => type_graphql_1.Int),
     (0, core_1.PrimaryKey)(),
     __metadata("design:type", Number)
-], User.prototype, "_id", void 0);
+], CardProgress.prototype, "_id", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => [Deck_1.Deck]),
-    (0, core_1.OneToMany)(() => Deck_1.Deck, (deck) => deck.user, { orphanRemoval: true }),
-    __metadata("design:type", Object)
-], User.prototype, "decks", void 0);
+    (0, type_graphql_1.Field)(() => User_1.User),
+    (0, core_1.ManyToOne)(() => User_1.User),
+    __metadata("design:type", User_1.User)
+], CardProgress.prototype, "user", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => String, { nullable: true }),
-    (0, core_1.Property)({ type: "text", nullable: true }),
-    __metadata("design:type", String)
-], User.prototype, "image", void 0);
-__decorate([
-    (0, type_graphql_1.Field)(() => String),
-    (0, core_1.Property)({ type: "text", unique: true }),
-    __metadata("design:type", String)
-], User.prototype, "username", void 0);
-__decorate([
-    (0, type_graphql_1.Field)(() => [CardProgress_1.CardProgress], { nullable: true }),
-    (0, core_1.OneToMany)(() => CardProgress_1.CardProgress, (progress) => progress.user, { orphanRemoval: true }),
-    __metadata("design:type", Object)
-], User.prototype, "cardProgresses", void 0);
-__decorate([
-    (0, core_1.Property)({ type: "text" }),
-    __metadata("design:type", String)
-], User.prototype, "password", void 0);
+    (0, type_graphql_1.Field)(() => Card_1.Card),
+    (0, core_1.ManyToOne)(() => Card_1.Card),
+    __metadata("design:type", Card_1.Card)
+], CardProgress.prototype, "card", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
-    (0, core_1.Property)({ type: "text", unique: true }),
+    (0, core_1.Property)(),
     __metadata("design:type", String)
-], User.prototype, "email", void 0);
+], CardProgress.prototype, "state", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => type_graphql_1.Int),
+    (0, core_1.Property)(),
+    __metadata("design:type", Number)
+], CardProgress.prototype, "steps", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => Date),
     (0, core_1.Property)({ type: "date" }),
     __metadata("design:type", Date)
-], User.prototype, "createdAt", void 0);
+], CardProgress.prototype, "nextRevision", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => Date),
+    (0, core_1.Property)({ type: "date" }),
+    __metadata("design:type", Date)
+], CardProgress.prototype, "createdAt", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => Date),
     (0, core_1.Property)({ type: "date", onUpdate: () => new Date() }),
     __metadata("design:type", Date)
-], User.prototype, "updatedAt", void 0);
-User = __decorate([
+], CardProgress.prototype, "updatedAt", void 0);
+CardProgress = __decorate([
     (0, type_graphql_1.ObjectType)(),
     (0, core_1.Entity)()
-], User);
-exports.User = User;
-//# sourceMappingURL=User.js.map
+], CardProgress);
+exports.CardProgress = CardProgress;
+//# sourceMappingURL=CardProgress.js.map

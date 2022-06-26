@@ -103,13 +103,15 @@ let UserResolver = class UserResolver {
         if (!currentUser) {
             return false;
         }
-        const basePath = path_1.default.join("userFiles", `user-${currentUser._id}`, filename);
+        const basePath = path_1.default.join("userFiles", `user-${currentUser._id}`, `avatar-${currentUser._id}`);
         console.log(`basepath`, basePath);
-        const targetPath = path_1.default.resolve('..', 'web', 'public', basePath);
+        const targetPath = path_1.default.resolve("..", "web", "public", basePath);
         if (currentUser.image) {
-            await (0, fs_1.unlink)(targetPath, (err) => { if (err) {
-                console.log(err);
-            } });
+            await (0, fs_1.unlink)(targetPath, (err) => {
+                if (err) {
+                    console.log(err);
+                }
+            });
         }
         console.log(`target`, targetPath);
         new Promise(async (resolve, reject) => {
@@ -373,12 +375,14 @@ let UserResolver = class UserResolver {
                 ],
             };
         }
-        const targetPath = path_1.default.resolve('..', 'web', 'public', `userFiles/${user._id}`);
-        (0, fs_1.mkdir)(targetPath, (err) => {
-            if (err) {
-                return console.log(err);
-            }
-        });
+        const targetPath = path_1.default.resolve("..", "web", "public", "userFiles", `user-${user._id}`);
+        if (!(0, fs_1.existsSync)(targetPath)) {
+            (0, fs_1.mkdir)(targetPath, (err) => {
+                if (err) {
+                    return console.log(err);
+                }
+            });
+        }
         try {
             await em.persistAndFlush(user);
         }
@@ -395,6 +399,7 @@ let UserResolver = class UserResolver {
                 };
             }
         }
+        console.log(user._id);
         req.session.userId = user._id;
         return {
             user,

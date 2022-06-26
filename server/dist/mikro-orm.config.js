@@ -4,13 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const constants_1 = require("./constants");
-const Post_1 = require("./entities/Post");
+const Card_1 = require("./entities/Card");
 const path_1 = __importDefault(require("path"));
 const User_1 = require("./entities/User");
 const Deck_1 = require("./entities/Deck");
 const DeckSubscriber_1 = require("./entities/DeckSubscriber");
+const CardProgress_1 = require("./entities/CardProgress");
 exports.default = {
-    entities: [Post_1.Post, User_1.User, Deck_1.Deck, DeckSubscriber_1.DeckSubscriber],
+    entities: [Card_1.Card, User_1.User, Deck_1.Deck, DeckSubscriber_1.DeckSubscriber, CardProgress_1.CardProgress],
     dbName: 'shuddit',
     type: 'postgresql',
     debug: !constants_1._prod_,
