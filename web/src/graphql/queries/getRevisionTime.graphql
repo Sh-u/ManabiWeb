@@ -1,0 +1,3 @@
+query getRevisionTime($currentCardId: Int!) {
+    getRevisionTime(currentCardId: $currentCardId)
+}

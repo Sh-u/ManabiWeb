@@ -15,15 +15,15 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import router, { useRouter } from "next/router";
-import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useRef, useState } from "react";
 import Navbar from "../../components/Navbar";
 import {
   useChangeEmailMutation,
   useChangeUsernameMutation,
   useForgotPasswordMutation,
-  useUploadAvatarMutation,
   useMeQuery,
+  useUploadAvatarMutation,
 } from "../../generated/graphql";
 import { toErrorMap } from "../../utils/toErrorMap";
 
@@ -51,14 +51,9 @@ const AccountPage = () => {
   };
 
   const [usernameChangeInput, setUsernameChangeInput] = useState("");
-
   const [emailChangeInput, setEmailChangeInput] = useState("");
   const [image, setImage] = useState({ file: null, url: null });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
 
   const [uploadAvatar] = useUploadAvatarMutation();
   const [changeUsername] = useChangeUsernameMutation();
@@ -76,7 +71,7 @@ const AccountPage = () => {
       status = "error";
     } else {
       title = "Success";
-      description = "Success in changing your user data";
+      description = "Refresh page to see changes";
       status = "success";
     }
     toast({
@@ -84,7 +79,7 @@ const AccountPage = () => {
       title: title,
       description: description,
       status: status,
-      duration: 1000,
+      duration: 3000,
       isClosable: true,
     });
   };
@@ -99,12 +94,6 @@ const AccountPage = () => {
     isOpen: isDeleteOpen,
     onOpen: onDeleteOpen,
     onClose: onDeleteClose,
-  } = useDisclosure();
-
-  const {
-    isOpen: isCropModalOpen,
-    onOpen: onCropModalOpen,
-    onClose: onCropModalClose,
   } = useDisclosure();
 
   const cancelRef = useRef();
@@ -134,8 +123,6 @@ const AccountPage = () => {
   };
 
   const uploadToServer = async () => {
-
-
     if (!image) return;
     const response = await uploadAvatar({
       variables: {
@@ -146,8 +133,6 @@ const AccountPage = () => {
     if (response?.errors) {
       console.log(response?.errors);
     }
-  
-
   };
 
   const handleSaveChanges = async () => {
@@ -185,7 +170,6 @@ const AccountPage = () => {
         return;
       }
       console.log(response);
-
     }
 
     if (image) {
@@ -193,10 +177,12 @@ const AccountPage = () => {
         await uploadToServer();
       } catch (err) {
         ShowResponseToast({
-          errors: [{
-            field: 'image',
-            message: 'uploading image failed'
-          }],
+          errors: [
+            {
+              field: "image",
+              message: "uploading image failed",
+            },
+          ],
         });
       }
     }
@@ -301,99 +287,108 @@ const AccountPage = () => {
           {SaveButton}
         </Flex>
         <Divider mt="10" maxW={"3xl"} />
-        <Flex align={"center"} justify={"center"} mt="10">
-          <Text fontSize={"sm"} fontWeight="semibold">
-            Username
-          </Text>
 
-          <Input
-            focusBorderColor="red.800"
-            name="Username"
-            placeholder={userData?.me?.username}
-            ml="5"
-            rounded={"xl"}
-            variant="filled"
-            onChange={(event) => setUsernameChangeInput(event.target.value)}
-            position="relative"
-          />
-        </Flex>
-        <Flex align={"center"} justify={"center"} mt="10">
-          <Text fontSize={"sm"} fontWeight="semibold">
-            Email
-          </Text>
-          <Input
-            focusBorderColor="red.800"
-            name="Email"
-            placeholder={userData?.me?.email}
-            ml="5"
-            rounded={"xl"}
-            variant="filled"
-            onChange={(event) => setEmailChangeInput(event.target.value)}
-          ></Input>
-        </Flex>
+        <Flex align={"start"} justify={"center"} mt="10" flexDir="column">
+          <Flex align={"center"} justify={"center"} mt="10">
+            <Text fontSize={"sm"} fontWeight="semibold">
+              Username
+            </Text>
+            <Input
+              focusBorderColor="red.800"
+              name="Username"
+              placeholder={userData?.me?.username}
+              ml="5"
+              rounded={"xl"}
+              variant="filled"
+              onChange={(event) => setUsernameChangeInput(event.target.value)}
+              position="relative"
+            />
+          </Flex>
+          <Flex align={"center"} justify={"center"} mt="10">
+            <Text fontSize={"sm"} fontWeight="semibold">
+              Email
+            </Text>
+            <Input
+              focusBorderColor="red.800"
+              name="Email"
+              placeholder={userData?.me?.email}
+              ml="5"
+              rounded={"xl"}
+              variant="filled"
+              onChange={(event) => setEmailChangeInput(event.target.value)}
+            />
+          </Flex>
 
-        <Flex align={"center"} justify={"center"} mt="10">
-          <Button
-            rounded="lg"
-            variant={"outline"}
-            onClick={handleResetPassword}
-          >
-            Reset Password
-          </Button>
-        </Flex>
+          <Flex align={"center"} justify={"center"} mt="10">
+            <Text fontSize={"sm"} fontWeight="semibold">
+              Password
+            </Text>
+            <Button
+              ml="5"
+              rounded="lg"
+              variant={"outline"}
+              onClick={handleResetPassword}
+            >
+              Reset Password
+            </Button>
+          </Flex>
 
-        <Flex align={"center"} justify={"center"} mt="10">
-          <Text fontSize={"sm"} fontWeight="semibold">
-            Profile picture
-          </Text>
+          <Flex align={"center"} justify={"center"} mt="10">
+            <Text fontSize={"sm"} fontWeight="semibold">
+              Profile picture
+            </Text>
 
-          <FormLabel
-            m="0"
-            fontWeight={"bold"}
-            fontSize="xl"
-            htmlFor="myImage"
-            cursor={"pointer"}
-            p="2"
-            rounded={"xl"}
-            ml="5"
-            h="auto"
-            w="auto"
-            bg="inherit"
-            position={"relative"}
-            _hover={{
-              textDecoration: 'underline'
-            }}
-            textUnderlineOffset={'2px'}
-          >
-            Upload Image
-          </FormLabel>
-          <Input
-            fontSize={"md"}
-            fontWeight={"bold"}
-            opacity="0"
-            width={"0.1px"}
-            height={"0.1px"}
-            position="absolute"
-            variant={"unstyled"}
-            type="file"
-            name="myImage"
-            id="myImage"
-            onChange={uploadToClient}
-          />
+            <FormLabel
+              m="0"
+              fontWeight={"bold"}
+              fontSize="xl"
+              htmlFor="myImage"
+              cursor={"pointer"}
+              p="2"
+              rounded={"xl"}
+              ml="5"
+              h="auto"
+              w="auto"
+              bg="inherit"
+              position={"relative"}
+              _hover={{
+                textDecoration: "underline",
+                textDecorationColor: "red.800",
+              }}
+              textUnderlineOffset={"2px"}
+            >
+              Upload Image
+            </FormLabel>
+            <Input
+              fontSize={"md"}
+              fontWeight={"bold"}
+              opacity="0"
+              width={"0.1px"}
+              height={"0.1px"}
+              position="absolute"
+              variant={"unstyled"}
+              type="file"
+              name="myImage"
+              id="myImage"
+              onChange={uploadToClient}
+            />
+          </Flex>
         </Flex>
 
         {image?.url ? <Avatar mt="10" size={"2xl"} src={image.url} /> : null}
 
         <Button
           variant={"unstyled"}
-          color="red.500"
-          fontWeight={"normal"}
-          mt="20"
+          color="red.800"
+          fontWeight={"bold"}
+          mt="10"
           onClick={onDeleteOpen}
+          _hover={{
+            color: "red.400",
+          }}
         >
           DELETE MY ACCOUNT!
         </Button>
-
         <AlertDialog
           isOpen={isDeleteOpen}
           leastDestructiveRef={cancelRef}

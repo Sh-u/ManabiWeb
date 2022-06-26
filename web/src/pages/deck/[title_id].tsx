@@ -39,6 +39,7 @@ const DeckPage = ({ decks }: DeckResponse) => {
     return false;
   };
 
+  const image = userData?.me?.image;
   const isOwnerOfDeck = () => {
     if (userData?.me?.decks?.some((deck) => deck._id === decks[0]._id)) {
       return true;
@@ -114,7 +115,6 @@ const DeckPage = ({ decks }: DeckResponse) => {
     refreshData();
   };
 
-
   return (
     <>
       <Navbar />
@@ -136,7 +136,12 @@ const DeckPage = ({ decks }: DeckResponse) => {
             bg="gray.300"
             color="black"
           >
-            <Avatar name="author" src={"/" + decks[0]?.user.image} ml="5" />
+            <Avatar
+              src={image ? "/" + image : null}
+              name={userData?.me?.username}
+              bg="red.400"
+              ml="5"
+            />
           </Tooltip>
         </Flex>
         <Flex align={"center"} justify={"center"} mt="5">
@@ -200,7 +205,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
     };
   }
   // console.log(data.findDeck.decks[0].subscribers);
-  console.log(data.findDeck.decks[0].user.image)
+  console.log(data.findDeck.decks[0].user.image);
   return {
     props: {
       decks: data.findDeck.decks,

@@ -18,6 +18,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import NextLink from "next/link";
+import { useEffect } from "react";
 import { FaDiscord, FaGithub } from "react-icons/fa";
 import {
   GetMyDecksDocument,
@@ -55,13 +56,7 @@ const Navbar = () => {
     },
   });
 
-  // if (meLoading) {
-  //   return (
-  //     <Center w='full' h='full'>
-  //       <Spinner color="red.500" />
-  //     </Center>
-  //   );
-  // }
+  const image = meData?.me?.image;
 
   return (
     <Flex
@@ -80,7 +75,7 @@ const Navbar = () => {
         >
           <NextLink href="/">
             <Link fontSize={"xl"} style={{ textDecoration: "none" }}>
-            ManabiWeb
+              ManabiWeb
             </Link>
           </NextLink>
         </Box>
@@ -144,10 +139,11 @@ const Navbar = () => {
                   }}
                 >
                   <Avatar
-                    src={"/" + meData?.me?.image}
+                    src={image ? "/" + image : null}
+                    name={meData?.me?.username}
+                    bg="red.400"
                     w={"40px"}
                     h={"40px"}
-                    name="User"
                   />
                 </MenuButton>
 

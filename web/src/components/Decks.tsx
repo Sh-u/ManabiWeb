@@ -14,11 +14,12 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Spinner,
   useDisclosure,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import router from "next/router";
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { useRecoilState } from "recoil";
 import { currentDeckBodyInfoState } from "../atoms/currentDeckBodyInfoState";
 import { showDeckBodyState } from "../atoms/showDeckBodyState";
@@ -39,7 +40,7 @@ const Decks = () => {
     number | undefined
   >(currentDeckBodyInfoState);
 
-  const { data: decksData, loading, error } = useGetMyDecksQuery();
+  const { data: decksData, loading, error, refetch } = useGetMyDecksQuery();
   const meQuery = useMeQuery();
   const [createDeck] = useCreateDeckMutation();
 
@@ -63,10 +64,17 @@ const Decks = () => {
 
   let decks = decksData?.getMyDecks?.decks;
 
+  const decksErrors = decksData?.getMyDecks?.errors;
+
   let orderedDecks = undefined;
 
   if (decks) {
     orderedDecks = [...decks]?.sort((a, b) => (a._id > b._id ? 1 : -1));
+  }
+  const handleModalClose = () => {
+
+    refetch();
+    onClose();
   }
 
   return (
@@ -83,8 +91,8 @@ const Decks = () => {
           ))}
         </Box>
       ) : (
-        <Box textAlign={"center"}>
-          {loading ? loading : decksData?.getMyDecks?.errors}
+        <Box textAlign={"center"} fontSize="2xl" mt="10">
+          {loading ? <Spinner size="lg" color="red.800" /> : decksErrors}
         </Box>
       )}
       <Flex
@@ -94,13 +102,11 @@ const Decks = () => {
         flexDirection={"column"}
       >
         <Flex
-        colorScheme="red"
-        
+          colorScheme="red"
           alignItems={"center"}
           justifyContent={"center"}
           mt={"3"}
           as={Button}
-        
           cursor={"pointer"}
           onClick={handleDeckCreation}
           transition={"ease-in-out"}
@@ -111,18 +117,20 @@ const Decks = () => {
             <Modal
               initialFocusRef={initialRef}
               isOpen={isOpen}
-              onClose={onClose}
+              onClose={handleModalClose}
             >
               <ModalOverlay />
               <ModalContent>
                 <Formik
-                  initialValues={{ title: "" }}
+                  initialValues={{ title: "", JP: true }}
                   onSubmit={async (values, { setErrors }) => {
+                    console.log(values);
                     const response = await createDeck({
                       variables: values,
                       update(cache, { data }) {
+                        console.log(data)
                         if (data.createDeck.errors) {
-                          console.log("error updating cache =>  INDEX.tsx");
+                          console.log(`2`, data.createDeck.errors);
                           return;
                         }
                         console.log("data", data);
@@ -142,7 +150,7 @@ const Decks = () => {
                             data: {
                               getMyDecks: {
                                 decks: [...data.createDeck.decks],
-                                errors: data.createDeck.errors,
+                                errors: getMyDecks.errors,
                               },
                             },
                           });
@@ -155,7 +163,7 @@ const Decks = () => {
                                   ...data.createDeck.decks,
                                   ...getMyDecks.decks,
                                 ],
-                                errors: data.createDeck.errors,
+                                errors: getMyDecks.errors,
                               },
                             },
                           });
@@ -164,9 +172,10 @@ const Decks = () => {
                     });
 
                     if (response.data?.createDeck?.errors) {
+                      console.log("after", decksData?.getMyDecks?.errors);
                       setErrors({ title: response.data?.createDeck?.errors });
                     } else if (response.data?.createDeck) {
-                      onClose();
+                      handleModalClose();
                     }
                   }}
                 >
@@ -196,9 +205,24 @@ const Decks = () => {
                                   </FormErrorMessage>
                                 ) : null}
                               </FormControl>
-                              <Checkbox mt={"5"} defaultChecked colorScheme={'red'}>
-                                Japanese Template
-                              </Checkbox>
+                            </>
+                          )}
+                        </Field>
+                        <Field name="JP">
+                          {({ field, form }) => (
+                            <>
+                              <FormLabel htmlFor="JP">
+                                <Checkbox
+                                  {...field}
+                                  id="JP"
+                                  mt={"5"}
+                                  defaultChecked
+                                  colorScheme={"red"}
+                                  checked={field.value}
+                                >
+                                  Japanese Template
+                                </Checkbox>
+                              </FormLabel>
                             </>
                           )}
                         </Field>
@@ -213,7 +237,7 @@ const Decks = () => {
                         >
                           Save
                         </Button>
-                        <Button onClick={onClose}>Cancel</Button>
+                        <Button onClick={handleModalClose}>Cancel</Button>
                       </ModalFooter>
                     </Form>
                   )}

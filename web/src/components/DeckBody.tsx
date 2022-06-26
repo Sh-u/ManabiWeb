@@ -1,23 +1,25 @@
 import { Button, Flex, Text } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { currentDeckBodyInfoState } from "../atoms/currentDeckBodyInfoState";
-import { showCreatePostState } from "../atoms/showCreatePostState";
+import { showCreateCardState } from "../atoms/showCreateCardState";
 import { showDeckBodyState } from "../atoms/showDeckBodyState";
-import { useFindDeckQuery } from "../generated/graphql";
+
 import useColors from "../hooks/useColors";
 import DeckOverview from "./DeckOverview";
 import AddCard from "./AddCard";
 import StudyCard from "./StudyCard";
+import DeckNav from "./DeckNav";
+import { useFindDeckQuery } from "../generated/graphql";
+
 
 const DeckBody = () => {
   const currentDeck = useRecoilValue(currentDeckBodyInfoState);
 
   const [showDeckBody, setShowDeckBody] =
     useRecoilState<boolean>(showDeckBodyState);
-  const [showCreatePost, setShowCreatePost] =
-    useRecoilState<boolean>(showCreatePostState);
 
+  const [showCreateCard, setShowCreateCard] = useRecoilState<boolean>(showCreateCardState)
   const [showStudyCard, setShowStudyCard] = useState(false);
 
   const { getColor } = useColors();
@@ -33,15 +35,25 @@ const DeckBody = () => {
   });
 
   useEffect(() => {
-    if (!loading && !showCreatePost) {
+    console.log('create card', showCreateCard)
+    if (!loading && !showCreateCard) {
       console.log("refetch");
       refetch();
     }
-  }, [showCreatePost]);
+  }, [showCreateCard]);
 
   const handleStudyNowButton = () => {
     setShowStudyCard(!showStudyCard);
   };
+
+  const handleSetShowDeckBody = useCallback(() => {
+    setShowDeckBody(!showDeckBody)
+  }, [])
+
+  const handleSetShowCreateCard = useCallback(() => {
+    console.log('craete card callback')
+    setShowCreateCard(!showCreateCard)
+  }, [])
 
   return (
     <Flex
@@ -59,44 +71,7 @@ const DeckBody = () => {
       mx={{ base: "xl", md: "350px  " }}
       flexDir={"column"}
     >
-      <Flex
-        align="center"
-        justify={"space-around"}
-        mt="5"
-        textUnderlineOffset={"2px"}
-      >
-        <Button
-          fontSize={"lg"}
-          _hover={{
-            textDecoration: "underline",
-          }}
-          variant={"unstyled"}
-          onClick={() => setShowDeckBody(!showDeckBody)}
-        >
-          Decks
-        </Button>
-        <Button
-          _hover={{
-            textDecoration: "underline",
-          }}
-          fontSize={"lg"}
-          variant={"unstyled"}
-        >
-          Stats
-        </Button>
-        <Button
-          _hover={{
-            textDecoration: "underline",
-          }}
-          fontSize={"lg"}
-          variant={"unstyled"}
-          onClick={() => {
-            setShowCreatePost(!showCreatePost);
-          }}
-        >
-          Add
-        </Button>
-      </Flex>
+      <DeckNav setShowCreateCard={handleSetShowCreateCard} setShowDeckBody={handleSetShowDeckBody} />
 
       {showStudyCard ? (
         <StudyCard data={data} />
@@ -104,7 +79,7 @@ const DeckBody = () => {
         <DeckOverview data={data} handleStudyNowButton={handleStudyNowButton} />
       )}
 
-      {showCreatePost ? <AddCard currentDeck={currentDeck} /> : null}
+      {showCreateCard ? <AddCard currentDeck={currentDeck} /> : null}
     </Flex>
   );
 };

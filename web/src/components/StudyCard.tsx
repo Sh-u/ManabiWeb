@@ -1,8 +1,12 @@
 import { Box, Button, Flex, Image, Text } from "@chakra-ui/react";
 import { useState } from "react";
-import { FindDeckQuery } from "../generated/graphql";
+import {
+  ChooseCardDifficultyDocument, FindDeckQuery, useGetRevisionTimeQuery,
+
+} from "../generated/graphql";
 
 import useColors from "../hooks/useColors";
+import { client } from "../pages/client";
 import EditCardModal from "./EditCardModal";
 import Player from "./Player";
 
@@ -17,6 +21,12 @@ const StudyCard = ({ data }: DeckOverviewProps) => {
 
   // const [showAnswer, setShowAnswer] = useState(false);
   const [cardState, setCardState] = useState<CardStateEnum>("STUDY");
+
+  const getRevisionTime = useGetRevisionTimeQuery({
+    variables: {
+      currentCardId: data?.findDeck?.decks[0]?.cards[0]._id
+    }
+  });
 
   const sentence = data?.findDeck?.decks[0]?.cards[0]?.sentence;
   const word = data?.findDeck?.decks[0]?.cards[0]?.word;
@@ -74,23 +84,43 @@ const StudyCard = ({ data }: DeckOverviewProps) => {
           </Button>
           {cardState === "ANSWER" ? (
             <Flex justify={"center"} align="center">
-              <Button
-                _hover={{
-                  bg: "red.600",
-                }}
-                bg="red.700"
-              >
-                Again
-              </Button>
-              <Button
-                _hover={{
-                  bg: "green.600",
-                }}
-                bg="green.700"
-                ml="5"
-              >
-                Good
-              </Button>
+              <Flex justify={"center"} align="center" flexDir={"column"}>
+                <Text>time</Text>
+                <Button
+                  _hover={{
+                    bg: "red.600",
+                  }}
+                  bg="red.700"
+                  onClick={async () => {
+                    const response = await client.mutate({
+                      mutation: ChooseCardDifficultyDocument,
+                      variables: {
+                        answerType: "AGAIN",
+                      },
+                    });
+
+                    if (!response || !response.data) {
+                      console.log("answer fail");
+                    }
+                    console.log(response?.data);
+                  }}
+                >
+                  Again
+                </Button>
+              </Flex>
+
+              <Flex justify={"center"} align="center" flexDir={"column"} ml="5">
+                <Text>{getRevisionTime?.data?.getRevisionTime} m</Text>
+                <Button
+                  _hover={{
+                    bg: "green.600",
+                  }}
+                  bg="green.700"
+                  
+                >
+                  Good
+                </Button>
+              </Flex>
             </Flex>
           ) : (
             <Button size="md" onClick={() => setCardState("ANSWER")}>

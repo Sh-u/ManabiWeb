@@ -1,8 +1,9 @@
-mutation CreateDeck($title: String!) {
-  createDeck(title: $title) {
+mutation CreateDeck($title: String!, $JP: Boolean!) {
+  createDeck(title: $title, JP: $JP) {
     decks {
       createdAt,
       title,
+      japaneseTemplate,
       user {
         _id
         username,

@@ -13,11 +13,17 @@ query FindDeck($_id: Int!) {
           word,
           image,
           userAudio
-          dictionaryAudio
+          dictionaryAudio,
+          cardProgresses {
+          _id,
+          steps
+        }
       },
       title,
       createdAt,
       updatedAt,
+      startingEase,
+      steps,
       subscribers {
         _id
       }

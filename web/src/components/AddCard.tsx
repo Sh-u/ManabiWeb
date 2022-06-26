@@ -19,30 +19,32 @@ import { useRecoilState } from "recoil";
 import Dropzone from "./Dropzone";
 import Player from "./Player";
 
-import { showCreatePostState } from "../atoms/showCreatePostState";
+import { showCreateCardState } from "../atoms/showCreateCardState";
 import useColors from "../hooks/useColors";
 import { useCreateCardMutation } from "../generated/graphql";
 
 const AddCard = ({ currentDeck }: { currentDeck: number }) => {
   const [image, setImage] = useState({ url: null, image: null });
   const [audio, setAudio] = useState({ url: null, audio: null });
-  const [showCreatePost, setShowCreatePost] =
-    useRecoilState(showCreatePostState);
+  const [showCreateCard, setCreateCardState] =
+    useRecoilState(showCreateCardState);
+
+
   const { getColor } = useColors();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [createCard] = useCreateCardMutation();
 
   useEffect(() => {
-    if (!showCreatePost) {
+    if (!showCreateCard) {
       return;
     }
     onOpen();
-  }, [showCreatePost]);
+  }, [showCreateCard]);
 
   const handleOnClose = () => {
-    if (!showCreatePost) return;
-    setShowCreatePost(!showCreatePost);
+    if (!showCreateCard) return;
+    setCreateCardState(!showCreateCard);
     onClose();
   };
 
@@ -235,7 +237,7 @@ const AddCard = ({ currentDeck }: { currentDeck: number }) => {
                         <Button
                           variant={"solid"}
                           onClick={() => {
-                            setShowCreatePost(false);
+                            setCreateCardState(false);
                             onClose();
                           }}
                         >

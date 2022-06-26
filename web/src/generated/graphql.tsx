@@ -22,6 +22,7 @@ export type Scalars = {
 export type Card = {
   __typename?: 'Card';
   _id: Scalars['Int'];
+  cardProgresses: Array<CardProgress>;
   createdAt: Scalars['String'];
   deck: Deck;
   dictionaryAudio?: Maybe<Scalars['String']>;
@@ -37,6 +38,18 @@ export type CardInput = {
   word: Scalars['String'];
 };
 
+export type CardProgress = {
+  __typename?: 'CardProgress';
+  _id: Scalars['Int'];
+  card: Card;
+  createdAt: Scalars['DateTime'];
+  nextRevision: Scalars['DateTime'];
+  state: Scalars['String'];
+  steps: Scalars['Int'];
+  updatedAt: Scalars['DateTime'];
+  user: User;
+};
+
 export type CardResponse = {
   __typename?: 'CardResponse';
   card?: Maybe<Card>;
@@ -48,6 +61,10 @@ export type Deck = {
   _id: Scalars['Int'];
   cards: Array<Card>;
   createdAt: Scalars['String'];
+  graduatingInterval: Scalars['Int'];
+  japaneseTemplate?: Maybe<Scalars['Boolean']>;
+  startingEase: Scalars['Float'];
+  steps: Array<Scalars['Int']>;
   subscribers: Array<DeckSubscriber>;
   title: Scalars['String'];
   updatedAt: Scalars['String'];
@@ -83,6 +100,7 @@ export type Mutation = {
   changeEmail: UserResponse;
   changePassword: UserResponse;
   changeUsername: UserResponse;
+  chooseCardDifficulty: Scalars['Boolean'];
   createCard: CardResponse;
   createDeck: DeckResponse;
   deleteCard: Scalars['Boolean'];
@@ -116,6 +134,12 @@ export type MutationChangeUsernameArgs = {
 };
 
 
+export type MutationChooseCardDifficultyArgs = {
+  answerType: Scalars['String'];
+  currentCardId: Scalars['Int'];
+};
+
+
 export type MutationCreateCardArgs = {
   audio?: InputMaybe<Scalars['Upload']>;
   deckId: Scalars['Int'];
@@ -125,6 +149,7 @@ export type MutationCreateCardArgs = {
 
 
 export type MutationCreateDeckArgs = {
+  JP: Scalars['Boolean'];
   title: Scalars['String'];
 };
 
@@ -192,8 +217,10 @@ export type Query = {
   card?: Maybe<Card>;
   findDeck: DeckResponse;
   getAllDecks: Array<Deck>;
+  getCardProgresses?: Maybe<Array<CardProgress>>;
   getCards: Array<Card>;
   getMyDecks: DeckResponse;
+  getRevisionTime: Scalars['Int'];
   getUsers: Array<User>;
   hello: Scalars['String'];
   me?: Maybe<User>;
@@ -211,6 +238,11 @@ export type QueryFindDeckArgs = {
 };
 
 
+export type QueryGetRevisionTimeArgs = {
+  currentCardId: Scalars['Int'];
+};
+
+
 export type QuerySearchForDeckArgs = {
   input: Scalars['String'];
 };
@@ -224,6 +256,7 @@ export type RegisterInput = {
 export type User = {
   __typename?: 'User';
   _id: Scalars['Int'];
+  cardProgresses?: Maybe<Array<CardProgress>>;
   createdAt: Scalars['DateTime'];
   decks: Array<Deck>;
   email: Scalars['String'];
@@ -262,6 +295,14 @@ export type ChangeUsernameMutationVariables = Exact<{
 
 export type ChangeUsernameMutation = { __typename?: 'Mutation', changeUsername: { __typename?: 'UserResponse', user?: { __typename?: 'User', _id: number, username: string, email: string } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
 
+export type ChooseCardDifficultyMutationVariables = Exact<{
+  currentCardId: Scalars['Int'];
+  answerType: Scalars['String'];
+}>;
+
+
+export type ChooseCardDifficultyMutation = { __typename?: 'Mutation', chooseCardDifficulty: boolean };
+
 export type CreateCardMutationVariables = Exact<{
   deckId: Scalars['Int'];
   options: CardInput;
@@ -274,10 +315,11 @@ export type CreateCardMutation = { __typename?: 'Mutation', createCard: { __type
 
 export type CreateDeckMutationVariables = Exact<{
   title: Scalars['String'];
+  JP: Scalars['Boolean'];
 }>;
 
 
-export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, user: { __typename?: 'User', _id: number, username: string, image?: string | null } }> | null } };
+export type CreateDeckMutation = { __typename?: 'Mutation', createDeck: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, japaneseTemplate?: boolean | null, _id: number, user: { __typename?: 'User', _id: number, username: string, image?: string | null } }> | null } };
 
 export type DeleteCardMutationVariables = Exact<{
   targetId: Scalars['Int'];
@@ -363,7 +405,7 @@ export type FindDeckQueryVariables = Exact<{
 }>;
 
 
-export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, user: { __typename?: 'User', _id: number, username: string, image?: string | null }, cards: Array<{ __typename?: 'Card', _id: number, sentence: string, word: string, image?: string | null, userAudio?: string | null, dictionaryAudio?: string | null }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
+export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, startingEase: number, steps: Array<number>, user: { __typename?: 'User', _id: number, username: string, image?: string | null }, cards: Array<{ __typename?: 'Card', _id: number, sentence: string, word: string, image?: string | null, userAudio?: string | null, dictionaryAudio?: string | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, steps: number }> }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
 
 export type GetAllDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -379,6 +421,13 @@ export type GetMyDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetMyDecksQuery = { __typename?: 'Query', getMyDecks: { __typename?: 'DeckResponse', errors?: string | null, decks?: Array<{ __typename?: 'Deck', createdAt: string, title: string, _id: number, user: { __typename?: 'User', _id: number, username: string, image?: string | null } }> | null } };
+
+export type GetRevisionTimeQueryVariables = Exact<{
+  currentCardId: Scalars['Int'];
+}>;
+
+
+export type GetRevisionTimeQuery = { __typename?: 'Query', getRevisionTime: number };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -533,6 +582,38 @@ export function useChangeUsernameMutation(baseOptions?: Apollo.MutationHookOptio
 export type ChangeUsernameMutationHookResult = ReturnType<typeof useChangeUsernameMutation>;
 export type ChangeUsernameMutationResult = Apollo.MutationResult<ChangeUsernameMutation>;
 export type ChangeUsernameMutationOptions = Apollo.BaseMutationOptions<ChangeUsernameMutation, ChangeUsernameMutationVariables>;
+export const ChooseCardDifficultyDocument = gql`
+    mutation chooseCardDifficulty($currentCardId: Int!, $answerType: String!) {
+  chooseCardDifficulty(currentCardId: $currentCardId, answerType: $answerType)
+}
+    `;
+export type ChooseCardDifficultyMutationFn = Apollo.MutationFunction<ChooseCardDifficultyMutation, ChooseCardDifficultyMutationVariables>;
+
+/**
+ * __useChooseCardDifficultyMutation__
+ *
+ * To run a mutation, you first call `useChooseCardDifficultyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChooseCardDifficultyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [chooseCardDifficultyMutation, { data, loading, error }] = useChooseCardDifficultyMutation({
+ *   variables: {
+ *      currentCardId: // value for 'currentCardId'
+ *      answerType: // value for 'answerType'
+ *   },
+ * });
+ */
+export function useChooseCardDifficultyMutation(baseOptions?: Apollo.MutationHookOptions<ChooseCardDifficultyMutation, ChooseCardDifficultyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChooseCardDifficultyMutation, ChooseCardDifficultyMutationVariables>(ChooseCardDifficultyDocument, options);
+      }
+export type ChooseCardDifficultyMutationHookResult = ReturnType<typeof useChooseCardDifficultyMutation>;
+export type ChooseCardDifficultyMutationResult = Apollo.MutationResult<ChooseCardDifficultyMutation>;
+export type ChooseCardDifficultyMutationOptions = Apollo.BaseMutationOptions<ChooseCardDifficultyMutation, ChooseCardDifficultyMutationVariables>;
 export const CreateCardDocument = gql`
     mutation CreateCard($deckId: Int!, $options: CardInput!, $image: Upload, $audio: Upload) {
   createCard(deckId: $deckId, options: $options, image: $image, audio: $audio) {
@@ -580,11 +661,12 @@ export type CreateCardMutationHookResult = ReturnType<typeof useCreateCardMutati
 export type CreateCardMutationResult = Apollo.MutationResult<CreateCardMutation>;
 export type CreateCardMutationOptions = Apollo.BaseMutationOptions<CreateCardMutation, CreateCardMutationVariables>;
 export const CreateDeckDocument = gql`
-    mutation CreateDeck($title: String!) {
-  createDeck(title: $title) {
+    mutation CreateDeck($title: String!, $JP: Boolean!) {
+  createDeck(title: $title, JP: $JP) {
     decks {
       createdAt
       title
+      japaneseTemplate
       user {
         _id
         username
@@ -612,6 +694,7 @@ export type CreateDeckMutationFn = Apollo.MutationFunction<CreateDeckMutation, C
  * const [createDeckMutation, { data, loading, error }] = useCreateDeckMutation({
  *   variables: {
  *      title: // value for 'title'
+ *      JP: // value for 'JP'
  *   },
  * });
  */
@@ -1021,10 +1104,16 @@ export const FindDeckDocument = gql`
         image
         userAudio
         dictionaryAudio
+        cardProgresses {
+          _id
+          steps
+        }
       }
       title
       createdAt
       updatedAt
+      startingEase
+      steps
       subscribers {
         _id
       }
@@ -1182,6 +1271,39 @@ export function useGetMyDecksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions
 export type GetMyDecksQueryHookResult = ReturnType<typeof useGetMyDecksQuery>;
 export type GetMyDecksLazyQueryHookResult = ReturnType<typeof useGetMyDecksLazyQuery>;
 export type GetMyDecksQueryResult = Apollo.QueryResult<GetMyDecksQuery, GetMyDecksQueryVariables>;
+export const GetRevisionTimeDocument = gql`
+    query getRevisionTime($currentCardId: Int!) {
+  getRevisionTime(currentCardId: $currentCardId)
+}
+    `;
+
+/**
+ * __useGetRevisionTimeQuery__
+ *
+ * To run a query within a React component, call `useGetRevisionTimeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetRevisionTimeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetRevisionTimeQuery({
+ *   variables: {
+ *      currentCardId: // value for 'currentCardId'
+ *   },
+ * });
+ */
+export function useGetRevisionTimeQuery(baseOptions: Apollo.QueryHookOptions<GetRevisionTimeQuery, GetRevisionTimeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetRevisionTimeQuery, GetRevisionTimeQueryVariables>(GetRevisionTimeDocument, options);
+      }
+export function useGetRevisionTimeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRevisionTimeQuery, GetRevisionTimeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetRevisionTimeQuery, GetRevisionTimeQueryVariables>(GetRevisionTimeDocument, options);
+        }
+export type GetRevisionTimeQueryHookResult = ReturnType<typeof useGetRevisionTimeQuery>;
+export type GetRevisionTimeLazyQueryHookResult = ReturnType<typeof useGetRevisionTimeLazyQuery>;
+export type GetRevisionTimeQueryResult = Apollo.QueryResult<GetRevisionTimeQuery, GetRevisionTimeQueryVariables>;
 export const GetUsersDocument = gql`
     query GetUsers {
   getUsers {
@@ -1296,6 +1418,7 @@ export const namedOperations = {
     GetAllDecks: 'GetAllDecks',
     GetCards: 'GetCards',
     GetMyDecks: 'GetMyDecks',
+    getRevisionTime: 'getRevisionTime',
     GetUsers: 'GetUsers',
     Me: 'Me',
     SearchForDeck: 'SearchForDeck'
@@ -1304,6 +1427,7 @@ export const namedOperations = {
     ChangeEmail: 'ChangeEmail',
     ChangePassword: 'ChangePassword',
     ChangeUsername: 'ChangeUsername',
+    chooseCardDifficulty: 'chooseCardDifficulty',
     CreateCard: 'CreateCard',
     CreateDeck: 'CreateDeck',
     DeleteCard: 'DeleteCard',

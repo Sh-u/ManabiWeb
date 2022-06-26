@@ -1,0 +1,3 @@
+mutation chooseCardDifficulty($currentCardId: Int!, $answerType: String!) {
+    chooseCardDifficulty(currentCardId: $currentCardId, answerType: $answerType)
+}

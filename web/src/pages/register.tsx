@@ -1,27 +1,9 @@
-import {
-  ApolloCache,
-  DefaultContext,
-  MutationFunctionOptions,
-  OperationVariables
-} from "@apollo/client";
 import { Box, Button, Flex } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import { useRouter } from "next/router";
 import InputField from "../components/InputField";
-import {
-  MeDocument, useRegisterMutation
-} from "../generated/graphql";
+import { MeDocument, useRegisterMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
-
-type registerProps = MutationFunctionOptions<
-  any,
-  OperationVariables,
-  DefaultContext,
-  ApolloCache<any>
-> & {
-  username: string;
-  password: string;
-};
 
 const Register = () => {
   const [register] = useRegisterMutation();
@@ -32,13 +14,13 @@ const Register = () => {
       maxW="full"
       justifyContent="center"
       alignItems="center"
-      mt={'300px'}
+      mt={"300px"}
     >
       <Formik
-        initialValues={{email: "", username: "", password: "" }}
+        initialValues={{ email: "", username: "", password: "" }}
         onSubmit={async (values, { setErrors }) => {
           const response = await register({
-            variables: {options: values},
+            variables: { options: values },
             update(cache, { data }) {
               cache.writeQuery({
                 query: MeDocument,
@@ -48,21 +30,19 @@ const Register = () => {
               });
             },
           });
-          if (response.data?.register.errors) {
-            console.log('errors')
-            setErrors(toErrorMap(response.data?.register.errors));
-          } else if (response.data.register.user){
+
+          console.log(response);
+          if (response.data?.register?.errors) {
+            console.log("errors");
+            setErrors(toErrorMap(response.data?.register?.errors));
+          } else if (response?.data?.register?.user) {
             router.push("/");
           }
         }}
       >
         {({ values, handleChange, isSubmitting }) => (
           <Form>
-            <InputField
-              name="email"
-              label="Email"
-              placeholder="email"
-            />
+            <InputField name="email" label="Email" placeholder="email" />
             <InputField
               name="username"
               label="Username"

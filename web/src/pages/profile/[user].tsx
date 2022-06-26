@@ -45,7 +45,7 @@ const UserPage = ({
   createdAt = createdAt.substring(0, createdAt.indexOf("T"));
 
   const { data: loggedUser } = useMeQuery();
-
+  const image = foundUser?.image;
   const EditButtonCheck =
     loggedUser?.me?._id === foundUser?._id ? (
       <NextLink href="/settings/account">
@@ -103,7 +103,7 @@ const UserPage = ({
       >
         <Flex align="center" justify={"space-around"} w="full">
           <Flex align="center" justify={"center"}>
-            <Avatar src={"/" + foundUser?.image} size={"2xl"} />
+            <Avatar src={image ? "/" + image : null} name={foundUser?.username} bg='red.400' size={"2xl"} />
             <Flex align="start" justify={"center"} flexDir="column" ml="3">
               <Text fontSize={"3xl"} fontWeight="semibold">
                 {foundUser?.username}
