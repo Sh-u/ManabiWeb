@@ -24,8 +24,9 @@ const DeckBody = () => {
 
   const { getColor } = useColors();
 
-  console.log("deckbody render");
-  const { data, error, loading, refetch } = useFindDeckQuery({
+  console.log('body')
+
+  const { data, error, loading, } = useFindDeckQuery({
     variables: {
       _id: currentDeck,
     },
@@ -34,13 +35,7 @@ const DeckBody = () => {
     },
   });
 
-  useEffect(() => {
-    console.log('create card', showCreateCard)
-    if (!loading && !showCreateCard) {
-      console.log("refetch");
-      refetch();
-    }
-  }, [showCreateCard]);
+ 
 
   const handleStudyNowButton = () => {
     setShowStudyCard(!showStudyCard);
@@ -74,12 +69,12 @@ const DeckBody = () => {
       <DeckNav setShowCreateCard={handleSetShowCreateCard} setShowDeckBody={handleSetShowDeckBody} />
 
       {showStudyCard ? (
-        <StudyCard data={data} />
+        <StudyCard deckId={data?.findDeck?.decks[0]?._id} />
       ) : (
-        <DeckOverview data={data} handleStudyNowButton={handleStudyNowButton} />
+        <DeckOverview deckId={data?.findDeck?.decks[0]?._id} deckTitle={data?.findDeck?.decks[0]?.title} handleStudyNowButton={handleStudyNowButton} />
       )}
 
-      {showCreateCard ? <AddCard currentDeck={currentDeck} /> : null}
+      {showCreateCard ? <AddCard currentDeckId={currentDeck} /> : null}
     </Flex>
   );
 };

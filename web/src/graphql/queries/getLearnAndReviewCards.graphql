@@ -1,0 +1,17 @@
+query getLearnAndReviewCards($deckId: Int!) {
+  getLearnAndReviewCards(deckId: $deckId) {
+    error
+    learn {
+      _id
+      cardProgresses {
+        _id
+      }
+    }
+    review {
+      _id
+      cardProgresses {
+        _id
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+query getStudyCard {
+  getStudyCard {
+    _id
+    sentence
+    word
+    dictionaryAudio
+    userAudio
+    image
+    cardProgresses {
+      _id
+      nextRevision
+      steps
+      state
+    }
+  }
+}

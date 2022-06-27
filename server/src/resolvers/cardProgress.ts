@@ -1,46 +1,69 @@
 import { Card } from "../entities/Card";
 import { MyContext } from "src/types";
-import { Arg, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Ctx, Field, Int, Mutation, ObjectType, Query, Resolver } from "type-graphql";
 import { CardProgress } from "../entities/CardProgress";
 import { compareAsc, format } from "date-fns";
 import add from "date-fns/add";
 
 type AnswerType = "GOOD" | "AGAIN";
 
+
+
+@ObjectType()
+class RevisionTimeResponse {
+  @Field(() => Int, {nullable: true})
+  AGAIN: number | null
+
+  @Field(() => Int, {nullable: true})
+  GOOD: number | null
+}
+
+
 @Resolver()
 export class CardProgressResolver {
-  @Query(() => Int)
+  @Query(() => RevisionTimeResponse)
   async getRevisionTime(
     @Arg("currentCardId", () => Int) currentCardId: number,
     @Ctx() { em }: MyContext
-  ): Promise<number | null> {
+  ): Promise<RevisionTimeResponse> {
+    const card = await em.findOne(Card, { _id: currentCardId });
 
-    const card = await em.findOne(Card, {_id: currentCardId})
-
-    if (!card){
-      return null;
+    if (!card) {
+      return {
+        AGAIN: null,
+        GOOD: null,
+      }
     }
-
 
     const currentCardProgress = await em.findOne(CardProgress, {
       card: card,
     });
 
     if (!currentCardProgress) {
-      return null;
+      return {
+        AGAIN: null,
+        GOOD: null,
+      }
     }
 
-
-    const deckSteps = card.deck.steps
+    const deckSteps = card.deck.steps;
     const ease = card.deck.startingEase;
     const cardSteps = card.cardProgresses[0].steps;
 
-    if (cardSteps > 2){
-      return deckSteps[cardSteps-2] * ease;
-    }
+    const result: RevisionTimeResponse = {
+      GOOD: null,
+      AGAIN: null,
+    };
     
 
-    return deckSteps[cardSteps];
+    if (cardSteps > 2) {
+      result.GOOD = deckSteps[2] * (currentCardProgress.steps - 2) * ease;
+    } else {
+      result.GOOD = deckSteps[cardSteps + 1];
+    }
+
+    result.AGAIN = deckSteps[0];
+    return result;
   }
 
   @Query(() => [CardProgress], { nullable: true })
@@ -54,12 +77,12 @@ export class CardProgressResolver {
     return progress;
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => String)
   async chooseCardDifficulty(
     @Arg("currentCardId", () => Int) currentCardId: number,
     @Arg("answerType") answerType: AnswerType,
     @Ctx() { em }: MyContext
-  ): Promise<boolean> {
+  ): Promise<String | null> {
     const currentCard = await em.findOne(
       Card,
       { _id: currentCardId },
@@ -67,7 +90,7 @@ export class CardProgressResolver {
     );
 
     if (!currentCard) {
-      return false;
+      return null;
     }
 
     const currentCardProgress = await em.findOne(CardProgress, {
@@ -75,38 +98,34 @@ export class CardProgressResolver {
     });
 
     if (!currentCardProgress) {
-      return false;
+      return null;
     }
+
     let addMinutes;
     const deckStepsValues = currentCard.deck.steps;
     console.log("deckStepsValues", deckStepsValues);
 
     if (answerType === "GOOD") {
-      if (currentCardProgress.steps < 3) {
-        currentCardProgress.steps++;
-      }
-
-      currentCardProgress.steps > 2
-        ? (currentCardProgress.state = "Review")
-        : (currentCardProgress.state = "Learn");
+      currentCardProgress.steps++;
     } else if (answerType === "AGAIN") {
-      if (currentCardProgress.steps > 0) {
-        currentCardProgress.steps--;
-      }
-
-      currentCardProgress.steps > 2
-        ? (currentCardProgress.state = "Review")
-        : (currentCardProgress.state = "Learn");
+      // currentCardProgress.steps > 2
+      //   ? (currentCardProgress.steps = 1)
+      //   : (currentCardProgress.steps = 0);
+      currentCardProgress.steps = 0;
     }
+
+    currentCardProgress.steps > 2
+      ? (currentCardProgress.state = "Review")
+      : (currentCardProgress.state = "Learn");
 
     addMinutes = deckStepsValues[currentCardProgress.steps];
     let ease = currentCard.deck.startingEase;
+
     if (currentCardProgress.steps > 2) {
       addMinutes = deckStepsValues[2] * (currentCardProgress.steps - 2) * ease;
     }
 
     const currentDate = new Date();
-
     currentCardProgress.nextRevision = add(currentDate, {
       minutes: addMinutes,
     });
@@ -117,6 +136,6 @@ export class CardProgressResolver {
       console.log(err);
     }
 
-    return true;
+    return currentCardProgress.nextRevision.toUTCString();
   }
 }

@@ -18,6 +18,9 @@ import path from "path";
 import { createWriteStream, mkdir, rm, access, existsSync } from "fs";
 import { Length } from "class-validator";
 import { CardProgress } from "../entities/CardProgress";
+import { Loaded } from "@mikro-orm/core/typings";
+import { AsyncLocalStorage } from "async_hooks";
+import { User } from "../entities/User";
 
 @InputType()
 class CardInput {
@@ -39,6 +42,18 @@ class CardResponse {
   card?: Card;
 }
 
+@ObjectType()
+class LearnAndReviewResponse {
+  @Field(() => String, { nullable: true })
+  error?: string;
+
+  @Field(() => [Card], { nullable: true })
+  learn?: Card[];
+
+  @Field(() => [Card], { nullable: true })
+  review?: Card[];
+}
+
 @Resolver()
 export class CardResolver {
   @Query(() => [Card])
@@ -46,12 +61,83 @@ export class CardResolver {
     return em.find(Card, {});
   }
 
-  @Query(() => Card, { nullable: true })
-  card(
-    @Arg("_id", () => Int) _id: number,
+  @Query(() => LearnAndReviewResponse)
+  async getLearnAndReviewCards(
+    @Arg("deckId", () => Int) deckId: number,
     @Ctx() { em }: MyContext
+  ): Promise<LearnAndReviewResponse> {
+    const currentDeck = await em.findOne(
+      Deck,
+      { _id: deckId },
+      { populate: ["cards"] }
+    );
+
+    if (!currentDeck) {
+      return {
+        error: "Deck not found",
+      };
+    }
+
+    const cards = await em.find(
+      Card,
+      { deck: currentDeck },
+      { populate: ["cardProgresses"] }
+    );
+
+    if (!cards) {
+      return {
+        error: "Cards not found",
+      };
+    }
+    const currentDate = new Date();
+    const result = cards.reduce<Record<string, Card[]>>(
+      (acc, card) => {
+        if (
+          card.cardProgresses
+            .toArray()
+            .find((progress) => progress.nextRevision < currentDate)
+        ) {
+          if (
+            card.cardProgresses.toArray().find((progress) => progress.steps > 2)
+          ) {
+            acc.review.push(card);
+          } else {
+            acc.learn.push(card);
+          }
+        }
+
+        return acc;
+      },
+      { learn: [], review: [] }
+    );
+
+    return result;
+  }
+
+  @Query(() => Card, { nullable: true })
+  async getStudyCard(
+    @Ctx() { em, req}: MyContext
   ): Promise<Card | null> {
-    return em.findOne(Card, { _id });
+    
+    const currentUser = await em.findOne(User, { _id: req.session.userId });
+
+    if (!currentUser){
+      return null;
+    }    
+    
+    const myProgressess = await em.find(CardProgress, {user: currentUser })
+
+    const currentDate = new Date();
+    const readyProgresses = myProgressess.filter((progress) => progress.nextRevision < currentDate);
+
+
+    if (!readyProgresses){
+      return null;
+    }
+    
+    
+    console.log(readyProgresses)
+    return readyProgresses[0].card;
   }
 
   @Mutation(() => CardResponse)
@@ -80,10 +166,6 @@ export class CardResolver {
 
     try {
       //... do some work
-   
-     
-
-
 
       const card = await em.create(Card, {
         sentence: options.sentence,
@@ -91,7 +173,10 @@ export class CardResolver {
         deck: currentDeck,
       });
 
-      const progress = await em.create(CardProgress, { card: card, user: card.deck.user._id,})
+      const progress = await em.create(CardProgress, {
+        card: card,
+        user: card.deck.user._id,
+      });
 
       await em.persist(progress);
 
@@ -223,14 +308,12 @@ export class CardResolver {
       };
     }
 
-
     await em.begin();
 
     try {
-
       card.sentence = options.sentence;
       card.word = options.word;
-  
+
       if (image) {
         console.log("mime", image.mimetype);
         image.filename = `image-${card._id}`;
@@ -263,7 +346,6 @@ export class CardResolver {
             });
         });
 
-
         card.image = path.join(basePath, image.filename);
       }
 
@@ -295,7 +377,6 @@ export class CardResolver {
       await em.rollback();
       throw e;
     }
- 
   }
 
   @Mutation(() => Boolean)

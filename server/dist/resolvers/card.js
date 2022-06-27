@@ -24,6 +24,7 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = require("fs");
 const class_validator_1 = require("class-validator");
 const CardProgress_1 = require("../entities/CardProgress");
+const User_1 = require("../entities/User");
 let CardInput = class CardInput {
 };
 __decorate([
@@ -52,12 +53,69 @@ __decorate([
 CardResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], CardResponse);
+let LearnAndReviewResponse = class LearnAndReviewResponse {
+};
+__decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    __metadata("design:type", String)
+], LearnAndReviewResponse.prototype, "error", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => [Card_1.Card], { nullable: true }),
+    __metadata("design:type", Array)
+], LearnAndReviewResponse.prototype, "learn", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => [Card_1.Card], { nullable: true }),
+    __metadata("design:type", Array)
+], LearnAndReviewResponse.prototype, "review", void 0);
+LearnAndReviewResponse = __decorate([
+    (0, type_graphql_1.ObjectType)()
+], LearnAndReviewResponse);
 let CardResolver = class CardResolver {
     async getCards({ em }) {
         return em.find(Card_1.Card, {});
     }
-    card(_id, { em }) {
-        return em.findOne(Card_1.Card, { _id });
+    async getLearnAndReviewCards(deckId, { em }) {
+        const currentDeck = await em.findOne(Deck_1.Deck, { _id: deckId }, { populate: ["cards"] });
+        if (!currentDeck) {
+            return {
+                error: "Deck not found",
+            };
+        }
+        const cards = await em.find(Card_1.Card, { deck: currentDeck }, { populate: ["cardProgresses"] });
+        if (!cards) {
+            return {
+                error: "Cards not found",
+            };
+        }
+        const currentDate = new Date();
+        const result = cards.reduce((acc, card) => {
+            if (card.cardProgresses
+                .toArray()
+                .find((progress) => progress.nextRevision < currentDate)) {
+                if (card.cardProgresses.toArray().find((progress) => progress.steps > 2)) {
+                    acc.review.push(card);
+                }
+                else {
+                    acc.learn.push(card);
+                }
+            }
+            return acc;
+        }, { learn: [], review: [] });
+        return result;
+    }
+    async getStudyCard({ em, req }) {
+        const currentUser = await em.findOne(User_1.User, { _id: req.session.userId });
+        if (!currentUser) {
+            return null;
+        }
+        const myProgressess = await em.find(CardProgress_1.CardProgress, { user: currentUser });
+        const currentDate = new Date();
+        const readyProgresses = myProgressess.filter((progress) => progress.nextRevision < currentDate);
+        if (!readyProgresses) {
+            return null;
+        }
+        console.log(readyProgresses);
+        return readyProgresses[0].card;
     }
     async createCard(options, deckId, image, audio, { em }) {
         if (options.sentence.length < 1 || options.word.length < 1) {
@@ -78,7 +136,10 @@ let CardResolver = class CardResolver {
                 word: options.word,
                 deck: currentDeck,
             });
-            const progress = await em.create(CardProgress_1.CardProgress, { card: card, user: card.deck.user._id, });
+            const progress = await em.create(CardProgress_1.CardProgress, {
+                card: card,
+                user: card.deck.user._id,
+            });
             await em.persist(progress);
             try {
                 await em.persistAndFlush(card);
@@ -263,13 +324,20 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CardResolver.prototype, "getCards", null);
 __decorate([
-    (0, type_graphql_1.Query)(() => Card_1.Card, { nullable: true }),
-    __param(0, (0, type_graphql_1.Arg)("_id", () => type_graphql_1.Int)),
+    (0, type_graphql_1.Query)(() => LearnAndReviewResponse),
+    __param(0, (0, type_graphql_1.Arg)("deckId", () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
-], CardResolver.prototype, "card", null);
+], CardResolver.prototype, "getLearnAndReviewCards", null);
+__decorate([
+    (0, type_graphql_1.Query)(() => Card_1.Card, { nullable: true }),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CardResolver.prototype, "getStudyCard", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => CardResponse),
     __param(0, (0, type_graphql_1.Arg)("options")),

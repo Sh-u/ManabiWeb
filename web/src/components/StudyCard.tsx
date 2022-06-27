@@ -1,8 +1,22 @@
-import { Box, Button, Flex, Image, Text } from "@chakra-ui/react";
-import { useState } from "react";
 import {
-  ChooseCardDifficultyDocument, FindDeckQuery, useGetRevisionTimeQuery,
-
+  Box,
+  Button,
+  Center,
+  Flex,
+  Image,
+  Spinner,
+  Text,
+} from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import {
+  ChooseCardDifficultyDocument,
+  FindDeckQuery,
+  GetRevisionTimeDocument,
+  GetRevisionTimeQuery,
+  useGetLearnAndReviewCardsLazyQuery,
+  useGetLearnAndReviewCardsQuery,
+  useGetRevisionTimeQuery,
+  useGetStudyCardQuery,
 } from "../generated/graphql";
 
 import useColors from "../hooks/useColors";
@@ -10,32 +24,53 @@ import { client } from "../pages/client";
 import EditCardModal from "./EditCardModal";
 import Player from "./Player";
 
-interface DeckOverviewProps {
-  data: FindDeckQuery;
-}
-
 export type CardStateEnum = "STUDY" | "ANSWER" | "EDIT";
 
-const StudyCard = ({ data }: DeckOverviewProps) => {
+const StudyCard = ({ deckId }: { deckId: number }) => {
   const { getColor } = useColors();
 
   // const [showAnswer, setShowAnswer] = useState(false);
   const [cardState, setCardState] = useState<CardStateEnum>("STUDY");
 
-  const getRevisionTime = useGetRevisionTimeQuery({
-    variables: {
-      currentCardId: data?.findDeck?.decks[0]?.cards[0]._id
-    }
-  });
+  const { data: studyCardQuery, loading: studyCardloading } =
+    useGetStudyCardQuery();
 
-  const sentence = data?.findDeck?.decks[0]?.cards[0]?.sentence;
-  const word = data?.findDeck?.decks[0]?.cards[0]?.word;
-  const image = data?.findDeck?.decks[0]?.cards[0]?.image;
-  const dictionaryAudio = data?.findDeck?.decks[0]?.cards[0]?.dictionaryAudio;
-  const userAudio = data?.findDeck?.decks[0]?.cards[0]?.userAudio;
-  const cardId = data?.findDeck?.decks[0]?.cards[0]?._id;
+  const foundCard = studyCardQuery?.getStudyCard;
 
-  console.log(word);
+  useEffect(() => {
+    if (!foundCard) return;
+    const fetchData = async () => {
+      const response = await client.query({
+        query: GetRevisionTimeDocument,
+        variables: {
+          currentCardId: foundCard?._id,
+        },
+      });
+
+      if (response) {
+        getRevisionTime = response?.data;
+      }
+    };
+    fetchData();
+  }, [foundCard]);
+  console.log(foundCard);
+
+  if (studyCardloading) {
+    return (
+      <Center mt="20">
+        <Spinner color="red.800" />
+      </Center>
+    );
+  }
+
+  let getRevisionTime: GetRevisionTimeQuery;
+
+  const sentence = foundCard?.sentence;
+  const word = foundCard?.word;
+  const image = foundCard?.image;
+  const dictionaryAudio = foundCard?.dictionaryAudio;
+  const userAudio = foundCard?.userAudio;
+  const cardId = foundCard?._id;
 
   const editProps = {
     cardState: cardState,
@@ -85,7 +120,7 @@ const StudyCard = ({ data }: DeckOverviewProps) => {
           {cardState === "ANSWER" ? (
             <Flex justify={"center"} align="center">
               <Flex justify={"center"} align="center" flexDir={"column"}>
-                <Text>time</Text>
+                <Text>{getRevisionTime?.getRevisionTime?.AGAIN} m</Text>
                 <Button
                   _hover={{
                     bg: "red.600",
@@ -95,6 +130,7 @@ const StudyCard = ({ data }: DeckOverviewProps) => {
                     const response = await client.mutate({
                       mutation: ChooseCardDifficultyDocument,
                       variables: {
+                        currentCardId: foundCard?._id,
                         answerType: "AGAIN",
                       },
                     });
@@ -110,13 +146,26 @@ const StudyCard = ({ data }: DeckOverviewProps) => {
               </Flex>
 
               <Flex justify={"center"} align="center" flexDir={"column"} ml="5">
-                <Text>{getRevisionTime?.data?.getRevisionTime} m</Text>
+                <Text>{getRevisionTime?.getRevisionTime?.GOOD} m</Text>
                 <Button
                   _hover={{
                     bg: "green.600",
                   }}
                   bg="green.700"
-                  
+                  onClick={async () => {
+                    const response = await client.mutate({
+                      mutation: ChooseCardDifficultyDocument,
+                      variables: {
+                        currentCardId: foundCard._id,
+                        answerType: "GOOD",
+                      },
+                    });
+
+                    if (!response || !response.data) {
+                      console.log("answer fail");
+                    }
+                    console.log(response?.data);
+                  }}
                 >
                   Good
                 </Button>

@@ -1,14 +1,54 @@
-import { Flex, Text, Button } from "@chakra-ui/react";
-import React from "react";
-import { Deck, DeckResponse, FindDeckQuery, Maybe } from "../generated/graphql";
+import { Flex, Text, Button, Center, Spinner } from "@chakra-ui/react";
+import React, { useEffect } from "react";
+import { useRecoilValue } from "recoil";
+import { showCreateCardState } from "../atoms/showCreateCardState";
+import {
+  Deck,
+  DeckResponse,
+  FindDeckQuery,
+  Maybe,
+  useGetLearnAndReviewCardsQuery,
+} from "../generated/graphql";
 import AddCard from "./AddCard";
 
 interface DeckOverviewProps {
-  data: FindDeckQuery;
+  deckTitle: string;
+  deckId: number;
   handleStudyNowButton: () => void;
 }
 
-const DeckOverview = ({ data, handleStudyNowButton }: DeckOverviewProps) => {
+const DeckOverview = ({
+  deckTitle,
+  deckId,
+  handleStudyNowButton,
+}: DeckOverviewProps) => {
+  console.log(`xdd`, deckId);
+  console.log(`xdd`);
+
+  if (!deckId) {
+    return (
+      <Center>
+        <Spinner color="red.800" />
+      </Center>
+    );
+  }
+  const { data: CardQuantity, loading, refetch } = useGetLearnAndReviewCardsQuery({
+    variables: {
+      deckId: deckId,
+    },
+  });
+  
+  const showCreateCard= useRecoilValue<boolean>(showCreateCardState)
+
+
+  useEffect(() => {
+
+    if (!loading && !showCreateCard) {
+      console.log("refetch");
+     refetch();
+    }
+  }, [showCreateCard]);
+
   return (
     <>
       <Flex
@@ -17,10 +57,10 @@ const DeckOverview = ({ data, handleStudyNowButton }: DeckOverviewProps) => {
         justify="center"
         align="center"
         mt="5"
-        h='full'
+        h="full"
       >
         <Text fontSize={"3xl"} fontWeight="bold">
-          {data?.findDeck?.decks[0]?.title}
+          {deckTitle}
         </Text>
 
         <Flex alignItems="center" justify={"center"} w="full" h="full">
@@ -31,14 +71,17 @@ const DeckOverview = ({ data, handleStudyNowButton }: DeckOverviewProps) => {
             w="50%"
             h="full"
           >
-            <Flex>
-              New: <Text ml="5">{data?.findDeck?.decks[0]?.cards?.length}</Text>
+            <Flex color="red.300">
+              Learning:{" "}
+              <Text ml="5">
+                {CardQuantity?.getLearnAndReviewCards?.learn?.length}
+              </Text>
             </Flex>
-            <Flex>
-              Learning: <Text ml="5">0</Text>
-            </Flex>
-            <Flex>
-              To Review: <Text ml="5">0</Text>
+            <Flex color="blue.300">
+              To Review:{" "}
+              <Text ml="5">
+                {CardQuantity?.getLearnAndReviewCards?.review?.length}
+              </Text>
             </Flex>
           </Flex>
           <Flex

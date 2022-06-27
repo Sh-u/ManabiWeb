@@ -89,6 +89,13 @@ export type FieldError = {
   message: Scalars['String'];
 };
 
+export type LearnAndReviewResponse = {
+  __typename?: 'LearnAndReviewResponse';
+  error?: Maybe<Scalars['String']>;
+  learn?: Maybe<Array<Card>>;
+  review?: Maybe<Array<Card>>;
+};
+
 export type LoginInput = {
   email?: InputMaybe<Scalars['String']>;
   password: Scalars['String'];
@@ -100,7 +107,7 @@ export type Mutation = {
   changeEmail: UserResponse;
   changePassword: UserResponse;
   changeUsername: UserResponse;
-  chooseCardDifficulty: Scalars['Boolean'];
+  chooseCardDifficulty: Scalars['String'];
   createCard: CardResponse;
   createDeck: DeckResponse;
   deleteCard: Scalars['Boolean'];
@@ -214,13 +221,14 @@ export type MutationUploadAvatarArgs = {
 
 export type Query = {
   __typename?: 'Query';
-  card?: Maybe<Card>;
   findDeck: DeckResponse;
   getAllDecks: Array<Deck>;
   getCardProgresses?: Maybe<Array<CardProgress>>;
   getCards: Array<Card>;
+  getLearnAndReviewCards: LearnAndReviewResponse;
   getMyDecks: DeckResponse;
-  getRevisionTime: Scalars['Int'];
+  getRevisionTime: RevisionTimeResponse;
+  getStudyCard?: Maybe<Card>;
   getUsers: Array<User>;
   hello: Scalars['String'];
   me?: Maybe<User>;
@@ -228,13 +236,13 @@ export type Query = {
 };
 
 
-export type QueryCardArgs = {
+export type QueryFindDeckArgs = {
   _id: Scalars['Int'];
 };
 
 
-export type QueryFindDeckArgs = {
-  _id: Scalars['Int'];
+export type QueryGetLearnAndReviewCardsArgs = {
+  deckId: Scalars['Int'];
 };
 
 
@@ -251,6 +259,12 @@ export type RegisterInput = {
   email: Scalars['String'];
   password: Scalars['String'];
   username: Scalars['String'];
+};
+
+export type RevisionTimeResponse = {
+  __typename?: 'RevisionTimeResponse';
+  AGAIN?: Maybe<Scalars['Int']>;
+  GOOD?: Maybe<Scalars['Int']>;
 };
 
 export type User = {
@@ -301,7 +315,7 @@ export type ChooseCardDifficultyMutationVariables = Exact<{
 }>;
 
 
-export type ChooseCardDifficultyMutation = { __typename?: 'Mutation', chooseCardDifficulty: boolean };
+export type ChooseCardDifficultyMutation = { __typename?: 'Mutation', chooseCardDifficulty: string };
 
 export type CreateCardMutationVariables = Exact<{
   deckId: Scalars['Int'];
@@ -405,7 +419,7 @@ export type FindDeckQueryVariables = Exact<{
 }>;
 
 
-export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, startingEase: number, steps: Array<number>, user: { __typename?: 'User', _id: number, username: string, image?: string | null }, cards: Array<{ __typename?: 'Card', _id: number, sentence: string, word: string, image?: string | null, userAudio?: string | null, dictionaryAudio?: string | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, steps: number }> }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
+export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, startingEase: number, steps: Array<number>, user: { __typename?: 'User', _id: number, username: string, image?: string | null }, cards: Array<{ __typename?: 'Card', _id: number, sentence: string, word: string, image?: string | null, userAudio?: string | null, dictionaryAudio?: string | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, steps: number, nextRevision: any }> }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
 
 export type GetAllDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -417,6 +431,13 @@ export type GetCardsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetCardsQuery = { __typename?: 'Query', getCards: Array<{ __typename?: 'Card', _id: number, sentence: string, word: string, createdAt: string, updatedAt: string }> };
 
+export type GetLearnAndReviewCardsQueryVariables = Exact<{
+  deckId: Scalars['Int'];
+}>;
+
+
+export type GetLearnAndReviewCardsQuery = { __typename?: 'Query', getLearnAndReviewCards: { __typename?: 'LearnAndReviewResponse', error?: string | null, learn?: Array<{ __typename?: 'Card', _id: number, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number }> }> | null, review?: Array<{ __typename?: 'Card', _id: number, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number }> }> | null } };
+
 export type GetMyDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -427,7 +448,12 @@ export type GetRevisionTimeQueryVariables = Exact<{
 }>;
 
 
-export type GetRevisionTimeQuery = { __typename?: 'Query', getRevisionTime: number };
+export type GetRevisionTimeQuery = { __typename?: 'Query', getRevisionTime: { __typename?: 'RevisionTimeResponse', AGAIN?: number | null, GOOD?: number | null } };
+
+export type GetStudyCardQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetStudyCardQuery = { __typename?: 'Query', getStudyCard?: { __typename?: 'Card', _id: number, sentence: string, word: string, dictionaryAudio?: string | null, userAudio?: string | null, image?: string | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, nextRevision: any, steps: number, state: string }> } | null };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1107,6 +1133,7 @@ export const FindDeckDocument = gql`
         cardProgresses {
           _id
           steps
+          nextRevision
         }
       }
       title
@@ -1227,6 +1254,53 @@ export function useGetCardsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<G
 export type GetCardsQueryHookResult = ReturnType<typeof useGetCardsQuery>;
 export type GetCardsLazyQueryHookResult = ReturnType<typeof useGetCardsLazyQuery>;
 export type GetCardsQueryResult = Apollo.QueryResult<GetCardsQuery, GetCardsQueryVariables>;
+export const GetLearnAndReviewCardsDocument = gql`
+    query getLearnAndReviewCards($deckId: Int!) {
+  getLearnAndReviewCards(deckId: $deckId) {
+    error
+    learn {
+      _id
+      cardProgresses {
+        _id
+      }
+    }
+    review {
+      _id
+      cardProgresses {
+        _id
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetLearnAndReviewCardsQuery__
+ *
+ * To run a query within a React component, call `useGetLearnAndReviewCardsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLearnAndReviewCardsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLearnAndReviewCardsQuery({
+ *   variables: {
+ *      deckId: // value for 'deckId'
+ *   },
+ * });
+ */
+export function useGetLearnAndReviewCardsQuery(baseOptions: Apollo.QueryHookOptions<GetLearnAndReviewCardsQuery, GetLearnAndReviewCardsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetLearnAndReviewCardsQuery, GetLearnAndReviewCardsQueryVariables>(GetLearnAndReviewCardsDocument, options);
+      }
+export function useGetLearnAndReviewCardsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLearnAndReviewCardsQuery, GetLearnAndReviewCardsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetLearnAndReviewCardsQuery, GetLearnAndReviewCardsQueryVariables>(GetLearnAndReviewCardsDocument, options);
+        }
+export type GetLearnAndReviewCardsQueryHookResult = ReturnType<typeof useGetLearnAndReviewCardsQuery>;
+export type GetLearnAndReviewCardsLazyQueryHookResult = ReturnType<typeof useGetLearnAndReviewCardsLazyQuery>;
+export type GetLearnAndReviewCardsQueryResult = Apollo.QueryResult<GetLearnAndReviewCardsQuery, GetLearnAndReviewCardsQueryVariables>;
 export const GetMyDecksDocument = gql`
     query GetMyDecks {
   getMyDecks {
@@ -1273,7 +1347,10 @@ export type GetMyDecksLazyQueryHookResult = ReturnType<typeof useGetMyDecksLazyQ
 export type GetMyDecksQueryResult = Apollo.QueryResult<GetMyDecksQuery, GetMyDecksQueryVariables>;
 export const GetRevisionTimeDocument = gql`
     query getRevisionTime($currentCardId: Int!) {
-  getRevisionTime(currentCardId: $currentCardId)
+  getRevisionTime(currentCardId: $currentCardId) {
+    AGAIN
+    GOOD
+  }
 }
     `;
 
@@ -1304,6 +1381,51 @@ export function useGetRevisionTimeLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type GetRevisionTimeQueryHookResult = ReturnType<typeof useGetRevisionTimeQuery>;
 export type GetRevisionTimeLazyQueryHookResult = ReturnType<typeof useGetRevisionTimeLazyQuery>;
 export type GetRevisionTimeQueryResult = Apollo.QueryResult<GetRevisionTimeQuery, GetRevisionTimeQueryVariables>;
+export const GetStudyCardDocument = gql`
+    query getStudyCard {
+  getStudyCard {
+    _id
+    sentence
+    word
+    dictionaryAudio
+    userAudio
+    image
+    cardProgresses {
+      _id
+      nextRevision
+      steps
+      state
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetStudyCardQuery__
+ *
+ * To run a query within a React component, call `useGetStudyCardQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetStudyCardQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetStudyCardQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetStudyCardQuery(baseOptions?: Apollo.QueryHookOptions<GetStudyCardQuery, GetStudyCardQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetStudyCardQuery, GetStudyCardQueryVariables>(GetStudyCardDocument, options);
+      }
+export function useGetStudyCardLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetStudyCardQuery, GetStudyCardQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetStudyCardQuery, GetStudyCardQueryVariables>(GetStudyCardDocument, options);
+        }
+export type GetStudyCardQueryHookResult = ReturnType<typeof useGetStudyCardQuery>;
+export type GetStudyCardLazyQueryHookResult = ReturnType<typeof useGetStudyCardLazyQuery>;
+export type GetStudyCardQueryResult = Apollo.QueryResult<GetStudyCardQuery, GetStudyCardQueryVariables>;
 export const GetUsersDocument = gql`
     query GetUsers {
   getUsers {
@@ -1417,8 +1539,10 @@ export const namedOperations = {
     FindDeck: 'FindDeck',
     GetAllDecks: 'GetAllDecks',
     GetCards: 'GetCards',
+    getLearnAndReviewCards: 'getLearnAndReviewCards',
     GetMyDecks: 'GetMyDecks',
     getRevisionTime: 'getRevisionTime',
+    getStudyCard: 'getStudyCard',
     GetUsers: 'GetUsers',
     Me: 'Me',
     SearchForDeck: 'SearchForDeck'

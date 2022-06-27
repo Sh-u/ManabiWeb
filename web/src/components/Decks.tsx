@@ -47,6 +47,8 @@ const Decks = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const initialRef = React.useRef();
 
+  console.log('decks')
+
   const handleDeckCreation = () => {
     if (!meQuery.data?.me) {
       router.push("/login");

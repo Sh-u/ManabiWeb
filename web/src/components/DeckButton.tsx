@@ -36,6 +36,7 @@ import {
   useDeleteDeckMutation,
   useRenameDeckMutation,
 } from "../generated/graphql";
+
 interface renameDeckProps {
   currentDeckID: number;
   showModal: boolean;
@@ -48,13 +49,12 @@ export const DeckButton = ({
   handleShowCurrentDeckInfo,
 }) => {
   const [showModal, setShowModal] = useState(false);
-  const [removePopOver, setRemovePopOver] = useState(true);
   const [deleteDeck] = useDeleteDeckMutation();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = React.useRef();
   const toast = useToast();
-
-  console.log('deckButton render')
+  
+  console.log("button");
 
   const copyTextToClipboard = async (text) => {
     if ("clipboard" in navigator) {
@@ -114,16 +114,15 @@ export const DeckButton = ({
   };
 
   return (
-    <Flex flexDir={"column"} alignItems="center" key={deck._id} >
+    <Flex flexDir={"column"} alignItems="center" key={deck._id}>
       <Flex mt="5" align="center" justify={"center"}>
         <Button
-        
-        _hover={{
-          textDecoration: 'underline',
-          textUnderlineOffset: '2px'
-        }}
-        variant={'unstyled'}
-        rounded='lg'
+          _hover={{
+            textDecoration: "underline",
+            textUnderlineOffset: "2px",
+          }}
+          variant={"unstyled"}
+          rounded="lg"
           onClick={() => {
             handleShowDeckBody();
             handleShowCurrentDeckInfo(deck._id);
@@ -132,7 +131,7 @@ export const DeckButton = ({
           textAlign={"center"}
           maxW="full"
         >
-          <Text>{deck.title}</Text>
+          <Text>{deck?.title}</Text>
         </Button>
         <Menu>
           <MenuButton cursor={"pointer"} ml="5" as={SettingsIcon} />

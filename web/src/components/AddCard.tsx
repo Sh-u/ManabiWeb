@@ -23,7 +23,7 @@ import { showCreateCardState } from "../atoms/showCreateCardState";
 import useColors from "../hooks/useColors";
 import { useCreateCardMutation } from "../generated/graphql";
 
-const AddCard = ({ currentDeck }: { currentDeck: number }) => {
+const AddCard = ({ currentDeckId }: { currentDeckId: number }) => {
   const [image, setImage] = useState({ url: null, image: null });
   const [audio, setAudio] = useState({ url: null, audio: null });
   const [showCreateCard, setCreateCardState] =
@@ -88,9 +88,9 @@ const AddCard = ({ currentDeck }: { currentDeck: number }) => {
 
                 const response = await createCard({
                   variables: {
-                    audio: audio.audio,
-                    deckId: currentDeck,
-                    image: image.image,
+                    audio: audio?.audio,
+                    deckId: currentDeckId,
+                    image: image?.image,
                     options: {
                       sentence: values.Sentence,
                       word: values.Word,

@@ -20,25 +20,52 @@ const Card_1 = require("../entities/Card");
 const type_graphql_1 = require("type-graphql");
 const CardProgress_1 = require("../entities/CardProgress");
 const add_1 = __importDefault(require("date-fns/add"));
+let RevisionTimeResponse = class RevisionTimeResponse {
+};
+__decorate([
+    (0, type_graphql_1.Field)(() => type_graphql_1.Int, { nullable: true }),
+    __metadata("design:type", Object)
+], RevisionTimeResponse.prototype, "AGAIN", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => type_graphql_1.Int, { nullable: true }),
+    __metadata("design:type", Object)
+], RevisionTimeResponse.prototype, "GOOD", void 0);
+RevisionTimeResponse = __decorate([
+    (0, type_graphql_1.ObjectType)()
+], RevisionTimeResponse);
 let CardProgressResolver = class CardProgressResolver {
     async getRevisionTime(currentCardId, { em }) {
         const card = await em.findOne(Card_1.Card, { _id: currentCardId });
         if (!card) {
-            return null;
+            return {
+                AGAIN: null,
+                GOOD: null,
+            };
         }
         const currentCardProgress = await em.findOne(CardProgress_1.CardProgress, {
             card: card,
         });
         if (!currentCardProgress) {
-            return null;
+            return {
+                AGAIN: null,
+                GOOD: null,
+            };
         }
         const deckSteps = card.deck.steps;
         const ease = card.deck.startingEase;
         const cardSteps = card.cardProgresses[0].steps;
+        const result = {
+            GOOD: null,
+            AGAIN: null,
+        };
         if (cardSteps > 2) {
-            return deckSteps[cardSteps - 2] * ease;
+            result.GOOD = deckSteps[2] * (currentCardProgress.steps - 2) * ease;
         }
-        return deckSteps[cardSteps];
+        else {
+            result.GOOD = deckSteps[cardSteps + 1];
+        }
+        result.AGAIN = deckSteps[0];
+        return result;
     }
     async getCardProgresses({ em }) {
         const progress = await em.find(CardProgress_1.CardProgress, {});
@@ -50,33 +77,26 @@ let CardProgressResolver = class CardProgressResolver {
     async chooseCardDifficulty(currentCardId, answerType, { em }) {
         const currentCard = await em.findOne(Card_1.Card, { _id: currentCardId }, { populate: ["cardProgresses"] });
         if (!currentCard) {
-            return false;
+            return null;
         }
         const currentCardProgress = await em.findOne(CardProgress_1.CardProgress, {
             card: currentCard,
         });
         if (!currentCardProgress) {
-            return false;
+            return null;
         }
         let addMinutes;
         const deckStepsValues = currentCard.deck.steps;
         console.log("deckStepsValues", deckStepsValues);
         if (answerType === "GOOD") {
-            if (currentCardProgress.steps < 3) {
-                currentCardProgress.steps++;
-            }
-            currentCardProgress.steps > 2
-                ? (currentCardProgress.state = "Review")
-                : (currentCardProgress.state = "Learn");
+            currentCardProgress.steps++;
         }
         else if (answerType === "AGAIN") {
-            if (currentCardProgress.steps > 0) {
-                currentCardProgress.steps--;
-            }
-            currentCardProgress.steps > 2
-                ? (currentCardProgress.state = "Review")
-                : (currentCardProgress.state = "Learn");
+            currentCardProgress.steps = 0;
         }
+        currentCardProgress.steps > 2
+            ? (currentCardProgress.state = "Review")
+            : (currentCardProgress.state = "Learn");
         addMinutes = deckStepsValues[currentCardProgress.steps];
         let ease = currentCard.deck.startingEase;
         if (currentCardProgress.steps > 2) {
@@ -92,11 +112,11 @@ let CardProgressResolver = class CardProgressResolver {
         catch (err) {
             console.log(err);
         }
-        return true;
+        return currentCardProgress.nextRevision.toUTCString();
     }
 };
 __decorate([
-    (0, type_graphql_1.Query)(() => type_graphql_1.Int),
+    (0, type_graphql_1.Query)(() => RevisionTimeResponse),
     __param(0, (0, type_graphql_1.Arg)("currentCardId", () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
@@ -111,7 +131,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CardProgressResolver.prototype, "getCardProgresses", null);
 __decorate([
-    (0, type_graphql_1.Mutation)(() => Boolean),
+    (0, type_graphql_1.Mutation)(() => String),
     __param(0, (0, type_graphql_1.Arg)("currentCardId", () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Arg)("answerType")),
     __param(2, (0, type_graphql_1.Ctx)()),

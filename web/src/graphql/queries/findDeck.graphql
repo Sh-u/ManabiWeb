@@ -17,6 +17,7 @@ query FindDeck($_id: Int!) {
           cardProgresses {
           _id,
           steps
+          nextRevision,
         }
       },
       title,
