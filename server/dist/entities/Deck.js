@@ -18,7 +18,7 @@ const User_1 = require("./User");
 let Deck = class Deck {
     constructor() {
         this.subscribers = new core_1.Collection(this);
-        this.steps = [1, 10, 1400];
+        this.steps = [1, 10, 1440];
         this.graduatingInterval = 1;
         this.startingEase = 2.5;
         this.cards = new core_1.Collection(this);

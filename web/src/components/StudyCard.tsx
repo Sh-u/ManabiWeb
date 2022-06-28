@@ -26,34 +26,58 @@ import Player from "./Player";
 
 export type CardStateEnum = "STUDY" | "ANSWER" | "EDIT";
 
-const StudyCard = ({ deckId }: { deckId: number }) => {
+interface StudyCardProps {
+  deckId: number;
+  setShowStudyCard: () => void;
+}
+
+const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
   const { getColor } = useColors();
 
-  // const [showAnswer, setShowAnswer] = useState(false);
+  const [revisionTime, setRevisionTime] = useState({
+    AGAIN: null,
+    GOOD: null,
+  });
   const [cardState, setCardState] = useState<CardStateEnum>("STUDY");
 
-  const { data: studyCardQuery, loading: studyCardloading } =
-    useGetStudyCardQuery();
-
+  const {
+    data: studyCardQuery,
+    loading: studyCardloading,
+    refetch,
+  } = useGetStudyCardQuery({
+    fetchPolicy: "no-cache",
+    onError(error) {
+      console.log(`err, `, error);
+    },
+  });
+  console.log("study card");
   const foundCard = studyCardQuery?.getStudyCard;
 
   useEffect(() => {
+    console.log("effect");
+    if (!foundCard && !studyCardloading) {
+      console.log("xd");
+      setShowStudyCard();
+    }
+
     if (!foundCard) return;
+    console.log("foundcard", foundCard);
     const fetchData = async () => {
       const response = await client.query({
         query: GetRevisionTimeDocument,
+
         variables: {
           currentCardId: foundCard?._id,
         },
       });
 
       if (response) {
-        getRevisionTime = response?.data;
+        console.log("get revision response", response?.data);
+        setRevisionTime({ ...response?.data.getRevisionTime });
       }
     };
     fetchData();
-  }, [foundCard]);
-  console.log(foundCard);
+  }, [studyCardQuery]);
 
   if (studyCardloading) {
     return (
@@ -63,7 +87,7 @@ const StudyCard = ({ deckId }: { deckId: number }) => {
     );
   }
 
-  let getRevisionTime: GetRevisionTimeQuery;
+  console.log(`state`, revisionTime);
 
   const sentence = foundCard?.sentence;
   const word = foundCard?.word;
@@ -120,7 +144,7 @@ const StudyCard = ({ deckId }: { deckId: number }) => {
           {cardState === "ANSWER" ? (
             <Flex justify={"center"} align="center">
               <Flex justify={"center"} align="center" flexDir={"column"}>
-                <Text>{getRevisionTime?.getRevisionTime?.AGAIN} m</Text>
+                <Text>{revisionTime?.AGAIN} m</Text>
                 <Button
                   _hover={{
                     bg: "red.600",
@@ -139,6 +163,8 @@ const StudyCard = ({ deckId }: { deckId: number }) => {
                       console.log("answer fail");
                     }
                     console.log(response?.data);
+
+                    refetch();
                   }}
                 >
                   Again
@@ -146,7 +172,7 @@ const StudyCard = ({ deckId }: { deckId: number }) => {
               </Flex>
 
               <Flex justify={"center"} align="center" flexDir={"column"} ml="5">
-                <Text>{getRevisionTime?.getRevisionTime?.GOOD} m</Text>
+                <Text>{revisionTime?.GOOD} m</Text>
                 <Button
                   _hover={{
                     bg: "green.600",
@@ -165,6 +191,8 @@ const StudyCard = ({ deckId }: { deckId: number }) => {
                       console.log("answer fail");
                     }
                     console.log(response?.data);
+                    console.log("x");
+                    refetch();
                   }}
                 >
                   Good

@@ -53,7 +53,7 @@ export class Deck {
 
   @Field(() => [Int])
   @Property()
-  steps: Array<number> = [1, 10, 1400];
+  steps: Array<number> = [1, 10, 1440];
 
   @Field(() => Int)
   @Property()

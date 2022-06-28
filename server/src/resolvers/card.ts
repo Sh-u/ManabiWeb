@@ -130,13 +130,13 @@ export class CardResolver {
     const currentDate = new Date();
     const readyProgresses = myProgressess.filter((progress) => progress.nextRevision < currentDate);
 
-
-    if (!readyProgresses){
+   
+    if (!readyProgresses || readyProgresses.length === 0){
       return null;
     }
     
     
-    console.log(readyProgresses)
+ 
     return readyProgresses[0].card;
   }
 

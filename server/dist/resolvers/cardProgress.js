@@ -20,6 +20,7 @@ const Card_1 = require("../entities/Card");
 const type_graphql_1 = require("type-graphql");
 const CardProgress_1 = require("../entities/CardProgress");
 const add_1 = __importDefault(require("date-fns/add"));
+const Deck_1 = require("../entities/Deck");
 let RevisionTimeResponse = class RevisionTimeResponse {
 };
 __decorate([
@@ -35,6 +36,7 @@ RevisionTimeResponse = __decorate([
 ], RevisionTimeResponse);
 let CardProgressResolver = class CardProgressResolver {
     async getRevisionTime(currentCardId, { em }) {
+        console.log('revision');
         const card = await em.findOne(Card_1.Card, { _id: currentCardId });
         if (!card) {
             return {
@@ -58,13 +60,19 @@ let CardProgressResolver = class CardProgressResolver {
             GOOD: null,
             AGAIN: null,
         };
-        if (cardSteps > 2) {
+        console.log('steps', cardSteps);
+        if (cardSteps === 2) {
+            result.GOOD = deckSteps[2] * ease;
+            console.log('res good', result.GOOD);
+        }
+        else if (cardSteps > 2) {
             result.GOOD = deckSteps[2] * (currentCardProgress.steps - 2) * ease;
         }
         else {
             result.GOOD = deckSteps[cardSteps + 1];
         }
         result.AGAIN = deckSteps[0];
+        console.log('result ', result);
         return result;
     }
     async getCardProgresses({ em }) {
@@ -85,9 +93,12 @@ let CardProgressResolver = class CardProgressResolver {
         if (!currentCardProgress) {
             return null;
         }
+        const currentDate = new Date();
+        const currentCardDeck = await em.findOne(Deck_1.Deck, { _id: currentCard.deck._id });
+        if (!currentCardDeck)
+            return null;
         let addMinutes;
-        const deckStepsValues = currentCard.deck.steps;
-        console.log("deckStepsValues", deckStepsValues);
+        const deckStepsValues = currentCardDeck.steps;
         if (answerType === "GOOD") {
             currentCardProgress.steps++;
         }
@@ -98,11 +109,10 @@ let CardProgressResolver = class CardProgressResolver {
             ? (currentCardProgress.state = "Review")
             : (currentCardProgress.state = "Learn");
         addMinutes = deckStepsValues[currentCardProgress.steps];
-        let ease = currentCard.deck.startingEase;
+        let ease = currentCardDeck.startingEase;
         if (currentCardProgress.steps > 2) {
             addMinutes = deckStepsValues[2] * (currentCardProgress.steps - 2) * ease;
         }
-        const currentDate = new Date();
         currentCardProgress.nextRevision = (0, add_1.default)(currentDate, {
             minutes: addMinutes,
         });
@@ -131,7 +141,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CardProgressResolver.prototype, "getCardProgresses", null);
 __decorate([
-    (0, type_graphql_1.Mutation)(() => String),
+    (0, type_graphql_1.Mutation)(() => String, { nullable: true }),
     __param(0, (0, type_graphql_1.Arg)("currentCardId", () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Arg)("answerType")),
     __param(2, (0, type_graphql_1.Ctx)()),

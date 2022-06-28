@@ -37,6 +37,7 @@ const DeckOverview = ({
       deckId: deckId,
     },
   });
+
   
   const showCreateCard= useRecoilValue<boolean>(showCreateCardState)
 
@@ -63,7 +64,7 @@ const DeckOverview = ({
           {deckTitle}
         </Text>
 
-        <Flex alignItems="center" justify={"center"} w="full" h="full">
+    {CardQuantity?.getLearnAndReviewCards?.learn.length || CardQuantity?.getLearnAndReviewCards?.review.length ? ( <Flex alignItems="center" justify={"center"} w="full" h="full">
           <Flex
             flexDir={"column"}
             alignItems="center"
@@ -127,7 +128,8 @@ const DeckOverview = ({
               </Text>
             </Button>
           </Flex>
-        </Flex>
+        </Flex>) : (<Text>No cards to review, come back later.</Text>)}
+       
       </Flex>
     </>
   );
