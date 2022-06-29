@@ -39,7 +39,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
     GOOD: null,
   });
   const [cardState, setCardState] = useState<CardStateEnum>("STUDY");
-
+  console.log('study card')
   const {
     data: studyCardQuery,
     loading: studyCardloading,
@@ -79,7 +79,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
     fetchData();
   }, [studyCardQuery]);
 
-  if (studyCardloading) {
+  if (!studyCardQuery?.getStudyCard) {
     return (
       <Center mt="20">
         <Spinner color="red.800" />
@@ -105,6 +105,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
     dictionaryAudio: dictionaryAudio,
     userAudio: userAudio,
     setCardState: setCardState,
+    refetchCard: refetch,
   };
 
   return (
@@ -144,7 +145,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
           {cardState === "ANSWER" ? (
             <Flex justify={"center"} align="center">
               <Flex justify={"center"} align="center" flexDir={"column"}>
-                <Text>{revisionTime?.AGAIN} m</Text>
+                <Text>{revisionTime?.AGAIN}</Text>
                 <Button
                   _hover={{
                     bg: "red.600",
@@ -172,7 +173,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
               </Flex>
 
               <Flex justify={"center"} align="center" flexDir={"column"} ml="5">
-                <Text>{revisionTime?.GOOD} m</Text>
+                <Text>{revisionTime?.GOOD}</Text>
                 <Button
                   _hover={{
                     bg: "green.600",

@@ -14,7 +14,7 @@ import { useFindDeckQuery } from "../generated/graphql";
 
 
 const DeckBody = () => {
-  const currentDeck = useRecoilValue(currentDeckBodyInfoState);
+  const currentDeckId = useRecoilValue(currentDeckBodyInfoState);
 
   const [showDeckBody, setShowDeckBody] =
     useRecoilState<boolean>(showDeckBodyState);
@@ -24,11 +24,11 @@ const DeckBody = () => {
 
   const { getColor } = useColors();
 
-
+  console.log('deck body', currentDeckId)
 
   const { data, error, loading, } = useFindDeckQuery({
     variables: {
-      _id: currentDeck,
+      _id: currentDeckId,
     },
     onCompleted() {
 
@@ -77,12 +77,12 @@ const DeckBody = () => {
       <DeckNav setShowCreateCard={handleSetShowCreateCard} setShowDeckBody={handleSetShowDeckBody} />
 
       {showStudyCard ? (
-        <StudyCard deckId={data?.findDeck?.decks[0]?._id} setShowStudyCard={handleSetShowStudyCard}/>
+        <StudyCard deckId={currentDeckId} setShowStudyCard={handleSetShowStudyCard}/>
       ) : (
-        <DeckOverview deckId={data?.findDeck?.decks[0]?._id} deckTitle={data?.findDeck?.decks[0]?.title} handleStudyNowButton={handleStudyNowButton} />
+        <DeckOverview deckId={currentDeckId} deckTitle={data?.findDeck?.decks[0]?.title} handleStudyNowButton={handleStudyNowButton} />
       )}
 
-      {showCreateCard ? <AddCard currentDeckId={currentDeck} /> : null}
+      {showCreateCard ? <AddCard currentDeckId={currentDeckId} /> : null}
     </Flex>
   );
 };

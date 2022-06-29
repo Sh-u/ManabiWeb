@@ -44,6 +44,11 @@ export class Card {
   @Property({ type: "text", nullable: true })
   image?: string;
 
+
+  @Field(() => String, { nullable: true })
+  @Property({ type: "text", nullable: true })
+  dictionaryMeaning?: string;
+
   @Field(() => String, { nullable: true })
   @Property({ type: "text", nullable: true })
   dictionaryAudio?: string;

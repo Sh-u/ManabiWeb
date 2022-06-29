@@ -29,6 +29,7 @@ const AddCard = ({ currentDeckId }: { currentDeckId: number }) => {
   const [showCreateCard, setCreateCardState] =
     useRecoilState(showCreateCardState);
 
+  console.log('add card')
 
   const { getColor } = useColors();
   const { isOpen, onOpen, onClose } = useDisclosure();

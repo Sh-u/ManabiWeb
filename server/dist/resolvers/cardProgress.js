@@ -24,11 +24,11 @@ const Deck_1 = require("../entities/Deck");
 let RevisionTimeResponse = class RevisionTimeResponse {
 };
 __decorate([
-    (0, type_graphql_1.Field)(() => type_graphql_1.Int, { nullable: true }),
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
     __metadata("design:type", Object)
 ], RevisionTimeResponse.prototype, "AGAIN", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => type_graphql_1.Int, { nullable: true }),
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
     __metadata("design:type", Object)
 ], RevisionTimeResponse.prototype, "GOOD", void 0);
 RevisionTimeResponse = __decorate([
@@ -36,7 +36,7 @@ RevisionTimeResponse = __decorate([
 ], RevisionTimeResponse);
 let CardProgressResolver = class CardProgressResolver {
     async getRevisionTime(currentCardId, { em }) {
-        console.log('revision');
+        console.log("revision");
         const card = await em.findOne(Card_1.Card, { _id: currentCardId });
         if (!card) {
             return {
@@ -56,24 +56,36 @@ let CardProgressResolver = class CardProgressResolver {
         const deckSteps = card.deck.steps;
         const ease = card.deck.startingEase;
         const cardSteps = card.cardProgresses[0].steps;
-        const result = {
-            GOOD: null,
-            AGAIN: null,
-        };
-        console.log('steps', cardSteps);
+        let goodNumber = null;
+        let againNumber = null;
+        let goodResult = null;
+        let againResult = null;
+        console.log("steps", cardSteps);
         if (cardSteps === 2) {
-            result.GOOD = deckSteps[2] * ease;
-            console.log('res good', result.GOOD);
+            goodNumber = deckSteps[2] * ease;
+            console.log("res good", goodNumber);
         }
         else if (cardSteps > 2) {
-            result.GOOD = deckSteps[2] * (currentCardProgress.steps - 2) * ease;
+            goodNumber = deckSteps[2] * (currentCardProgress.steps - 2) * ease;
         }
         else {
-            result.GOOD = deckSteps[cardSteps + 1];
+            goodNumber = deckSteps[cardSteps + 1];
+            if (goodNumber < 1440) {
+                goodResult = `${goodNumber} m`;
+            }
         }
-        result.AGAIN = deckSteps[0];
-        console.log('result ', result);
-        return result;
+        if (goodNumber >= 1440) {
+            const days = Math.floor(goodNumber / 1440);
+            const leftoverMinutes = goodNumber % 1440;
+            goodResult = `${days} day/s, ${leftoverMinutes} m`;
+        }
+        againNumber = deckSteps[0];
+        againResult = `${againNumber} m`;
+        console.log(goodNumber);
+        return {
+            GOOD: goodResult,
+            AGAIN: againResult,
+        };
     }
     async getCardProgresses({ em }) {
         const progress = await em.find(CardProgress_1.CardProgress, {});
@@ -94,7 +106,9 @@ let CardProgressResolver = class CardProgressResolver {
             return null;
         }
         const currentDate = new Date();
-        const currentCardDeck = await em.findOne(Deck_1.Deck, { _id: currentCard.deck._id });
+        const currentCardDeck = await em.findOne(Deck_1.Deck, {
+            _id: currentCard.deck._id,
+        });
         if (!currentCardDeck)
             return null;
         let addMinutes;

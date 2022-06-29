@@ -1,6 +1,15 @@
 import { Card } from "../entities/Card";
 import { MyContext } from "src/types";
-import { Arg, Ctx, Field, Int, Mutation, ObjectType, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Ctx,
+  Field,
+  Int,
+  Mutation,
+  ObjectType,
+  Query,
+  Resolver,
+} from "type-graphql";
 import { CardProgress } from "../entities/CardProgress";
 import { compareAsc, format } from "date-fns";
 import add from "date-fns/add";
@@ -8,17 +17,14 @@ import { Deck } from "../entities/Deck";
 
 type AnswerType = "GOOD" | "AGAIN";
 
-
-
 @ObjectType()
 class RevisionTimeResponse {
-  @Field(() => Int, {nullable: true})
-  AGAIN: number | null
+  @Field(() => String, { nullable: true })
+  AGAIN: string | null;
 
-  @Field(() => Int, {nullable: true})
-  GOOD: number | null
+  @Field(() => String, { nullable: true })
+  GOOD: string | null;
 }
-
 
 @Resolver()
 export class CardProgressResolver {
@@ -27,15 +33,14 @@ export class CardProgressResolver {
     @Arg("currentCardId", () => Int) currentCardId: number,
     @Ctx() { em }: MyContext
   ): Promise<RevisionTimeResponse> {
-
-    console.log('revision')
+    console.log("revision");
     const card = await em.findOne(Card, { _id: currentCardId });
 
     if (!card) {
       return {
         AGAIN: null,
         GOOD: null,
-      }
+      };
     }
 
     const currentCardProgress = await em.findOne(CardProgress, {
@@ -46,33 +51,48 @@ export class CardProgressResolver {
       return {
         AGAIN: null,
         GOOD: null,
-      }
+      };
     }
 
     const deckSteps = card.deck.steps;
     const ease = card.deck.startingEase;
     const cardSteps = card.cardProgresses[0].steps;
 
-    const result: RevisionTimeResponse = {
-      GOOD: null,
-      AGAIN: null,
-    };
-    
-    console.log('steps', cardSteps)
-    if (cardSteps === 2){
-      result.GOOD = deckSteps[2] * ease;
-      console.log('res good', result.GOOD)
-    }
-    else if (cardSteps > 2) {
-      result.GOOD = deckSteps[2] * (currentCardProgress.steps - 2) * ease;
+    let goodNumber = null;
+    let againNumber = null;
+
+    let goodResult = null;
+    let againResult = null;
+
+    console.log("steps", cardSteps);
+    if (cardSteps === 2) {
+      goodNumber = deckSteps[2] * ease;
+      console.log("res good", goodNumber);
+    } else if (cardSteps > 2) {
+      goodNumber = deckSteps[2] * (currentCardProgress.steps - 2) * ease;
     } else {
-      result.GOOD = deckSteps[cardSteps + 1];
+      goodNumber = deckSteps[cardSteps + 1];
+
+      if (goodNumber < 1440) {
+        goodResult = `${goodNumber} m`;
+      }
     }
 
-    result.AGAIN = deckSteps[0];
+    if (goodNumber >= 1440) {
+      const days = Math.floor(goodNumber / 1440);
+      const leftoverMinutes = goodNumber % 1440;
 
-    console.log('result ', result)
-    return result;
+      goodResult = `${days} day/s, ${leftoverMinutes} m`;
+    }
+
+    againNumber = deckSteps[0];
+    againResult = `${againNumber} m`;
+
+    console.log(goodNumber)
+    return {
+      GOOD: goodResult,
+      AGAIN: againResult,
+    };
   }
 
   @Query(() => [CardProgress], { nullable: true })
@@ -86,7 +106,7 @@ export class CardProgressResolver {
     return progress;
   }
 
-  @Mutation(() => String, {nullable: true})
+  @Mutation(() => String, { nullable: true })
   async chooseCardDifficulty(
     @Arg("currentCardId", () => Int) currentCardId: number,
     @Arg("answerType") answerType: AnswerType,
@@ -111,15 +131,14 @@ export class CardProgressResolver {
     }
     const currentDate = new Date();
 
-    const currentCardDeck = await em.findOne(Deck, {_id: currentCard.deck._id})
+    const currentCardDeck = await em.findOne(Deck, {
+      _id: currentCard.deck._id,
+    });
 
     if (!currentCardDeck) return null;
 
-
     let addMinutes;
     const deckStepsValues = currentCardDeck.steps;
-
- 
 
     if (answerType === "GOOD") {
       currentCardProgress.steps++;
@@ -141,12 +160,10 @@ export class CardProgressResolver {
       addMinutes = deckStepsValues[2] * (currentCardProgress.steps - 2) * ease;
     }
 
-  
     currentCardProgress.nextRevision = add(currentDate, {
       minutes: addMinutes,
     });
 
-    
     try {
       await em.persistAndFlush(currentCardProgress);
     } catch (err) {

@@ -22,13 +22,11 @@ const DeckOverview = ({
   deckId,
   handleStudyNowButton,
 }: DeckOverviewProps) => {
-  console.log(`xdd`, deckId);
-  console.log(`xdd`);
 
   if (!deckId) {
     return (
-      <Center>
-        <Spinner color="red.800" />
+      <Center mt='32'>
+        <Spinner color="red.800" size='xl'/>
       </Center>
     );
   }

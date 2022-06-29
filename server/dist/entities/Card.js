@@ -50,6 +50,11 @@ __decorate([
     (0, type_graphql_1.Field)(() => String, { nullable: true }),
     (0, core_1.Property)({ type: "text", nullable: true }),
     __metadata("design:type", String)
+], Card.prototype, "dictionaryMeaning", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    (0, core_1.Property)({ type: "text", nullable: true }),
+    __metadata("design:type", String)
 ], Card.prototype, "dictionaryAudio", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String, { nullable: true }),

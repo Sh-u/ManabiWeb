@@ -115,28 +115,24 @@ export class CardResolver {
   }
 
   @Query(() => Card, { nullable: true })
-  async getStudyCard(
-    @Ctx() { em, req}: MyContext
-  ): Promise<Card | null> {
-    
+  async getStudyCard(@Ctx() { em, req }: MyContext): Promise<Card | null> {
     const currentUser = await em.findOne(User, { _id: req.session.userId });
 
-    if (!currentUser){
-      return null;
-    }    
-    
-    const myProgressess = await em.find(CardProgress, {user: currentUser })
-
-    const currentDate = new Date();
-    const readyProgresses = myProgressess.filter((progress) => progress.nextRevision < currentDate);
-
-   
-    if (!readyProgresses || readyProgresses.length === 0){
+    if (!currentUser) {
       return null;
     }
-    
-    
- 
+
+    const myProgressess = await em.find(CardProgress, { user: currentUser });
+
+    const currentDate = new Date();
+    const readyProgresses = myProgressess.filter(
+      (progress) => progress.nextRevision < currentDate
+    );
+
+    if (!readyProgresses || readyProgresses.length === 0) {
+      return null;
+    }
+
     return readyProgresses[0].card;
   }
 
@@ -160,6 +156,37 @@ export class CardResolver {
       return {
         error: "Couldn't find a current deck in Card/Resolver",
       };
+    }
+    let scrapedWordAudio;
+    let scrapedWordMeaning: string;
+    console.log(currentDeck.japaneseTemplate)
+    if (currentDeck.japaneseTemplate) {
+      const reqBody =  {
+        query: options.word,
+        language: "English",
+        no_english: false,
+      }
+
+      const response = await fetch("https://jotoba.de/api/search/words", {
+        method: "POST",
+        body: JSON.stringify(reqBody),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      console.log('fetch')
+
+      if (response){
+        const parsed = await response.json();
+
+        const readings = parsed.words.map((w: any) => scrapedWordMeaning += `${w.reading.kana} / `)
+       
+        if (readings){
+          console.log(readings)
+        }
+      
+      }
     }
 
     await em.begin();

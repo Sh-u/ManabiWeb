@@ -1,3 +1,4 @@
+import { ApolloQueryResult } from "@apollo/client";
 import { CloseIcon } from "@chakra-ui/icons";
 import {
   Modal,
@@ -16,7 +17,7 @@ import { Formik, Form, Field } from "formik";
 
 import React, { useEffect, useState } from "react";
 import Dropzone from "../components/Dropzone";
-import { useEditCardMutation } from "../generated/graphql";
+import { GetStudyCardQuery, useEditCardMutation } from "../generated/graphql";
 import useColors from "../hooks/useColors";
 import Player from "./Player";
 import { CardStateEnum } from "./StudyCard";
@@ -30,6 +31,7 @@ interface EditCardModalProps {
   userAudio: string;
   userImage: string;
   setCardState: React.Dispatch<React.SetStateAction<CardStateEnum>>;
+  refetchCard: () => void; 
 }
 
 const EditCardModal: React.FC<EditCardModalProps> = ({
@@ -41,6 +43,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
   userAudio,
   userImage,
   setCardState,
+  refetchCard
 }) => {
   const [editPost] = useEditCardMutation();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -142,6 +145,7 @@ const EditCardModal: React.FC<EditCardModalProps> = ({
                 }
 
                 console.log("success ", response?.data?.editCard?.card);
+                refetchCard();
                 setAudio(null);
                 setImage(null);
                 values.Sentence = "";

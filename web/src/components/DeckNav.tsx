@@ -7,6 +7,7 @@ interface DeckNavProps {
 }
 
 const DeckNav = ({setShowDeckBody, setShowCreateCard}: DeckNavProps) => {
+  console.log('deck nav')
   return (
     <>
       <Flex

@@ -128,6 +128,32 @@ let CardResolver = class CardResolver {
                 error: "Couldn't find a current deck in Card/Resolver",
             };
         }
+        let scrapedWordAudio;
+        let scrapedWordMeaning;
+        console.log(currentDeck.japaneseTemplate);
+        if (currentDeck.japaneseTemplate) {
+            const reqBody = {
+                query: options.word,
+                language: "English",
+                no_english: false,
+            };
+            const response = await fetch("https://jotoba.de/api/search/words", {
+                method: "POST",
+                body: JSON.stringify(reqBody),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+            console.log('fetch');
+            if (response) {
+                const parsed = await response.json();
+                const readings = parsed.words.map((w) => scrapedWordMeaning += `${w.reading.kana} / `);
+                if (readings) {
+                    console.log(readings);
+                }
+            }
+        }
         await em.begin();
         try {
             const card = await em.create(Card_1.Card, {
