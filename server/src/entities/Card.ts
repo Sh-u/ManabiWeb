@@ -11,7 +11,17 @@ import {
 import { Field, Int, ObjectType } from "type-graphql";
 import { Deck } from "./Deck";
 
-import {CardProgress} from "./CardProgress"
+import { CardProgress } from "./CardProgress";
+
+@ObjectType()
+export class PitchAccent {
+
+  @Field()
+  part: String;
+
+  @Field()
+  high: Boolean;
+}
 
 @ObjectType()
 @Entity()
@@ -19,7 +29,6 @@ export class Card {
   [OptionalProps]?:
     | "createdAt"
     | "updatedAt"
-
     | "image"
     | "dictionaryAudio"
     | "userAudio";
@@ -44,7 +53,6 @@ export class Card {
   @Property({ type: "text", nullable: true })
   image?: string;
 
-
   @Field(() => String, { nullable: true })
   @Property({ type: "text", nullable: true })
   dictionaryMeaning?: string;
@@ -52,6 +60,10 @@ export class Card {
   @Field(() => String, { nullable: true })
   @Property({ type: "text", nullable: true })
   dictionaryAudio?: string;
+
+  @Field(() => [PitchAccent], { nullable: true })
+  @Property({ nullable: true })
+  pitchAccent?: PitchAccent[];
 
   @Field(() => String, { nullable: true })
   @Property({ type: "text", nullable: true })

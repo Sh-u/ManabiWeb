@@ -26,7 +26,9 @@ export type Card = {
   createdAt: Scalars['String'];
   deck: Deck;
   dictionaryAudio?: Maybe<Scalars['String']>;
+  dictionaryMeaning?: Maybe<Scalars['String']>;
   image?: Maybe<Scalars['String']>;
+  pitchAccent?: Maybe<Array<PitchAccent>>;
   sentence: Scalars['String'];
   updatedAt: Scalars['String'];
   userAudio?: Maybe<Scalars['String']>;
@@ -107,7 +109,7 @@ export type Mutation = {
   changeEmail: UserResponse;
   changePassword: UserResponse;
   changeUsername: UserResponse;
-  chooseCardDifficulty: Scalars['String'];
+  chooseCardDifficulty?: Maybe<Scalars['String']>;
   createCard: CardResponse;
   createDeck: DeckResponse;
   deleteCard: Scalars['Boolean'];
@@ -219,6 +221,12 @@ export type MutationUploadAvatarArgs = {
   image: Scalars['Upload'];
 };
 
+export type PitchAccent = {
+  __typename?: 'PitchAccent';
+  high: Scalars['Boolean'];
+  part: Scalars['String'];
+};
+
 export type Query = {
   __typename?: 'Query';
   findDeck: DeckResponse;
@@ -263,8 +271,8 @@ export type RegisterInput = {
 
 export type RevisionTimeResponse = {
   __typename?: 'RevisionTimeResponse';
-  AGAIN?: Maybe<Scalars['Int']>;
-  GOOD?: Maybe<Scalars['Int']>;
+  AGAIN?: Maybe<Scalars['String']>;
+  GOOD?: Maybe<Scalars['String']>;
 };
 
 export type User = {
@@ -315,7 +323,7 @@ export type ChooseCardDifficultyMutationVariables = Exact<{
 }>;
 
 
-export type ChooseCardDifficultyMutation = { __typename?: 'Mutation', chooseCardDifficulty: string };
+export type ChooseCardDifficultyMutation = { __typename?: 'Mutation', chooseCardDifficulty?: string | null };
 
 export type CreateCardMutationVariables = Exact<{
   deckId: Scalars['Int'];
@@ -448,12 +456,12 @@ export type GetRevisionTimeQueryVariables = Exact<{
 }>;
 
 
-export type GetRevisionTimeQuery = { __typename?: 'Query', getRevisionTime: { __typename?: 'RevisionTimeResponse', AGAIN?: number | null, GOOD?: number | null } };
+export type GetRevisionTimeQuery = { __typename?: 'Query', getRevisionTime: { __typename?: 'RevisionTimeResponse', AGAIN?: string | null, GOOD?: string | null } };
 
 export type GetStudyCardQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetStudyCardQuery = { __typename?: 'Query', getStudyCard?: { __typename?: 'Card', _id: number, sentence: string, word: string, dictionaryAudio?: string | null, userAudio?: string | null, image?: string | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, nextRevision: any, steps: number, state: string }> } | null };
+export type GetStudyCardQuery = { __typename?: 'Query', getStudyCard?: { __typename?: 'Card', _id: number, sentence: string, word: string, dictionaryAudio?: string | null, dictionaryMeaning?: string | null, userAudio?: string | null, image?: string | null, pitchAccent?: Array<{ __typename?: 'PitchAccent', part: string, high: boolean }> | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, nextRevision: any, steps: number, state: string }> } | null };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1388,6 +1396,11 @@ export const GetStudyCardDocument = gql`
     sentence
     word
     dictionaryAudio
+    dictionaryMeaning
+    pitchAccent {
+      part
+      high
+    }
     userAudio
     image
     cardProgresses {

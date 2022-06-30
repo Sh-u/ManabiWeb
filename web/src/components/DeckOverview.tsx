@@ -36,6 +36,7 @@ const DeckOverview = ({
     },
   });
 
+  console.log(CardQuantity?.getLearnAndReviewCards)
   
   const showCreateCard= useRecoilValue<boolean>(showCreateCardState)
 

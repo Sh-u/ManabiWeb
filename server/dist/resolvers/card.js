@@ -128,8 +128,9 @@ let CardResolver = class CardResolver {
                 error: "Couldn't find a current deck in Card/Resolver",
             };
         }
-        let scrapedWordAudio;
-        let scrapedWordMeaning;
+        let scrapedWordAudio = null;
+        let scrapedWordMeaning = null;
+        let scrapedPitchAccent = null;
         console.log(currentDeck.japaneseTemplate);
         if (currentDeck.japaneseTemplate) {
             const reqBody = {
@@ -148,10 +149,13 @@ let CardResolver = class CardResolver {
             console.log('fetch');
             if (response) {
                 const parsed = await response.json();
-                const readings = parsed.words.map((w) => scrapedWordMeaning += `${w.reading.kana} / `);
-                if (readings) {
-                    console.log(readings);
-                }
+                console.log(parsed.words);
+                const meaning = parsed.words[0].senses.glosses;
+                const readings = parsed.words.map((w) => `${w.reading.kana} / `).slice(0, 2);
+                const pitch = parsed.words[0].pitch;
+                scrapedWordAudio = `jotoba.de/${parsed.words[0].audio}`;
+                scrapedWordMeaning = `${meaning} / ${[...readings].toString()}`;
+                scrapedPitchAccent = pitch;
             }
         }
         await em.begin();
@@ -160,6 +164,9 @@ let CardResolver = class CardResolver {
                 sentence: options.sentence,
                 word: options.word,
                 deck: currentDeck,
+                dictionaryAudio: scrapedWordAudio,
+                dictionaryMeaning: scrapedWordMeaning,
+                pitchAccent: scrapedPitchAccent
             });
             const progress = await em.create(CardProgress_1.CardProgress, {
                 card: card,

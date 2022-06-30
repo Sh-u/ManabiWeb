@@ -330,6 +330,15 @@
           "nullable": true,
           "mappedType": "text"
         },
+        "dictionary_meaning": {
+          "name": "dictionary_meaning",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
         "dictionary_audio": {
           "name": "dictionary_audio",
           "type": "text",
@@ -338,6 +347,15 @@
           "primary": false,
           "nullable": true,
           "mappedType": "text"
+        },
+        "pitch_accent": {
+          "name": "pitch_accent",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "array"
         },
         "user_audio": {
           "name": "user_audio",

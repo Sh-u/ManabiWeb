@@ -4,6 +4,11 @@ query getStudyCard {
     sentence
     word
     dictionaryAudio
+    dictionaryMeaning
+    pitchAccent{
+      part
+      high
+    }
     userAudio
     image
     cardProgresses {
