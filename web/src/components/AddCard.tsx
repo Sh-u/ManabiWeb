@@ -89,6 +89,7 @@ const AddCard = ({ currentDeckId }: { currentDeckId: number }) => {
 
                 const response = await createCard({
                   variables: {
+                    
                     audio: audio?.audio,
                     deckId: currentDeckId,
                     image: image?.image,

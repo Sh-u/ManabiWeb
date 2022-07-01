@@ -91,10 +91,14 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
 
   const sentence = foundCard?.sentence;
   const word = foundCard?.word;
+  const pitchAccent = foundCard?.pitchAccent;
   const image = foundCard?.image;
   const dictionaryAudio = foundCard?.dictionaryAudio;
+  const dictionaryMeaning = foundCard?.dictionaryMeaning;
   const userAudio = foundCard?.userAudio;
   const cardId = foundCard?._id;
+
+
 
   const editProps = {
     cardState: cardState,
@@ -121,9 +125,10 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
         <Text fontSize={"3xl"}>{sentence}</Text>
         {cardState === "ANSWER" ? (
           <>
-            <Text>{word}</Text>
+            <Text fontSize={"5xl"} mt='5'>{word} </Text>
+            <Text fontSize={'xl'} mt='5'>{dictionaryMeaning.toString()}</Text>
             {image ? <Image src={image} w="auto" maxH={"64"} /> : null}
-            <Flex justify={"center"} align="center">
+            <Flex justify={"center"} align="center" mt='5'>
               {dictionaryAudio ? (
                 <Player isUsers={false} url={dictionaryAudio} />
               ) : null}

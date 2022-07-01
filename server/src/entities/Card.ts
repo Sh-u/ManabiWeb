@@ -7,21 +7,14 @@ import {
   OneToMany,
   Collection,
   ManyToMany,
+  OneToOne,
 } from "@mikro-orm/core";
 import { Field, Int, ObjectType } from "type-graphql";
 import { Deck } from "./Deck";
 
 import { CardProgress } from "./CardProgress";
+import { PitchAccent } from "./PitchAccent";
 
-@ObjectType()
-export class PitchAccent {
-
-  @Field()
-  part: String;
-
-  @Field()
-  high: Boolean;
-}
 
 @ObjectType()
 @Entity()
@@ -31,7 +24,11 @@ export class Card {
     | "updatedAt"
     | "image"
     | "dictionaryAudio"
-    | "userAudio";
+    | "dictionaryMeaning"
+    | "userAudio"
+    | "pitchAccent"
+    | "furigana"
+
 
   @Field(() => Int)
   @PrimaryKey()
@@ -45,6 +42,11 @@ export class Card {
   @Property({ type: "text" })
   word!: string;
 
+  @Field(() => String, { nullable: true })
+  @Property({ type: "text", nullable: true })
+  furigana?: string;
+
+
   @Field(() => [CardProgress])
   @OneToMany(() => CardProgress, (cardProgress) => cardProgress.card)
   cardProgresses = new Collection<CardProgress>(this);
@@ -53,17 +55,17 @@ export class Card {
   @Property({ type: "text", nullable: true })
   image?: string;
 
-  @Field(() => String, { nullable: true })
-  @Property({ type: "text", nullable: true })
-  dictionaryMeaning?: string;
+  @Field(() => [String], { nullable: true })
+  @Property({ nullable: true })
+  dictionaryMeaning?: string[];
 
   @Field(() => String, { nullable: true })
   @Property({ type: "text", nullable: true })
   dictionaryAudio?: string;
 
-  @Field(() => [PitchAccent], { nullable: true })
-  @Property({ nullable: true })
-  pitchAccent?: PitchAccent[];
+  @Field(() => PitchAccent, { nullable: true })
+  @OneToOne(() => PitchAccent, (pitch) => pitch.card, {owner: true, orphanRemoval: true, nullable: true})
+  pitchAccent?: PitchAccent
 
   @Field(() => String, { nullable: true })
   @Property({ type: "text", nullable: true })

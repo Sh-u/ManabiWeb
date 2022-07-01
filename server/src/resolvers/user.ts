@@ -435,6 +435,7 @@ export class UserResolver {
       password: hashedPassword,
       email: options.email,
 
+
     });
 
     if (!user) {
@@ -446,6 +447,24 @@ export class UserResolver {
           },
         ],
       };
+    }
+ 
+
+    try {
+      await em.persistAndFlush(user);
+    } catch (err) {
+      console.log(err);
+      if (err.code === "23505") {
+   
+        return {
+          errors: [
+            {
+              field: "username",
+              message: "user already exists",
+            },
+          ],
+        };
+      }
     }
     const targetPath = path.resolve(
       "..",
@@ -463,22 +482,7 @@ export class UserResolver {
       });
     }
 
-    try {
-      await em.persistAndFlush(user);
-    } catch (err) {
-      console.log(err.code);
-      if (err.code === "23505") {
-        return {
-          errors: [
-            {
-              field: "username",
-              message: "user already exists",
-            },
-          ],
-        };
-      }
-    }
-    console.log(user._id)
+    console.log(`user id`, user._id)
     req.session.userId = user._id;
     return {
       user,

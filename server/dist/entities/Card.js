@@ -9,25 +9,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Card = exports.PitchAccent = void 0;
+exports.Card = void 0;
 const core_1 = require("@mikro-orm/core");
 const type_graphql_1 = require("type-graphql");
 const Deck_1 = require("./Deck");
 const CardProgress_1 = require("./CardProgress");
-let PitchAccent = class PitchAccent {
-};
-__decorate([
-    (0, type_graphql_1.Field)(),
-    __metadata("design:type", String)
-], PitchAccent.prototype, "part", void 0);
-__decorate([
-    (0, type_graphql_1.Field)(),
-    __metadata("design:type", Boolean)
-], PitchAccent.prototype, "high", void 0);
-PitchAccent = __decorate([
-    (0, type_graphql_1.ObjectType)()
-], PitchAccent);
-exports.PitchAccent = PitchAccent;
+const PitchAccent_1 = require("./PitchAccent");
 let Card = class Card {
     constructor() {
         this.cardProgresses = new core_1.Collection(this);
@@ -51,6 +38,11 @@ __decorate([
     __metadata("design:type", String)
 ], Card.prototype, "word", void 0);
 __decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    (0, core_1.Property)({ type: "text", nullable: true }),
+    __metadata("design:type", String)
+], Card.prototype, "furigana", void 0);
+__decorate([
     (0, type_graphql_1.Field)(() => [CardProgress_1.CardProgress]),
     (0, core_1.OneToMany)(() => CardProgress_1.CardProgress, (cardProgress) => cardProgress.card),
     __metadata("design:type", Object)
@@ -61,9 +53,9 @@ __decorate([
     __metadata("design:type", String)
 ], Card.prototype, "image", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => String, { nullable: true }),
-    (0, core_1.Property)({ type: "text", nullable: true }),
-    __metadata("design:type", String)
+    (0, type_graphql_1.Field)(() => [String], { nullable: true }),
+    (0, core_1.Property)({ nullable: true }),
+    __metadata("design:type", Array)
 ], Card.prototype, "dictionaryMeaning", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String, { nullable: true }),
@@ -71,9 +63,9 @@ __decorate([
     __metadata("design:type", String)
 ], Card.prototype, "dictionaryAudio", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => [PitchAccent], { nullable: true }),
-    (0, core_1.Property)({ nullable: true }),
-    __metadata("design:type", Array)
+    (0, type_graphql_1.Field)(() => PitchAccent_1.PitchAccent, { nullable: true }),
+    (0, core_1.OneToOne)(() => PitchAccent_1.PitchAccent, (pitch) => pitch.card, { owner: true, orphanRemoval: true, nullable: true }),
+    __metadata("design:type", PitchAccent_1.PitchAccent)
 ], Card.prototype, "pitchAccent", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String, { nullable: true }),

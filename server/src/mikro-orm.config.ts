@@ -7,9 +7,10 @@ import { User } from "./entities/User";
 import { Deck } from "./entities/Deck";
 import { DeckSubscriber } from "./entities/DeckSubscriber";
 import { CardProgress } from "./entities/CardProgress";
+import { PitchAccent } from "./entities/PitchAccent";
 
 export default {
-    entities: [Card, User, Deck, DeckSubscriber, CardProgress],
+    entities: [Card, User, Deck, DeckSubscriber, CardProgress, PitchAccent],
     dbName: 'shuddit',
     type: 'postgresql',
     debug: !_prod_,

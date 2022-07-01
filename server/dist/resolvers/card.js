@@ -25,6 +25,7 @@ const fs_1 = require("fs");
 const class_validator_1 = require("class-validator");
 const CardProgress_1 = require("../entities/CardProgress");
 const User_1 = require("../entities/User");
+const PitchAccent_1 = require("../entities/PitchAccent");
 let CardInput = class CardInput {
 };
 __decorate([
@@ -117,6 +118,7 @@ let CardResolver = class CardResolver {
         return readyProgresses[0].card;
     }
     async createCard(options, deckId, image, audio, { em }) {
+        var _a;
         if (options.sentence.length < 1 || options.word.length < 1) {
             return {
                 error: "Input is too short",
@@ -128,11 +130,13 @@ let CardResolver = class CardResolver {
                 error: "Couldn't find a current deck in Card/Resolver",
             };
         }
+        const jpRegex = /[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]|[\uFF00-\uFFEF]|[\u4E00-\u9FAF]|[\u2605-\u2606]|[\u2190-\u2195]|\u203B/g;
+        const isInputJPchar = jpRegex.test(options.word);
         let scrapedWordAudio = null;
         let scrapedWordMeaning = null;
         let scrapedPitchAccent = null;
-        console.log(currentDeck.japaneseTemplate);
-        if (currentDeck.japaneseTemplate) {
+        let scrapedFurigana = null;
+        if (currentDeck.japaneseTemplate && isInputJPchar) {
             const reqBody = {
                 query: options.word,
                 language: "English",
@@ -142,20 +146,24 @@ let CardResolver = class CardResolver {
                 method: "POST",
                 body: JSON.stringify(reqBody),
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
             });
-            console.log('fetch');
+            console.log("fetch");
             if (response) {
                 const parsed = await response.json();
-                console.log(parsed.words);
-                const meaning = parsed.words[0].senses.glosses;
-                const readings = parsed.words.map((w) => `${w.reading.kana} / `).slice(0, 2);
-                const pitch = parsed.words[0].pitch;
-                scrapedWordAudio = `jotoba.de/${parsed.words[0].audio}`;
-                scrapedWordMeaning = `${meaning} / ${[...readings].toString()}`;
+                const firstObjectWithAudio = parsed.words.find((obj) => obj.audio);
+                const furigana = options.word.length === 1
+                    ? parsed.kanji[0].kunyomi[0]
+                    : parsed.words.map((obj) => obj.reading.kana);
+                const meaning = (_a = firstObjectWithAudio === null || firstObjectWithAudio === void 0 ? void 0 : firstObjectWithAudio.senses[0]) === null || _a === void 0 ? void 0 : _a.glosses;
+                const pitch = firstObjectWithAudio === null || firstObjectWithAudio === void 0 ? void 0 : firstObjectWithAudio.pitch;
+                scrapedWordAudio = `https://jotoba.de${firstObjectWithAudio === null || firstObjectWithAudio === void 0 ? void 0 : firstObjectWithAudio.audio}`;
+                scrapedWordMeaning = meaning;
                 scrapedPitchAccent = pitch;
+                scrapedFurigana = furigana;
+                console.log("all", scrapedPitchAccent);
             }
         }
         await em.begin();
@@ -166,8 +174,16 @@ let CardResolver = class CardResolver {
                 deck: currentDeck,
                 dictionaryAudio: scrapedWordAudio,
                 dictionaryMeaning: scrapedWordMeaning,
-                pitchAccent: scrapedPitchAccent
+                furigana: scrapedFurigana
             });
+            if (scrapedPitchAccent) {
+                const part = await em.create(PitchAccent_1.PitchAccent, {
+                    part: scrapedPitchAccent.map((obj) => obj.part),
+                    high: scrapedPitchAccent.map((obj) => obj.high),
+                    card: card,
+                });
+                await em.persist(part);
+            }
             const progress = await em.create(CardProgress_1.CardProgress, {
                 card: card,
                 user: card.deck.user._id,

@@ -21,6 +21,7 @@ import { CardProgress } from "../entities/CardProgress";
 import { Loaded } from "@mikro-orm/core/typings";
 import { AsyncLocalStorage } from "async_hooks";
 import { User } from "../entities/User";
+import { PitchAccent } from "../entities/PitchAccent";
 
 @InputType()
 class CardInput {
@@ -145,11 +146,13 @@ export class CardResolver {
     @Arg("audio", () => GraphQLUpload, { nullable: true }) audio: FileUpload,
     @Ctx() { em }: MyContext
   ): Promise<CardResponse> {
+
     if (options.sentence.length < 1 || options.word.length < 1) {
       return {
         error: "Input is too short",
       };
     }
+
     const currentDeck = await em.findOne(Deck, { _id: deckId });
 
     if (!currentDeck) {
@@ -157,46 +160,59 @@ export class CardResolver {
         error: "Couldn't find a current deck in Card/Resolver",
       };
     }
+
+    const jpRegex = /[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]|[\uFF00-\uFFEF]|[\u4E00-\u9FAF]|[\u2605-\u2606]|[\u2190-\u2195]|\u203B/g; 
+    const isInputJPchar: boolean = jpRegex.test(options.word)
+
     let scrapedWordAudio: string | null = null;
     let scrapedWordMeaning: string | null = null;
     let scrapedPitchAccent = null;
-    console.log(currentDeck.japaneseTemplate)
-    if (currentDeck.japaneseTemplate) {
-      const reqBody =  {
+    let scrapedFurigana: string | null = null;
+
+    if (currentDeck.japaneseTemplate && isInputJPchar) {
+      const reqBody = {
         query: options.word,
         language: "English",
         no_english: false,
-      }
+      };
 
       const response = await fetch("https://jotoba.de/api/search/words", {
         method: "POST",
         body: JSON.stringify(reqBody),
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
       });
-      console.log('fetch')
+      console.log("fetch");
 
-      if (response){
+      if (response) {
         const parsed = await response.json();
+        
 
-        console.log(parsed.words)
-        const meaning = parsed.words[0].senses.glosses;
-        const readings = parsed.words.map((w: any) =>  `${w.reading.kana} / `).slice(0, 2)
-        const pitch = parsed.words[0].pitch;
+        const firstObjectWithAudio = parsed.words.find((obj: any) => obj.audio);
 
-        scrapedWordAudio = `jotoba.de/${parsed.words[0].audio}`
-        scrapedWordMeaning = `${meaning} / ${[...readings].toString()}`
+        const furigana = options.word.length === 1 
+        ? parsed.kanji[0].kunyomi[0]
+        : parsed.words.map( (obj: any) => obj.reading.kana)
+
+        const meaning = firstObjectWithAudio?.senses[0]?.glosses;
+
+        const pitch = firstObjectWithAudio?.pitch;
+
+        scrapedWordAudio = `https://jotoba.de${firstObjectWithAudio?.audio}`;
+        scrapedWordMeaning = meaning;
         scrapedPitchAccent = pitch;
-      
+        scrapedFurigana = furigana;
+
+        console.log("all", scrapedPitchAccent);
+
       }
     }
 
     await em.begin();
 
     try {
-      //... do some work
 
       const card = await em.create(Card, {
         sentence: options.sentence,
@@ -204,21 +220,45 @@ export class CardResolver {
         deck: currentDeck,
         dictionaryAudio: scrapedWordAudio,
         dictionaryMeaning: scrapedWordMeaning,
-        pitchAccent: scrapedPitchAccent
+        furigana: scrapedFurigana
       });
+
+
+      if (scrapedPitchAccent){
+        // for (const pitchObj of scrapedPitchAccent){
+        //   console.log('loop', pitchObj)
+
+         
+        // }
+
+        const part = await em.create(PitchAccent, {
+          part: scrapedPitchAccent.map((obj: any) => obj.part),
+          high: scrapedPitchAccent.map((obj: any) => obj.high),
+          card: card,
+        });
+
+
+        await em.persist(part);
+      }
 
       const progress = await em.create(CardProgress, {
         card: card,
         user: card.deck.user._id,
       });
 
+   
       await em.persist(progress);
+   
+
 
       try {
         await em.persistAndFlush(card);
       } catch (err) {
         console.log(err);
       }
+
+
+  
 
       if (image) {
         console.log("mime", image.mimetype);

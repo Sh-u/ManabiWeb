@@ -321,6 +321,15 @@
           "nullable": false,
           "mappedType": "text"
         },
+        "furigana": {
+          "name": "furigana",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
         "image": {
           "name": "image",
           "type": "text",
@@ -332,12 +341,12 @@
         },
         "dictionary_meaning": {
           "name": "dictionary_meaning",
-          "type": "text",
+          "type": "text[]",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "mappedType": "text"
+          "mappedType": "array"
         },
         "dictionary_audio": {
           "name": "dictionary_audio",
@@ -348,14 +357,14 @@
           "nullable": true,
           "mappedType": "text"
         },
-        "pitch_accent": {
-          "name": "pitch_accent",
-          "type": "text[]",
+        "pitch_accent__id": {
+          "name": "pitch_accent__id",
+          "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "mappedType": "array"
+          "mappedType": "integer"
         },
         "user_audio": {
           "name": "user_audio",
@@ -400,6 +409,15 @@
       "schema": "public",
       "indexes": [
         {
+          "columnNames": [
+            "pitch_accent__id"
+          ],
+          "composite": false,
+          "keyName": "card_pitch_accent__id_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "card_pkey",
           "columnNames": [
             "_id"
@@ -411,6 +429,19 @@
       ],
       "checks": [],
       "foreignKeys": {
+        "card_pitch_accent__id_foreign": {
+          "constraintName": "card_pitch_accent__id_foreign",
+          "columnNames": [
+            "pitch_accent__id"
+          ],
+          "localTableName": "public.card",
+          "referencedColumnNames": [
+            "_id"
+          ],
+          "referencedTableName": "public.pitch_accent",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
         "card_deck__id_foreign": {
           "constraintName": "card_deck__id_foreign",
           "columnNames": [
@@ -536,6 +567,83 @@
             "card__id"
           ],
           "localTableName": "public.card_progress",
+          "referencedColumnNames": [
+            "_id"
+          ],
+          "referencedTableName": "public.card",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "_id": {
+          "name": "_id",
+          "type": "serial",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "part": {
+          "name": "part",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "json"
+        },
+        "high": {
+          "name": "high",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "json"
+        },
+        "card__id": {
+          "name": "card__id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "pitch_accent",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": [
+            "card__id"
+          ],
+          "composite": false,
+          "keyName": "pitch_accent_card__id_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "pitch_accent_pkey",
+          "columnNames": [
+            "_id"
+          ],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "pitch_accent_card__id_foreign": {
+          "constraintName": "pitch_accent_card__id_foreign",
+          "columnNames": [
+            "card__id"
+          ],
+          "localTableName": "public.pitch_accent",
           "referencedColumnNames": [
             "_id"
           ],

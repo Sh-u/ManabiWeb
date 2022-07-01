@@ -375,19 +375,11 @@ let UserResolver = class UserResolver {
                 ],
             };
         }
-        const targetPath = path_1.default.resolve("..", "web", "public", "userFiles", `user-${user._id}`);
-        if (!(0, fs_1.existsSync)(targetPath)) {
-            (0, fs_1.mkdir)(targetPath, (err) => {
-                if (err) {
-                    return console.log(err);
-                }
-            });
-        }
         try {
             await em.persistAndFlush(user);
         }
         catch (err) {
-            console.log(err.code);
+            console.log(err);
             if (err.code === "23505") {
                 return {
                     errors: [
@@ -399,7 +391,15 @@ let UserResolver = class UserResolver {
                 };
             }
         }
-        console.log(user._id);
+        const targetPath = path_1.default.resolve("..", "web", "public", "userFiles", `user-${user._id}`);
+        if (!(0, fs_1.existsSync)(targetPath)) {
+            (0, fs_1.mkdir)(targetPath, (err) => {
+                if (err) {
+                    return console.log(err);
+                }
+            });
+        }
+        console.log(`user id`, user._id);
         req.session.userId = user._id;
         return {
             user,
