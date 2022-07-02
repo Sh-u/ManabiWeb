@@ -26,9 +26,10 @@ export type Card = {
   createdAt: Scalars['String'];
   deck: Deck;
   dictionaryAudio?: Maybe<Scalars['String']>;
-  dictionaryMeaning?: Maybe<Scalars['String']>;
+  dictionaryMeaning?: Maybe<Array<Scalars['String']>>;
+  furigana?: Maybe<Scalars['String']>;
   image?: Maybe<Scalars['String']>;
-  pitchAccent?: Maybe<Array<PitchAccent>>;
+  pitchAccent?: Maybe<PitchAccent>;
   sentence: Scalars['String'];
   updatedAt: Scalars['String'];
   userAudio?: Maybe<Scalars['String']>;
@@ -223,8 +224,10 @@ export type MutationUploadAvatarArgs = {
 
 export type PitchAccent = {
   __typename?: 'PitchAccent';
-  high: Scalars['Boolean'];
-  part: Scalars['String'];
+  _id: Scalars['Int'];
+  card: Card;
+  high: Array<Scalars['Boolean']>;
+  part: Array<Scalars['String']>;
 };
 
 export type Query = {
@@ -461,7 +464,7 @@ export type GetRevisionTimeQuery = { __typename?: 'Query', getRevisionTime: { __
 export type GetStudyCardQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetStudyCardQuery = { __typename?: 'Query', getStudyCard?: { __typename?: 'Card', _id: number, sentence: string, word: string, dictionaryAudio?: string | null, dictionaryMeaning?: string | null, userAudio?: string | null, image?: string | null, pitchAccent?: Array<{ __typename?: 'PitchAccent', part: string, high: boolean }> | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, nextRevision: any, steps: number, state: string }> } | null };
+export type GetStudyCardQuery = { __typename?: 'Query', getStudyCard?: { __typename?: 'Card', _id: number, sentence: string, word: string, dictionaryAudio?: string | null, dictionaryMeaning?: Array<string> | null, userAudio?: string | null, image?: string | null, pitchAccent?: { __typename?: 'PitchAccent', part: Array<string>, high: Array<boolean> } | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, nextRevision: any, steps: number, state: string }> } | null };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 

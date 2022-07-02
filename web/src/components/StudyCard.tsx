@@ -18,11 +18,44 @@ import {
   useGetRevisionTimeQuery,
   useGetStudyCardQuery,
 } from "../generated/graphql";
-
+import { Tooltip } from "@chakra-ui/react";
 import useColors from "../hooks/useColors";
 import { client } from "../pages/client";
 import EditCardModal from "./EditCardModal";
 import Player from "./Player";
+
+type PitchAccentColorType = {
+  color: "red" | "blue" | "orange" | "green"
+  type: "atamadaka" | "heiban" | "nakamadaka" | "odaka"
+}
+
+export const checkPitchColor = (high: Array<boolean>) : PitchAccentColorType => {
+
+
+  if (high[0]) {
+    return {
+      color: "red",
+      type: "atamadaka"
+    }
+  }
+  if (high.slice(1).every((h) => h === true)) {
+    return {
+      color: "blue",
+      type: "heiban"
+    }
+  }
+  if (!high[0] && high[1] && high[2]) {
+    return {
+      color: "orange",
+      type: "nakamadaka"
+    }
+  } else {
+    return {
+      color: "green",
+      type: "odaka"
+    }
+  }
+};
 
 export type CardStateEnum = "STUDY" | "ANSWER" | "EDIT";
 
@@ -39,7 +72,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
     GOOD: null,
   });
   const [cardState, setCardState] = useState<CardStateEnum>("STUDY");
-  console.log('study card')
+  console.log("study card");
   const {
     data: studyCardQuery,
     loading: studyCardloading,
@@ -98,8 +131,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
   const userAudio = foundCard?.userAudio;
   const cardId = foundCard?._id;
 
-
-
+  console.log(...pitchAccent?.high);
   const editProps = {
     cardState: cardState,
     cardId: cardId,
@@ -125,10 +157,22 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
         <Text fontSize={"3xl"}>{sentence}</Text>
         {cardState === "ANSWER" ? (
           <>
-            <Text fontSize={"5xl"} mt='5'>{word} </Text>
-            <Text fontSize={'xl'} mt='5'>{dictionaryMeaning.toString()}</Text>
+            <Tooltip placement='right' label={checkPitchColor(pitchAccent.high).type} top='0'>
+              <Text
+                fontSize={"5xl"}
+                mt="5"
+                color={pitchAccent ? checkPitchColor(pitchAccent.high).color : null}
+              >
+                {word}
+              </Text>
+            </Tooltip>
+            <Text fontSize="9xl">{pitchAccent[0]?.high[0]}</Text>
+
+            <Text fontSize={"xl"} mt="5">
+              {dictionaryMeaning.toString().replaceAll(",", ", ") ?? null}
+            </Text>
             {image ? <Image src={image} w="auto" maxH={"64"} /> : null}
-            <Flex justify={"center"} align="center" mt='5'>
+            <Flex justify={"center"} align="center" mt="5">
               {dictionaryAudio ? (
                 <Player isUsers={false} url={dictionaryAudio} />
               ) : null}
