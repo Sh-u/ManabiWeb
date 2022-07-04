@@ -122,8 +122,9 @@ export class CardResolver {
     if (!currentUser) {
       return null;
     }
+   
+    const myProgressess = await em.find(CardProgress, { user: currentUser }, {populate: ['card.pitchAccent']});
 
-    const myProgressess = await em.find(CardProgress, { user: currentUser });
 
     const currentDate = new Date();
     const readyProgresses = myProgressess.filter(
@@ -134,6 +135,9 @@ export class CardResolver {
       return null;
     }
 
+
+    console.log(myProgressess[0].card.pitchAccent?.toArray()[0])
+    
     return readyProgresses[0].card;
   }
 
@@ -169,32 +173,54 @@ export class CardResolver {
     let scrapedPitchAccent = null;
     let scrapedFurigana: string | null = null;
 
+    let descriptiveResponse = null;
+    let moraResponse = null;
+
     if (currentDeck.japaneseTemplate && isInputJPchar) {
-      const reqBody = {
+
+      const reqWordBody = {
         query: options.word,
         language: "English",
         no_english: false,
       };
 
-      const response = await fetch("https://jotoba.de/api/search/words", {
+      
+
+      const jotobaResponse = await fetch("https://jotoba.de/api/search/words", {
         method: "POST",
-        body: JSON.stringify(reqBody),
+        body: JSON.stringify(reqWordBody),
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
       });
-      console.log("fetch");
 
-      if (response) {
-        const parsed = await response.json();
+      const kotuResponse = await fetch("https://kotu.io/api/dictionary/parse", {
+        method: "POST",
+        body: "",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+
+      if (kotuResponse){
+        const parsed = await kotuResponse.json();
+
+        
+
+      }
+
+
+      if (jotobaResponse) {
+        const parsed = await jotobaResponse.json();
         
 
         const firstObjectWithAudio = parsed.words.find((obj: any) => obj.audio);
 
         const furigana = options.word.length === 1 
         ? parsed.kanji[0].kunyomi[0]
-        : parsed.words.map( (obj: any) => obj.reading.kana)
+        : parsed.words[0].reading.kana
 
         const meaning = firstObjectWithAudio?.senses[0]?.glosses;
 
@@ -206,7 +232,7 @@ export class CardResolver {
         scrapedFurigana = furigana;
 
         console.log("all", scrapedPitchAccent);
-
+        // console.log('map', scrapedPitchAccent.map((obj: any) => obj.part))
       }
     }
 
@@ -234,6 +260,8 @@ export class CardResolver {
         const part = await em.create(PitchAccent, {
           part: scrapedPitchAccent.map((obj: any) => obj.part),
           high: scrapedPitchAccent.map((obj: any) => obj.high),
+          descriptive: descriptiveResponse,
+          mora: moraResponse,
           card: card,
         });
 

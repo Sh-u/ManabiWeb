@@ -132,7 +132,7 @@ const SearchBarInput = () => {
                         <Flex align="center" justify="center">
                           <Avatar
                             name="author"
-                            src={"/" + result.user.image}
+                            src={result?.user?.image ?? null}
                             ml="2"
                             w="5"
                             h="5"

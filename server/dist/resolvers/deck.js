@@ -102,7 +102,7 @@ let DeckResolver = class DeckResolver {
     async createDeck(title, JP, { em, req }) {
         const user = await em.findOne(User_1.User, { _id: req.session.userId });
         console.log(user);
-        if (title.length < 4 || title.length > 30) {
+        if (title.length < 4 || title.length > 20) {
             return {
                 errors: "Invalid title length",
             };

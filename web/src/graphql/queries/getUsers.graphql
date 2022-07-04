@@ -1,5 +1,8 @@
 query GetUsers{
     getUsers {
-        ...BasicUser
+        ...BasicUser,
+        followers{
+            _id
+        }
     }
 }

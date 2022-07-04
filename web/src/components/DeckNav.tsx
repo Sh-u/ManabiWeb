@@ -20,15 +20,20 @@ const DeckNav = ({setShowDeckBody, setShowCreateCard}: DeckNavProps) => {
           fontSize={"lg"}
           _hover={{
             textDecoration: "underline",
+            textDecorationColor: 'red.800'
+           
           }}
           variant={"unstyled"}
           onClick={() => setShowDeckBody()}
         >
           Decks
         </Button>
+        
         <Button
+        display='none'
           _hover={{
             textDecoration: "underline",
+            textDecorationColor: 'red.800'
           }}
           fontSize={"lg"}
           variant={"unstyled"}
@@ -36,8 +41,10 @@ const DeckNav = ({setShowDeckBody, setShowCreateCard}: DeckNavProps) => {
           Stats
         </Button>
         <Button
+        
           _hover={{
             textDecoration: "underline",
+            textDecorationColor: 'red.800'
           }}
           fontSize={"lg"}
           variant={"unstyled"}

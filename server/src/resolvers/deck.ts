@@ -132,7 +132,7 @@ export class DeckResolver {
   ): Promise<DeckResponse> {
     const user = await em.findOne(User, { _id: req.session.userId });
     console.log(user)
-    if (title.length < 4 || title.length > 30) {
+    if (title.length < 4 || title.length > 20) {
       return {
         errors: "Invalid title length",
       };

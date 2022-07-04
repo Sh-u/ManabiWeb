@@ -8,31 +8,37 @@ import {
   Icon,
   Text,
   Link,
+  Spinner,
 } from "@chakra-ui/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { HiClock, HiPencil, HiSearch, HiUserGroup } from "react-icons/hi";
 import Navbar from "../../components/Navbar";
 import {
+  FindUserDocument,
+  FindUserQuery,
   GetUsersDocument,
   GetUsersQuery,
+  useFollowUserMutation,
   useMeQuery,
+  useFindUserQuery,
 } from "../../generated/graphql";
 import useColors from "../../hooks/useColors";
 import { client } from "../client";
 import NextLink from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/router";
 
 interface FoundUser {
   foundUser: {
-    image?: string;
-    createdAt?: Date;
-    __typename?: string;
+    __typename?: "User";
     _id: number;
     username: string;
-    decks: {
-      __typename?: string;
+    image?: string;
+    createdAt: any;
+    followers?: {
+      __typename?: "User";
       _id: number;
-      title: string;
-      createdAt: string;
+      username: string;
     }[];
   };
 }
@@ -41,15 +47,46 @@ const UserPage = ({
   foundUser,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { getColor } = useColors();
+  const router = useRouter();
   let createdAt = foundUser?.createdAt?.toString();
   createdAt = createdAt.substring(0, createdAt.indexOf("T"));
 
-  const { data: loggedUser } = useMeQuery();
+  const [followUser] = useFollowUserMutation();
+
+  const handleFollow = async () => {
+    const response = await followUser({
+      variables: {
+        targetUserId: foundUser?._id,
+      },
+    });
+
+    if (!response) {
+      console.log("follow error");
+    }
+
+    console.log("success", response?.data?.followUser);
+    router.replace(router.asPath);
+  };
+
+  console.log(foundUser?.followers);
+  const { data: loggedUser, loading } = useMeQuery();
   const image = foundUser?.image;
+
+  if (loading) {
+    return <Spinner color="red.800" />;
+  }
+  const FollowButtonCheck = (
+    <Button variant={"outline"} onClick={() => handleFollow()}>
+      {foundUser?.followers.find((user) => user._id === loggedUser?.me?._id)
+        ? "Unfollow"
+        : "Follow"}
+    </Button>
+  );
+
   const EditButtonCheck =
     loggedUser?.me?._id === foundUser?._id ? (
       <NextLink href="/settings/account">
-        <Link style={{ textDecoration: "none" }} >
+        <Link style={{ textDecoration: "none" }}>
           <Button
             p="0"
             borderRadius={"12px"}
@@ -83,7 +120,7 @@ const UserPage = ({
         </Link>
       </NextLink>
     ) : (
-      <Button variant={"outline"}>Follow</Button>
+      FollowButtonCheck
     );
 
   return (
@@ -103,7 +140,12 @@ const UserPage = ({
       >
         <Flex align="center" justify={"space-around"} w="full">
           <Flex align="center" justify={"center"}>
-            <Avatar src={image ? "/" + image : null} name={foundUser?.username} bg='red.400' size={"2xl"} />
+            <Avatar
+              src={image ? "/" + image : null}
+              name={foundUser?.username}
+              bg="red.400"
+              size={"2xl"}
+            />
             <Flex align="start" justify={"center"} flexDir="column" ml="3">
               <Text fontSize={"3xl"} fontWeight="semibold">
                 {foundUser?.username}
@@ -116,7 +158,9 @@ const UserPage = ({
               </Flex>
               <Flex fontSize={"sm"} align="center" justify={"center"}>
                 <Icon as={HiUserGroup} />{" "}
-                <Text ml="2">Followers: 0 / Following: 0</Text>
+                <Text ml="2">
+                  Followers: {foundUser?.followers?.length} / Following: 0
+                </Text>
               </Flex>
               <Flex fontSize={"sm"} align="center" justify={"center"}>
                 🇯🇵
@@ -215,13 +259,25 @@ const UserPage = ({
 export const getServerSideProps: GetServerSideProps<FoundUser> = async ({
   query,
 }) => {
-  const { data } = await client.query<GetUsersQuery>({
-    query: GetUsersDocument,
+  const inputedUser = query.user;
+
+  // const { data, refetch: findUserRefetch } = useFindUserQuery({
+  //   variables: {
+  //     targetUsername: inputedUser.toString(),
+  //   },
+  // });
+
+  const { data } = await client.query<FindUserQuery>({
+    query: FindUserDocument,
+    variables: {
+      targetUsername: inputedUser.toString(),
+    },
+    fetchPolicy: "no-cache",
   });
 
-  const inputedUser = query.user;
-  const foundUser = data.getUsers.find((user) => user.username === inputedUser);
+  const foundUser = data?.findUser?.user;
 
+  console.log(foundUser);
   if (foundUser) {
     return {
       props: {

@@ -1,4 +1,4 @@
-import { Button, Flex, Text } from "@chakra-ui/react";
+import { Button, Divider, Flex, Text } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { currentDeckBodyInfoState } from "../atoms/currentDeckBodyInfoState";
@@ -62,12 +62,12 @@ const DeckBody = () => {
     <Flex
       mt="5"
       bg={getColor("gray.400", "gray.800")}
-      bgGradient={getColor(
-        "linear(to-b, gray.50, white)",
-        "linear(to-b, gray.800, gray.700)"
-      )}
-      border="1px solid"
-      borderColor={getColor("gray.100", "gray.700")}
+      // bgGradient={getColor(
+      //   "linear(to-b, gray.50, white)",
+      //   "linear(to-b, gray.800, gray.700)"
+      // )}
+      // border="1px solid"
+      // borderColor={getColor("gray.100", "gray.700")}
       width={"auto"}
       h="lg"
       rounded="2xl"
@@ -75,6 +75,8 @@ const DeckBody = () => {
       flexDir={"column"}
     >
       <DeckNav setShowCreateCard={handleSetShowCreateCard} setShowDeckBody={handleSetShowDeckBody} />
+
+ 
 
       {showStudyCard ? (
         <StudyCard deckId={currentDeckId} setShowStudyCard={handleSetShowStudyCard}/>

@@ -1,0 +1,13 @@
+mutation FollowUser($targetUserId: Int!) {
+  followUser(targetUserId: $targetUserId) {
+    message
+    user {
+      _id
+      username
+      followers {
+        _id
+        username
+      }
+    }
+  }
+}

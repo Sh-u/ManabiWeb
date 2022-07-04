@@ -105,16 +105,18 @@ let CardResolver = class CardResolver {
         return result;
     }
     async getStudyCard({ em, req }) {
+        var _a;
         const currentUser = await em.findOne(User_1.User, { _id: req.session.userId });
         if (!currentUser) {
             return null;
         }
-        const myProgressess = await em.find(CardProgress_1.CardProgress, { user: currentUser });
+        const myProgressess = await em.find(CardProgress_1.CardProgress, { user: currentUser }, { populate: ['card.pitchAccent'] });
         const currentDate = new Date();
         const readyProgresses = myProgressess.filter((progress) => progress.nextRevision < currentDate);
         if (!readyProgresses || readyProgresses.length === 0) {
             return null;
         }
+        console.log((_a = myProgressess[0].card.pitchAccent) === null || _a === void 0 ? void 0 : _a.toArray()[0]);
         return readyProgresses[0].card;
     }
     async createCard(options, deckId, image, audio, { em }) {
@@ -136,27 +138,39 @@ let CardResolver = class CardResolver {
         let scrapedWordMeaning = null;
         let scrapedPitchAccent = null;
         let scrapedFurigana = null;
+        let descriptiveResponse = null;
+        let moraResponse = null;
         if (currentDeck.japaneseTemplate && isInputJPchar) {
-            const reqBody = {
+            const reqWordBody = {
                 query: options.word,
                 language: "English",
                 no_english: false,
             };
-            const response = await fetch("https://jotoba.de/api/search/words", {
+            const jotobaResponse = await fetch("https://jotoba.de/api/search/words", {
                 method: "POST",
-                body: JSON.stringify(reqBody),
+                body: JSON.stringify(reqWordBody),
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
                 },
             });
-            console.log("fetch");
-            if (response) {
-                const parsed = await response.json();
+            const kotuResponse = await fetch("https://kotu.io/api/dictionary/parse", {
+                method: "POST",
+                body: "",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+            });
+            if (kotuResponse) {
+                const parsed = await kotuResponse.json();
+            }
+            if (jotobaResponse) {
+                const parsed = await jotobaResponse.json();
                 const firstObjectWithAudio = parsed.words.find((obj) => obj.audio);
                 const furigana = options.word.length === 1
                     ? parsed.kanji[0].kunyomi[0]
-                    : parsed.words.map((obj) => obj.reading.kana);
+                    : parsed.words[0].reading.kana;
                 const meaning = (_a = firstObjectWithAudio === null || firstObjectWithAudio === void 0 ? void 0 : firstObjectWithAudio.senses[0]) === null || _a === void 0 ? void 0 : _a.glosses;
                 const pitch = firstObjectWithAudio === null || firstObjectWithAudio === void 0 ? void 0 : firstObjectWithAudio.pitch;
                 scrapedWordAudio = `https://jotoba.de${firstObjectWithAudio === null || firstObjectWithAudio === void 0 ? void 0 : firstObjectWithAudio.audio}`;
@@ -180,6 +194,8 @@ let CardResolver = class CardResolver {
                 const part = await em.create(PitchAccent_1.PitchAccent, {
                     part: scrapedPitchAccent.map((obj) => obj.part),
                     high: scrapedPitchAccent.map((obj) => obj.high),
+                    descriptive: descriptiveResponse,
+                    mora: moraResponse,
                     card: card,
                 });
                 await em.persist(part);

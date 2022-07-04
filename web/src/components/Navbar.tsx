@@ -66,7 +66,7 @@ const Navbar = () => {
       alignItems={"center"}
       justifyContent={"space-between"}
     >
-      <Flex alignItems={"center"}>
+      <Flex alignItems={"center"} justify='center'>
         <Box
           fontSize={"24px"}
           fontWeight={"600"}
@@ -80,22 +80,11 @@ const Navbar = () => {
           </NextLink>
         </Box>
 
-        <Button
-          fontSize={"24px"}
-          variant={"solid"}
-          ml={{ base: "20px", md: "50px" }}
-          color="white"
-          bgGradient="linear(to-l, red.700, #FF0020)"
-          rounded={"lg"}
-          _hover={{
-            transitionDuration: "100ms",
-            transform: "scale(1.1 )",
-          }}
-        >
-          <NextLink href="/learn">
-            <Link style={{ textDecoration: "none" }}> Learn</Link>
+       
+          <NextLink href="/learn" >
+            <Link style={{ textDecoration: "none" }} fontSize='3xl' fontWeight={'bold'} ml='10'> Learn</Link>
           </NextLink>
-        </Button>
+       
       </Flex>
 
       <Box w="lg" display={{ base: "none", md: "block" }} position="relative">

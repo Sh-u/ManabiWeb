@@ -62,7 +62,7 @@ LoginInput = __decorate([
 let FieldError = class FieldError {
 };
 __decorate([
-    (0, type_graphql_1.Field)(),
+    (0, type_graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], FieldError.prototype, "field", void 0);
 __decorate([
@@ -72,6 +72,19 @@ __decorate([
 FieldError = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], FieldError);
+let FollowResponse = class FollowResponse {
+};
+__decorate([
+    (0, type_graphql_1.Field)(() => User_1.User, { nullable: true }),
+    __metadata("design:type", User_1.User)
+], FollowResponse.prototype, "user", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    __metadata("design:type", String)
+], FollowResponse.prototype, "message", void 0);
+FollowResponse = __decorate([
+    (0, type_graphql_1.ObjectType)()
+], FollowResponse);
 let UserResponse = class UserResponse {
 };
 __decorate([
@@ -86,6 +99,44 @@ UserResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], UserResponse);
 let UserResolver = class UserResolver {
+    async followUser({ em, req }, targetUserId) {
+        const currentUser = await em.findOne(User_1.User, { _id: req.session.userId });
+        if (!currentUser) {
+            return {
+                message: "follow user: current user not found",
+            };
+        }
+        const targetUser = await em.findOne(User_1.User, { _id: targetUserId }, { populate: ["followers"] });
+        if (!targetUser) {
+            return {
+                message: "follow user: target user not found",
+            };
+        }
+        if (targetUser.followers.contains(currentUser)) {
+            targetUser.followers.remove(currentUser);
+            try {
+                await em.persistAndFlush(targetUser);
+            }
+            catch (err) {
+                console.log(err);
+            }
+            return {
+                user: targetUser,
+                message: "unfollowed",
+            };
+        }
+        targetUser.followers.add(currentUser);
+        try {
+            await em.persistAndFlush(targetUser);
+        }
+        catch (err) {
+            console.log(err);
+        }
+        return {
+            user: targetUser,
+            message: "followed",
+        };
+    }
     async forgotPassword({ em, redis }, _username) {
         const user = await em.findOne(User_1.User, { username: _username });
         if (!user) {
@@ -150,8 +201,26 @@ let UserResolver = class UserResolver {
         return user;
     }
     async getUsers({ em }) {
-        const users = await em.find(User_1.User, {});
+        const users = await em.find(User_1.User, {}, { populate: ["followers"] });
         return users;
+    }
+    async findUser({ em }, targetUsername) {
+        const targetUser = await em.findOne(User_1.User, { username: targetUsername }, { populate: ["followers"] });
+        console.log('here');
+        if (!targetUser) {
+            console.log('error');
+            return {
+                errors: [
+                    {
+                        message: "Find User: Cannot find user with this Id"
+                    }
+                ]
+            };
+        }
+        console.log('good');
+        return {
+            user: targetUser,
+        };
     }
     async changePassword(token, newPassword, { req, em, redis }) {
         if (newPassword.includes("@")) {
@@ -445,6 +514,14 @@ let UserResolver = class UserResolver {
     }
 };
 __decorate([
+    (0, type_graphql_1.Mutation)(() => FollowResponse, { nullable: true }),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)("targetUserId", () => type_graphql_1.Int)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Number]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "followUser", null);
+__decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
     __param(0, (0, type_graphql_1.Ctx)()),
     __param(1, (0, type_graphql_1.Arg)("username")),
@@ -474,6 +551,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "getUsers", null);
+__decorate([
+    (0, type_graphql_1.Query)(() => UserResponse),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)("targetUsername", () => String)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "findUser", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => UserResponse),
     __param(0, (0, type_graphql_1.Arg)("token")),

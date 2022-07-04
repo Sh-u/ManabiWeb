@@ -8,18 +8,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var User_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const core_1 = require("@mikro-orm/core");
 const type_graphql_1 = require("type-graphql");
 const CardProgress_1 = require("./CardProgress");
 const Deck_1 = require("./Deck");
-let User = class User {
+const Follower_1 = require("./Follower");
+let User = User_1 = class User {
     constructor() {
         this.decks = new core_1.Collection(this);
         this.cardProgresses = new core_1.Collection(this);
         this.createdAt = new Date();
         this.updatedAt = new Date();
+        this.followers = new core_1.Collection(this);
     }
 };
 __decorate([
@@ -66,7 +69,12 @@ __decorate([
     (0, core_1.Property)({ type: "date", onUpdate: () => new Date() }),
     __metadata("design:type", Date)
 ], User.prototype, "updatedAt", void 0);
-User = __decorate([
+__decorate([
+    (0, type_graphql_1.Field)(() => [User_1], { nullable: true }),
+    (0, core_1.ManyToMany)({ entity: () => User_1, pivotEntity: () => Follower_1.Follower, nullable: true }),
+    __metadata("design:type", Object)
+], User.prototype, "followers", void 0);
+User = User_1 = __decorate([
     (0, type_graphql_1.ObjectType)(),
     (0, core_1.Entity)()
 ], User);

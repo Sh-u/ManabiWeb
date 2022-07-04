@@ -63,9 +63,9 @@ export class Card {
   @Property({ type: "text", nullable: true })
   dictionaryAudio?: string;
 
-  @Field(() => PitchAccent, { nullable: true })
-  @OneToOne(() => PitchAccent, (pitch) => pitch.card, {owner: true, orphanRemoval: true, nullable: true})
-  pitchAccent?: PitchAccent
+  @Field(() => [PitchAccent], { nullable: true })
+  @OneToMany(() => PitchAccent, accent => accent.card, {nullable: true})
+  pitchAccent? = new Collection<PitchAccent>(this);
 
   @Field(() => String, { nullable: true })
   @Property({ type: "text", nullable: true })

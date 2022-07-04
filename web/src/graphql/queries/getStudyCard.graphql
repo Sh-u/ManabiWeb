@@ -3,6 +3,7 @@ query getStudyCard {
     _id
     sentence
     word
+    furigana
     dictionaryAudio
     dictionaryMeaning
     pitchAccent{

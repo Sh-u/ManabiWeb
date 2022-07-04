@@ -15,10 +15,22 @@ const type_graphql_1 = require("type-graphql");
 const Card_1 = require("./Card");
 let PitchAccent = class PitchAccent {
     constructor() {
+        this.descriptive = null;
+        this.mora = null;
         this.part = [];
         this.high = [];
     }
 };
+__decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    (0, core_1.Property)({ nullable: true }),
+    __metadata("design:type", Object)
+], PitchAccent.prototype, "descriptive", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => type_graphql_1.Int, { nullable: true }),
+    (0, core_1.Property)({ nullable: true }),
+    __metadata("design:type", Object)
+], PitchAccent.prototype, "mora", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => type_graphql_1.Int),
     (0, core_1.PrimaryKey)(),
@@ -36,7 +48,7 @@ __decorate([
 ], PitchAccent.prototype, "high", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => Card_1.Card),
-    (0, core_1.OneToOne)(() => Card_1.Card),
+    (0, core_1.ManyToOne)(() => Card_1.Card),
     __metadata("design:type", Card_1.Card)
 ], PitchAccent.prototype, "card", void 0);
 PitchAccent = __decorate([

@@ -1,0 +1,18 @@
+query FindUser($targetUsername: String!) {
+  findUser(targetUsername: $targetUsername) {
+    errors {
+      field
+      message
+    }
+    user {
+      _id
+      username
+      image
+      createdAt
+      followers {
+        _id
+        username
+      }
+    }
+  }
+}

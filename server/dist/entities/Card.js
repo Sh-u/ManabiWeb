@@ -18,6 +18,7 @@ const PitchAccent_1 = require("./PitchAccent");
 let Card = class Card {
     constructor() {
         this.cardProgresses = new core_1.Collection(this);
+        this.pitchAccent = new core_1.Collection(this);
         this.createdAt = new Date();
         this.updatedAt = new Date();
     }
@@ -63,9 +64,9 @@ __decorate([
     __metadata("design:type", String)
 ], Card.prototype, "dictionaryAudio", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => PitchAccent_1.PitchAccent, { nullable: true }),
-    (0, core_1.OneToOne)(() => PitchAccent_1.PitchAccent, (pitch) => pitch.card, { owner: true, orphanRemoval: true, nullable: true }),
-    __metadata("design:type", PitchAccent_1.PitchAccent)
+    (0, type_graphql_1.Field)(() => [PitchAccent_1.PitchAccent], { nullable: true }),
+    (0, core_1.OneToMany)(() => PitchAccent_1.PitchAccent, accent => accent.card, { nullable: true }),
+    __metadata("design:type", Object)
 ], Card.prototype, "pitchAccent", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String, { nullable: true }),

@@ -294,6 +294,71 @@
     },
     {
       "columns": {
+        "user_1__id": {
+          "name": "user_1__id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "user_2__id": {
+          "name": "user_2__id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "user_followers",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "user_followers_pkey",
+          "columnNames": [
+            "user_1__id",
+            "user_2__id"
+          ],
+          "composite": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "user_followers_user_1__id_foreign": {
+          "constraintName": "user_followers_user_1__id_foreign",
+          "columnNames": [
+            "user_1__id"
+          ],
+          "localTableName": "public.user_followers",
+          "referencedColumnNames": [
+            "_id"
+          ],
+          "referencedTableName": "public.user",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "user_followers_user_2__id_foreign": {
+          "constraintName": "user_followers_user_2__id_foreign",
+          "columnNames": [
+            "user_2__id"
+          ],
+          "localTableName": "public.user_followers",
+          "referencedColumnNames": [
+            "_id"
+          ],
+          "referencedTableName": "public.user",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
         "_id": {
           "name": "_id",
           "type": "serial",
@@ -357,15 +422,6 @@
           "nullable": true,
           "mappedType": "text"
         },
-        "pitch_accent__id": {
-          "name": "pitch_accent__id",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "mappedType": "integer"
-        },
         "user_audio": {
           "name": "user_audio",
           "type": "text",
@@ -409,15 +465,6 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": [
-            "pitch_accent__id"
-          ],
-          "composite": false,
-          "keyName": "card_pitch_accent__id_unique",
-          "primary": false,
-          "unique": true
-        },
-        {
           "keyName": "card_pkey",
           "columnNames": [
             "_id"
@@ -429,19 +476,6 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "card_pitch_accent__id_foreign": {
-          "constraintName": "card_pitch_accent__id_foreign",
-          "columnNames": [
-            "pitch_accent__id"
-          ],
-          "localTableName": "public.card",
-          "referencedColumnNames": [
-            "_id"
-          ],
-          "referencedTableName": "public.pitch_accent",
-          "deleteRule": "set null",
-          "updateRule": "cascade"
-        },
         "card_deck__id_foreign": {
           "constraintName": "card_deck__id_foreign",
           "columnNames": [
@@ -586,6 +620,24 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "descriptive": {
+          "name": "descriptive",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "json"
+        },
+        "mora": {
+          "name": "mora",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "json"
+        },
         "part": {
           "name": "part",
           "type": "jsonb",
@@ -617,15 +669,6 @@
       "name": "pitch_accent",
       "schema": "public",
       "indexes": [
-        {
-          "columnNames": [
-            "card__id"
-          ],
-          "composite": false,
-          "keyName": "pitch_accent_card__id_unique",
-          "primary": false,
-          "unique": true
-        },
         {
           "keyName": "pitch_accent_pkey",
           "columnNames": [

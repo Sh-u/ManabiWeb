@@ -12,6 +12,7 @@ import {
 import { Field, Int, ObjectType } from "type-graphql";
 import { CardProgress } from "./CardProgress";
 import { Deck } from "./Deck";
+import { Follower } from "./Follower";
 
 @ObjectType()
 @Entity()
@@ -57,4 +58,9 @@ export class User {
   @Field(() => Date)
   @Property({ type: "date", onUpdate: () => new Date() })
   updatedAt: Date = new Date();
+
+
+  @Field(() => [User], {nullable: true})
+  @ManyToMany({ entity: () => User, pivotEntity: () => Follower, nullable: true})
+  followers = new Collection<User>(this);
 }

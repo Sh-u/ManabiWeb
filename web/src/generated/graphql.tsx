@@ -29,7 +29,7 @@ export type Card = {
   dictionaryMeaning?: Maybe<Array<Scalars['String']>>;
   furigana?: Maybe<Scalars['String']>;
   image?: Maybe<Scalars['String']>;
-  pitchAccent?: Maybe<PitchAccent>;
+  pitchAccent?: Maybe<Array<PitchAccent>>;
   sentence: Scalars['String'];
   updatedAt: Scalars['String'];
   userAudio?: Maybe<Scalars['String']>;
@@ -88,8 +88,14 @@ export type DeckSubscriber = {
 
 export type FieldError = {
   __typename?: 'FieldError';
-  field: Scalars['String'];
+  field?: Maybe<Scalars['String']>;
   message: Scalars['String'];
+};
+
+export type FollowResponse = {
+  __typename?: 'FollowResponse';
+  message?: Maybe<Scalars['String']>;
+  user?: Maybe<User>;
 };
 
 export type LearnAndReviewResponse = {
@@ -116,6 +122,7 @@ export type Mutation = {
   deleteCard: Scalars['Boolean'];
   deleteDeck: Scalars['Boolean'];
   editCard: CardResponse;
+  followUser?: Maybe<FollowResponse>;
   forgotPassword: Scalars['Boolean'];
   login: UserResponse;
   logout: Scalars['Boolean'];
@@ -182,6 +189,11 @@ export type MutationEditCardArgs = {
 };
 
 
+export type MutationFollowUserArgs = {
+  targetUserId: Scalars['Int'];
+};
+
+
 export type MutationForgotPasswordArgs = {
   username: Scalars['String'];
 };
@@ -226,13 +238,16 @@ export type PitchAccent = {
   __typename?: 'PitchAccent';
   _id: Scalars['Int'];
   card: Card;
+  descriptive?: Maybe<Scalars['String']>;
   high: Array<Scalars['Boolean']>;
+  mora?: Maybe<Scalars['Int']>;
   part: Array<Scalars['String']>;
 };
 
 export type Query = {
   __typename?: 'Query';
   findDeck: DeckResponse;
+  findUser: UserResponse;
   getAllDecks: Array<Deck>;
   getCardProgresses?: Maybe<Array<CardProgress>>;
   getCards: Array<Card>;
@@ -249,6 +264,11 @@ export type Query = {
 
 export type QueryFindDeckArgs = {
   _id: Scalars['Int'];
+};
+
+
+export type QueryFindUserArgs = {
+  targetUsername: Scalars['String'];
 };
 
 
@@ -285,6 +305,7 @@ export type User = {
   createdAt: Scalars['DateTime'];
   decks: Array<Deck>;
   email: Scalars['String'];
+  followers?: Maybe<Array<User>>;
   image?: Maybe<Scalars['String']>;
   updatedAt: Scalars['DateTime'];
   username: Scalars['String'];
@@ -303,7 +324,7 @@ export type ChangeEmailMutationVariables = Exact<{
 }>;
 
 
-export type ChangeEmailMutation = { __typename?: 'Mutation', changeEmail: { __typename?: 'UserResponse', user?: { __typename?: 'User', _id: number, username: string, email: string } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
+export type ChangeEmailMutation = { __typename?: 'Mutation', changeEmail: { __typename?: 'UserResponse', user?: { __typename?: 'User', _id: number, username: string, email: string } | null, errors?: Array<{ __typename?: 'FieldError', field?: string | null, message: string }> | null } };
 
 export type ChangePasswordMutationVariables = Exact<{
   token: Scalars['String'];
@@ -311,14 +332,14 @@ export type ChangePasswordMutationVariables = Exact<{
 }>;
 
 
-export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
+export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field?: string | null, message: string }> | null, user?: { __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
 
 export type ChangeUsernameMutationVariables = Exact<{
   newUsername: Scalars['String'];
 }>;
 
 
-export type ChangeUsernameMutation = { __typename?: 'Mutation', changeUsername: { __typename?: 'UserResponse', user?: { __typename?: 'User', _id: number, username: string, email: string } | null, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null } };
+export type ChangeUsernameMutation = { __typename?: 'Mutation', changeUsername: { __typename?: 'UserResponse', user?: { __typename?: 'User', _id: number, username: string, email: string } | null, errors?: Array<{ __typename?: 'FieldError', field?: string | null, message: string }> | null } };
 
 export type ChooseCardDifficultyMutationVariables = Exact<{
   currentCardId: Scalars['Int'];
@@ -370,6 +391,13 @@ export type EditCardMutationVariables = Exact<{
 
 export type EditCardMutation = { __typename?: 'Mutation', editCard: { __typename?: 'CardResponse', error?: string | null, card?: { __typename?: 'Card', _id: number, sentence: string, word: string, image?: string | null, dictionaryAudio?: string | null, userAudio?: string | null, createdAt: string, updatedAt: string } | null } };
 
+export type FollowUserMutationVariables = Exact<{
+  targetUserId: Scalars['Int'];
+}>;
+
+
+export type FollowUserMutation = { __typename?: 'Mutation', followUser?: { __typename?: 'FollowResponse', message?: string | null, user?: { __typename?: 'User', _id: number, username: string, followers?: Array<{ __typename?: 'User', _id: number, username: string }> | null } | null } | null };
+
 export type ForgotPasswordMutationVariables = Exact<{
   username: Scalars['String'];
 }>;
@@ -382,7 +410,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field?: string | null, message: string }> | null, user?: { __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -394,7 +422,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field?: string | null, message: string }> | null, user?: { __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> } | null } };
 
 export type RenameDeckMutationVariables = Exact<{
   _id: Scalars['Float'];
@@ -432,6 +460,13 @@ export type FindDeckQueryVariables = Exact<{
 
 export type FindDeckQuery = { __typename?: 'Query', findDeck: { __typename?: 'DeckResponse', decks?: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string, updatedAt: string, startingEase: number, steps: Array<number>, user: { __typename?: 'User', _id: number, username: string, image?: string | null }, cards: Array<{ __typename?: 'Card', _id: number, sentence: string, word: string, image?: string | null, userAudio?: string | null, dictionaryAudio?: string | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, steps: number, nextRevision: any }> }>, subscribers: Array<{ __typename?: 'DeckSubscriber', _id: number }> }> | null } };
 
+export type FindUserQueryVariables = Exact<{
+  targetUsername: Scalars['String'];
+}>;
+
+
+export type FindUserQuery = { __typename?: 'Query', findUser: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field?: string | null, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string, image?: string | null, createdAt: any, followers?: Array<{ __typename?: 'User', _id: number, username: string }> | null } | null } };
+
 export type GetAllDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -464,12 +499,12 @@ export type GetRevisionTimeQuery = { __typename?: 'Query', getRevisionTime: { __
 export type GetStudyCardQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetStudyCardQuery = { __typename?: 'Query', getStudyCard?: { __typename?: 'Card', _id: number, sentence: string, word: string, dictionaryAudio?: string | null, dictionaryMeaning?: Array<string> | null, userAudio?: string | null, image?: string | null, pitchAccent?: { __typename?: 'PitchAccent', part: Array<string>, high: Array<boolean> } | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, nextRevision: any, steps: number, state: string }> } | null };
+export type GetStudyCardQuery = { __typename?: 'Query', getStudyCard?: { __typename?: 'Card', _id: number, sentence: string, word: string, furigana?: string | null, dictionaryAudio?: string | null, dictionaryMeaning?: Array<string> | null, userAudio?: string | null, image?: string | null, pitchAccent?: Array<{ __typename?: 'PitchAccent', part: Array<string>, high: Array<boolean> }> | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, nextRevision: any, steps: number, state: string }> } | null };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> }> };
+export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, followers?: Array<{ __typename?: 'User', _id: number }> | null, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> }> };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -850,6 +885,47 @@ export function useEditCardMutation(baseOptions?: Apollo.MutationHookOptions<Edi
 export type EditCardMutationHookResult = ReturnType<typeof useEditCardMutation>;
 export type EditCardMutationResult = Apollo.MutationResult<EditCardMutation>;
 export type EditCardMutationOptions = Apollo.BaseMutationOptions<EditCardMutation, EditCardMutationVariables>;
+export const FollowUserDocument = gql`
+    mutation FollowUser($targetUserId: Int!) {
+  followUser(targetUserId: $targetUserId) {
+    message
+    user {
+      _id
+      username
+      followers {
+        _id
+        username
+      }
+    }
+  }
+}
+    `;
+export type FollowUserMutationFn = Apollo.MutationFunction<FollowUserMutation, FollowUserMutationVariables>;
+
+/**
+ * __useFollowUserMutation__
+ *
+ * To run a mutation, you first call `useFollowUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFollowUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [followUserMutation, { data, loading, error }] = useFollowUserMutation({
+ *   variables: {
+ *      targetUserId: // value for 'targetUserId'
+ *   },
+ * });
+ */
+export function useFollowUserMutation(baseOptions?: Apollo.MutationHookOptions<FollowUserMutation, FollowUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<FollowUserMutation, FollowUserMutationVariables>(FollowUserDocument, options);
+      }
+export type FollowUserMutationHookResult = ReturnType<typeof useFollowUserMutation>;
+export type FollowUserMutationResult = Apollo.MutationResult<FollowUserMutation>;
+export type FollowUserMutationOptions = Apollo.BaseMutationOptions<FollowUserMutation, FollowUserMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($username: String!) {
   forgotPassword(username: $username)
@@ -1187,6 +1263,54 @@ export function useFindDeckLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<F
 export type FindDeckQueryHookResult = ReturnType<typeof useFindDeckQuery>;
 export type FindDeckLazyQueryHookResult = ReturnType<typeof useFindDeckLazyQuery>;
 export type FindDeckQueryResult = Apollo.QueryResult<FindDeckQuery, FindDeckQueryVariables>;
+export const FindUserDocument = gql`
+    query FindUser($targetUsername: String!) {
+  findUser(targetUsername: $targetUsername) {
+    errors {
+      field
+      message
+    }
+    user {
+      _id
+      username
+      image
+      createdAt
+      followers {
+        _id
+        username
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useFindUserQuery__
+ *
+ * To run a query within a React component, call `useFindUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindUserQuery({
+ *   variables: {
+ *      targetUsername: // value for 'targetUsername'
+ *   },
+ * });
+ */
+export function useFindUserQuery(baseOptions: Apollo.QueryHookOptions<FindUserQuery, FindUserQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindUserQuery, FindUserQueryVariables>(FindUserDocument, options);
+      }
+export function useFindUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindUserQuery, FindUserQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindUserQuery, FindUserQueryVariables>(FindUserDocument, options);
+        }
+export type FindUserQueryHookResult = ReturnType<typeof useFindUserQuery>;
+export type FindUserLazyQueryHookResult = ReturnType<typeof useFindUserLazyQuery>;
+export type FindUserQueryResult = Apollo.QueryResult<FindUserQuery, FindUserQueryVariables>;
 export const GetAllDecksDocument = gql`
     query GetAllDecks {
   getAllDecks {
@@ -1398,6 +1522,7 @@ export const GetStudyCardDocument = gql`
     _id
     sentence
     word
+    furigana
     dictionaryAudio
     dictionaryMeaning
     pitchAccent {
@@ -1446,6 +1571,9 @@ export const GetUsersDocument = gql`
     query GetUsers {
   getUsers {
     ...BasicUser
+    followers {
+      _id
+    }
   }
 }
     ${BasicUserFragmentDoc}`;
@@ -1553,6 +1681,7 @@ export type SearchForDeckQueryResult = Apollo.QueryResult<SearchForDeckQuery, Se
 export const namedOperations = {
   Query: {
     FindDeck: 'FindDeck',
+    FindUser: 'FindUser',
     GetAllDecks: 'GetAllDecks',
     GetCards: 'GetCards',
     getLearnAndReviewCards: 'getLearnAndReviewCards',
@@ -1573,6 +1702,7 @@ export const namedOperations = {
     DeleteCard: 'DeleteCard',
     DeleteDeck: 'DeleteDeck',
     EditCard: 'EditCard',
+    FollowUser: 'FollowUser',
     ForgotPassword: 'ForgotPassword',
     Login: 'Login',
     Logout: 'Logout',

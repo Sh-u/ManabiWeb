@@ -47,11 +47,20 @@ class LoginInput {
 
 @ObjectType()
 class FieldError {
-  @Field()
-  field: string;
+  @Field({nullable: true})
+  field?: string;
 
   @Field()
   message: string;
+}
+
+@ObjectType()
+class FollowResponse {
+  @Field(() => User, { nullable: true })
+  user?: User;
+
+  @Field(() => String, { nullable: true })
+  message?: string;
 }
 
 @ObjectType()
@@ -65,6 +74,59 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
+  @Mutation(() => FollowResponse, { nullable: true })
+  async followUser(
+    @Ctx() { em, req }: MyContext,
+    @Arg("targetUserId", () => Int) targetUserId: number
+  ): Promise<FollowResponse | null> {
+    const currentUser = await em.findOne(User, { _id: req.session.userId });
+
+    if (!currentUser) {
+      return {
+        message: "follow user: current user not found",
+      };
+    }
+
+    const targetUser = await em.findOne(
+      User,
+      { _id: targetUserId },
+      { populate: ["followers"] }
+    );
+
+    if (!targetUser) {
+      return {
+        message: "follow user: target user not found",
+      };
+    }
+
+    if (targetUser.followers.contains(currentUser)) {
+      targetUser.followers.remove(currentUser);
+      try {
+        await em.persistAndFlush(targetUser);
+      } catch (err) {
+        console.log(err);
+      }
+
+      return {
+        user: targetUser,
+        message: "unfollowed",
+      };
+    }
+
+    targetUser.followers.add(currentUser);
+
+    try {
+      await em.persistAndFlush(targetUser);
+    } catch (err) {
+      console.log(err);
+    }
+
+    return {
+      user: targetUser,
+      message: "followed",
+    };
+  }
+
   @Mutation(() => Boolean)
   async forgotPassword(
     @Ctx() { em, redis }: MyContext,
@@ -165,8 +227,31 @@ export class UserResolver {
 
   @Query(() => [User])
   async getUsers(@Ctx() { em }: MyContext) {
-    const users = await em.find(User, {});
+    const users = await em.find(User, {}, { populate: ["followers"] });
     return users;
+  }
+
+  @Query(() => UserResponse)
+  async findUser(
+    @Ctx() { em }: MyContext,
+    @Arg("targetUsername", () => String) targetUsername: string
+  ): Promise<UserResponse> {
+    const targetUser = await em.findOne(User, {username: targetUsername}, { populate: ["followers"] });
+    console.log('here')
+    if (!targetUser){
+      console.log('error')
+      return {
+        errors: [
+          {
+            message: "Find User: Cannot find user with this Id"
+          }
+        ]
+      }
+    }
+    console.log('good')
+    return {
+      user: targetUser,
+    }
   }
 
   @Mutation(() => UserResponse)
@@ -434,8 +519,6 @@ export class UserResolver {
       username: options.username,
       password: hashedPassword,
       email: options.email,
-
-
     });
 
     if (!user) {
@@ -448,14 +531,12 @@ export class UserResolver {
         ],
       };
     }
- 
 
     try {
       await em.persistAndFlush(user);
     } catch (err) {
       console.log(err);
       if (err.code === "23505") {
-   
         return {
           errors: [
             {
@@ -482,7 +563,7 @@ export class UserResolver {
       });
     }
 
-    console.log(`user id`, user._id)
+    console.log(`user id`, user._id);
     req.session.userId = user._id;
     return {
       user,

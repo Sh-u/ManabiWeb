@@ -197,13 +197,13 @@ const AddCard = ({ currentDeckId }: { currentDeckId: number }) => {
                       </Box>
 
                       <Flex flexDir={"column"} justify="center" align="start">
-                        <Player
+                        {/* <Player
                           marginTop={"10"}
                           isUsers={false}
                           url={
                             "https://sounds.soundofgothic.pl/assets/gsounds/INFO_BAU_2_WICHTIGEPERSONEN_15_00.WAV"
                           }
-                        />
+                        /> */}
 
                         {audio?.url ? (
                           <Flex
@@ -245,7 +245,7 @@ const AddCard = ({ currentDeckId }: { currentDeckId: number }) => {
                         >
                           Close
                         </Button>
-                        <Button ml="5" variant={"solid"} type="submit">
+                        <Button ml="5" variant={"solid"} type="submit" isLoading={isSubmitting}>
                           Save
                         </Button>
                       </Flex>
