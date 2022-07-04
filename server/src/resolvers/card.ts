@@ -195,7 +195,16 @@ export class CardResolver {
         },
       });
 
-      const kotuResponse = await fetch("https://kotu.io/api/dictionary/parse", {
+      const kotuSegmentResponse = await fetch("https://kotu.io/api/dictionary/segment", {
+        method: "POST",
+        body: options.sentence,
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+
+      const kotuParseResponse = await fetch("https://kotu.io/api/dictionary/parse", {
         method: "POST",
         body: "",
         headers: {
@@ -204,8 +213,14 @@ export class CardResolver {
         },
       });
 
-      if (kotuResponse){
-        const parsed = await kotuResponse.json();
+      if (kotuSegmentResponse){
+        const parsed = await kotuSegmentResponse.json();
+
+
+      }
+
+      if (kotuParseResponse){
+        const parsed = await kotuParseResponse.json();
 
         
 

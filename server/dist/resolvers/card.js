@@ -154,7 +154,15 @@ let CardResolver = class CardResolver {
                     Accept: "application/json",
                 },
             });
-            const kotuResponse = await fetch("https://kotu.io/api/dictionary/parse", {
+            const kotuSegmentResponse = await fetch("https://kotu.io/api/dictionary/segment", {
+                method: "POST",
+                body: options.sentence,
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+            });
+            const kotuParseResponse = await fetch("https://kotu.io/api/dictionary/parse", {
                 method: "POST",
                 body: "",
                 headers: {
@@ -162,8 +170,11 @@ let CardResolver = class CardResolver {
                     Accept: "application/json",
                 },
             });
-            if (kotuResponse) {
-                const parsed = await kotuResponse.json();
+            if (kotuSegmentResponse) {
+                const parsed = await kotuSegmentResponse.json();
+            }
+            if (kotuParseResponse) {
+                const parsed = await kotuParseResponse.json();
             }
             if (jotobaResponse) {
                 const parsed = await jotobaResponse.json();

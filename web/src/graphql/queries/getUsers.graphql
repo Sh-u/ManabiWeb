@@ -1,8 +1,8 @@
-query GetUsers{
-    getUsers {
-        ...BasicUser,
-        followers{
-            _id
-        }
+query GetUsers {
+  getUsers {
+    ...BasicUser
+    followers {
+      _id
     }
+  }
 }
