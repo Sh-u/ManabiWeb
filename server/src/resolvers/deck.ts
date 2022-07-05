@@ -53,6 +53,7 @@ export class DeckResolver {
 
   @Query(() => DeckResponse)
   async getMyDecks(@Ctx() { req, em }: MyContext): Promise<DeckResponse> {
+    
     const user = await em.findOne(User, { _id: req.session.userId });
 
     if (!user) {

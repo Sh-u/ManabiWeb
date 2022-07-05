@@ -39,15 +39,18 @@ const Decks = () => {
   const [currentDeckBodyInfo, setCurrentDeckBodyInfo] = useRecoilState<
     number | undefined
   >(currentDeckBodyInfoState);
-
-  const { data: decksData, loading, error, refetch } = useGetMyDecksQuery();
   const meQuery = useMeQuery();
+  const { data: decksData, loading, error, refetch } = useGetMyDecksQuery();
+
   const [createDeck] = useCreateDeckMutation();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const initialRef = React.useRef();
 
   console.log('decks')
+
+
+  console.log(decksData?.getMyDecks)
 
   const handleDeckCreation = () => {
     if (!meQuery.data?.me) {

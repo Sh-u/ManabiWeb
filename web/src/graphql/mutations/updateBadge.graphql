@@ -1,0 +1,3 @@
+mutation UpdateBadge($username: String!) {
+  updateBadge(username: $username)
+}

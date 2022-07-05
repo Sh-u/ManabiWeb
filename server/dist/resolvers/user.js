@@ -15,16 +15,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserResolver = void 0;
+exports.UserResolver = exports.BadgeUpdateIntervals = void 0;
 const argon2_1 = __importDefault(require("argon2"));
-const sendMail_1 = require("../utility/sendMail");
+const date_fns_1 = require("date-fns");
+const fs_1 = require("fs");
+const graphql_upload_1 = require("graphql-upload");
+const path_1 = __importDefault(require("path"));
 const type_graphql_1 = require("type-graphql");
+const uuid_1 = require("uuid");
 const constants_1 = require("../constants");
 const User_1 = require("../entities/User");
-const uuid_1 = require("uuid");
-const graphql_upload_1 = require("graphql-upload");
-const fs_1 = require("fs");
-const path_1 = __importDefault(require("path"));
+const sendMail_1 = require("../utility/sendMail");
+var BadgeUpdateIntervals;
+(function (BadgeUpdateIntervals) {
+    BadgeUpdateIntervals[BadgeUpdateIntervals["improving"] = 14] = "improving";
+    BadgeUpdateIntervals[BadgeUpdateIntervals["scholar"] = 90] = "scholar";
+    BadgeUpdateIntervals[BadgeUpdateIntervals["cardMaster"] = 365] = "cardMaster";
+})(BadgeUpdateIntervals = exports.BadgeUpdateIntervals || (exports.BadgeUpdateIntervals = {}));
 let RegisterInput = class RegisterInput {
 };
 __decorate([
@@ -137,6 +144,37 @@ let UserResolver = class UserResolver {
             message: "followed",
         };
     }
+    async updateBadge({ em }, _username) {
+        const targetUser = await em.findOne(User_1.User, { username: _username });
+        if (!targetUser) {
+            return false;
+        }
+        const creationDate = targetUser === null || targetUser === void 0 ? void 0 : targetUser.createdAt;
+        const currentDate = new Date();
+        if ((0, date_fns_1.differenceInDays)(currentDate, creationDate) <
+            BadgeUpdateIntervals.improving) {
+            return false;
+        }
+        else if ((0, date_fns_1.differenceInDays)(currentDate, creationDate) >=
+            BadgeUpdateIntervals.cardMaster) {
+            targetUser.badge = "Card Master";
+        }
+        else if ((0, date_fns_1.differenceInDays)(currentDate, creationDate) >=
+            BadgeUpdateIntervals.scholar) {
+            targetUser.badge = "Scholar";
+        }
+        else if ((0, date_fns_1.differenceInDays)(currentDate, creationDate) >=
+            BadgeUpdateIntervals.improving) {
+            targetUser.badge = "Improving";
+        }
+        try {
+            await em.persistAndFlush(targetUser);
+        }
+        catch (err) {
+            console.log(err);
+        }
+        return true;
+    }
     async forgotPassword({ em, redis }, _username) {
         const user = await em.findOne(User_1.User, { username: _username });
         if (!user) {
@@ -205,19 +243,20 @@ let UserResolver = class UserResolver {
         return users;
     }
     async findUser({ em }, targetUsername) {
-        const targetUser = await em.findOne(User_1.User, { username: targetUsername }, { populate: ["followers"] });
-        console.log('here');
+        console.log("find");
+        const targetUser = await em.findOne(User_1.User, { username: targetUsername }, { populate: true });
+        console.log(targetUser === null || targetUser === void 0 ? void 0 : targetUser.followers.getItems());
         if (!targetUser) {
-            console.log('error');
+            console.log("error");
             return {
                 errors: [
                     {
-                        message: "Find User: Cannot find user with this Id"
-                    }
-                ]
+                        message: "Find User: Cannot find user with this Id",
+                    },
+                ],
             };
         }
-        console.log('good');
+        console.log("good");
         return {
             user: targetUser,
         };
@@ -521,6 +560,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Number]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "followUser", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Boolean),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)("username")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "updateBadge", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
     __param(0, (0, type_graphql_1.Ctx)()),

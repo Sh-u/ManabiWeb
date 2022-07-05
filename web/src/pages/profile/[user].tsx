@@ -6,27 +6,24 @@ import {
   Divider,
   Flex,
   Icon,
-  Text,
+  Image,
   Link,
   Spinner,
+  Text,
 } from "@chakra-ui/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import NextLink from "next/link";
+import { useRouter } from "next/router";
 import { HiClock, HiPencil, HiSearch, HiUserGroup } from "react-icons/hi";
 import Navbar from "../../components/Navbar";
 import {
   FindUserDocument,
   FindUserQuery,
-  GetUsersDocument,
-  GetUsersQuery,
   useFollowUserMutation,
   useMeQuery,
-  useFindUserQuery,
 } from "../../generated/graphql";
 import useColors from "../../hooks/useColors";
 import { client } from "../client";
-import NextLink from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/router";
 
 interface FoundUser {
   foundUser: {
@@ -35,6 +32,9 @@ interface FoundUser {
     username: string;
     image?: string;
     createdAt: any;
+    badge: string;
+    dayStreak: number;
+    cardStudied: number;
     followers?: {
       __typename?: "User";
       _id: number;
@@ -48,12 +48,20 @@ const UserPage = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { getColor } = useColors();
   const router = useRouter();
+  
   let createdAt = foundUser?.createdAt?.toString();
   createdAt = createdAt.substring(0, createdAt.indexOf("T"));
+
+  const meQuery = useMeQuery();
 
   const [followUser] = useFollowUserMutation();
 
   const handleFollow = async () => {
+    if (!meQuery.data?.me) {
+      router.push("/login");
+      return;
+    }
+
     const response = await followUser({
       variables: {
         targetUserId: foundUser?._id,
@@ -71,6 +79,22 @@ const UserPage = ({
   console.log(foundUser?.followers);
   const { data: loggedUser, loading } = useMeQuery();
   const image = foundUser?.image;
+
+  const getBadgeColor = (badge: string) => {
+    switch (badge) {
+      case "New":
+        return "green";
+
+      case "Improving":
+        return "yellow";
+
+      case "Scholar":
+        return "blue";
+
+      case "Card Master":
+        return "red";
+    }
+  };
 
   if (loading) {
     return <Spinner color="red.800" />;
@@ -147,12 +171,14 @@ const UserPage = ({
               size={"2xl"}
             />
             <Flex align="start" justify={"center"} flexDir="column" ml="3">
-              <Text fontSize={"3xl"} fontWeight="semibold">
-                {foundUser?.username}
-                <Badge ml="2" colorScheme="green">
-                  New
+              <Flex justify="center" align="center">
+                <Text fontSize={"3xl"} fontWeight="semibold">
+                  {foundUser?.username}
+                </Text>
+                <Badge ml="2" colorScheme={getBadgeColor(foundUser?.badge)}>
+                  {foundUser?.badge}
                 </Badge>
-              </Text>
+              </Flex>
               <Flex fontSize={"sm"} align="center" justify={"center"}>
                 <Icon as={HiClock} /> <Text ml="2">joined on: {createdAt}</Text>
               </Flex>
@@ -162,9 +188,12 @@ const UserPage = ({
                   Followers: {foundUser?.followers?.length} / Following: 0
                 </Text>
               </Flex>
-              <Flex fontSize={"sm"} align="center" justify={"center"}>
-                🇯🇵
-              </Flex>
+              <Image
+                boxSize="30px"
+                borderRadius="md"
+                src="/jpFlag.svg"
+                alt="jp"
+              />
             </Flex>
           </Flex>
           <Box opacity={0}>empty</Box>
@@ -190,8 +219,8 @@ const UserPage = ({
               rounded="xl"
               p="2"
               w="10vw"
-              color="gray.400"
-              opacity={0.5}
+              color={foundUser?.dayStreak === 0 ? "gray.400" : "gray.100"}
+              opacity={foundUser?.dayStreak === 0 ? 0.5 : 1}
             >
               <Flex align="center" justify="start">
                 <Text fontSize={"lg"}>🔥</Text>
@@ -202,7 +231,9 @@ const UserPage = ({
                   fontSize="md"
                   ml="3"
                 >
-                  <Text fontWeight={"bold"}>0</Text>
+                  <Text fontWeight={"bold"} fontSize="lg">
+                    {foundUser?.dayStreak}
+                  </Text>
                   <Text>Day Streak</Text>
                 </Flex>
               </Flex>
@@ -212,8 +243,8 @@ const UserPage = ({
               rounded="xl"
               p="2"
               w="10vw"
-              color="gray.400"
-              opacity={0.5}
+              color={foundUser?.cardStudied === 0 ? "gray.400" : "gray.100"}
+              opacity={foundUser?.cardStudied === 0 ? 0.5 : 1}
               mt="10"
             >
               <Flex align="center" justify="start">
@@ -261,12 +292,6 @@ export const getServerSideProps: GetServerSideProps<FoundUser> = async ({
 }) => {
   const inputedUser = query.user;
 
-  // const { data, refetch: findUserRefetch } = useFindUserQuery({
-  //   variables: {
-  //     targetUsername: inputedUser.toString(),
-  //   },
-  // });
-
   const { data } = await client.query<FindUserQuery>({
     query: FindUserDocument,
     variables: {
@@ -278,6 +303,7 @@ export const getServerSideProps: GetServerSideProps<FoundUser> = async ({
   const foundUser = data?.findUser?.user;
 
   console.log(foundUser);
+
   if (foundUser) {
     return {
       props: {

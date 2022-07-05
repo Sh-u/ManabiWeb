@@ -130,6 +130,7 @@ export type Mutation = {
   renameDeck?: Maybe<Deck>;
   subscribeToDeck: DeckResponse;
   unsubscribeToDeck: Scalars['Boolean'];
+  updateBadge: Scalars['Boolean'];
   updateCardTitle?: Maybe<Card>;
   uploadAvatar: Scalars['Boolean'];
 };
@@ -225,6 +226,11 @@ export type MutationUnsubscribeToDeckArgs = {
 };
 
 
+export type MutationUpdateBadgeArgs = {
+  username: Scalars['String'];
+};
+
+
 export type MutationUpdateCardTitleArgs = {
   _id: Scalars['Float'];
 };
@@ -301,8 +307,11 @@ export type RevisionTimeResponse = {
 export type User = {
   __typename?: 'User';
   _id: Scalars['Int'];
+  badge: Scalars['String'];
   cardProgresses?: Maybe<Array<CardProgress>>;
+  cardStudied: Scalars['Int'];
   createdAt: Scalars['DateTime'];
+  dayStreak: Scalars['Int'];
   decks: Array<Deck>;
   email: Scalars['String'];
   followers?: Maybe<Array<User>>;
@@ -446,6 +455,13 @@ export type UnsubscribeToDeckMutationVariables = Exact<{
 
 export type UnsubscribeToDeckMutation = { __typename?: 'Mutation', unsubscribeToDeck: boolean };
 
+export type UpdateBadgeMutationVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type UpdateBadgeMutation = { __typename?: 'Mutation', updateBadge: boolean };
+
 export type UploadAvatarMutationVariables = Exact<{
   image: Scalars['Upload'];
 }>;
@@ -465,7 +481,7 @@ export type FindUserQueryVariables = Exact<{
 }>;
 
 
-export type FindUserQuery = { __typename?: 'Query', findUser: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field?: string | null, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string, image?: string | null, createdAt: any, followers?: Array<{ __typename?: 'User', _id: number, username: string }> | null } | null } };
+export type FindUserQuery = { __typename?: 'Query', findUser: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field?: string | null, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string, image?: string | null, createdAt: any, badge: string, dayStreak: number, cardStudied: number, followers?: Array<{ __typename?: 'User', _id: number, username: string }> | null } | null } };
 
 export type GetAllDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1169,6 +1185,37 @@ export function useUnsubscribeToDeckMutation(baseOptions?: Apollo.MutationHookOp
 export type UnsubscribeToDeckMutationHookResult = ReturnType<typeof useUnsubscribeToDeckMutation>;
 export type UnsubscribeToDeckMutationResult = Apollo.MutationResult<UnsubscribeToDeckMutation>;
 export type UnsubscribeToDeckMutationOptions = Apollo.BaseMutationOptions<UnsubscribeToDeckMutation, UnsubscribeToDeckMutationVariables>;
+export const UpdateBadgeDocument = gql`
+    mutation UpdateBadge($username: String!) {
+  updateBadge(username: $username)
+}
+    `;
+export type UpdateBadgeMutationFn = Apollo.MutationFunction<UpdateBadgeMutation, UpdateBadgeMutationVariables>;
+
+/**
+ * __useUpdateBadgeMutation__
+ *
+ * To run a mutation, you first call `useUpdateBadgeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateBadgeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateBadgeMutation, { data, loading, error }] = useUpdateBadgeMutation({
+ *   variables: {
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useUpdateBadgeMutation(baseOptions?: Apollo.MutationHookOptions<UpdateBadgeMutation, UpdateBadgeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateBadgeMutation, UpdateBadgeMutationVariables>(UpdateBadgeDocument, options);
+      }
+export type UpdateBadgeMutationHookResult = ReturnType<typeof useUpdateBadgeMutation>;
+export type UpdateBadgeMutationResult = Apollo.MutationResult<UpdateBadgeMutation>;
+export type UpdateBadgeMutationOptions = Apollo.BaseMutationOptions<UpdateBadgeMutation, UpdateBadgeMutationVariables>;
 export const UploadAvatarDocument = gql`
     mutation UploadAvatar($image: Upload!) {
   uploadAvatar(image: $image)
@@ -1275,6 +1322,9 @@ export const FindUserDocument = gql`
       username
       image
       createdAt
+      badge
+      dayStreak
+      cardStudied
       followers {
         _id
         username
@@ -1710,6 +1760,7 @@ export const namedOperations = {
     RenameDeck: 'RenameDeck',
     SubscribeToDeck: 'SubscribeToDeck',
     UnsubscribeToDeck: 'UnsubscribeToDeck',
+    UpdateBadge: 'UpdateBadge',
     UploadAvatar: 'UploadAvatar'
   },
   Fragment: {

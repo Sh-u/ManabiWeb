@@ -1,7 +1,9 @@
-import { UserInputError } from "apollo-server-core";
 import argon2 from "argon2";
-import { MyContext } from "../types";
-import { sendMail } from "../utility/sendMail";
+import { differenceInDays } from "date-fns";
+import { createWriteStream, existsSync, mkdir, unlink } from "fs";
+import { FileUpload, GraphQLUpload } from "graphql-upload";
+import path from "path";
+
 import {
   Arg,
   Ctx,
@@ -13,15 +15,17 @@ import {
   Query,
   Resolver,
 } from "type-graphql";
+import { v4 } from "uuid";
 import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
 import { User } from "../entities/User";
-import { v4 } from "uuid";
-import { Deck } from "../entities/Deck";
-import mv from "mv";
-import { finished, Stream } from "stream";
-import { GraphQLUpload, FileUpload } from "graphql-upload";
-import { createWriteStream, mkdir, unlink, existsSync } from "fs";
-import path from "path";
+import { MyContext } from "../types";
+import { sendMail } from "../utility/sendMail";
+
+export enum BadgeUpdateIntervals {
+  improving = 14,
+  scholar = 90,
+  cardMaster = 365,
+}
 
 @InputType()
 class RegisterInput {
@@ -47,7 +51,7 @@ class LoginInput {
 
 @ObjectType()
 class FieldError {
-  @Field({nullable: true})
+  @Field({ nullable: true })
   field?: string;
 
   @Field()
@@ -125,6 +129,51 @@ export class UserResolver {
       user: targetUser,
       message: "followed",
     };
+  }
+
+  @Mutation(() => Boolean)
+  async updateBadge(
+    @Ctx() { em }: MyContext,
+    @Arg("username") _username: string
+  ): Promise<boolean> {
+    const targetUser = await em.findOne(User, { username: _username });
+
+    if (!targetUser) {
+      return false;
+    }
+    const creationDate = targetUser?.createdAt;
+
+    const currentDate = new Date();
+
+    if (
+      differenceInDays(currentDate, creationDate) <
+      BadgeUpdateIntervals.improving
+    ) {
+      return false;
+    } else if (
+      differenceInDays(currentDate, creationDate) >=
+      BadgeUpdateIntervals.cardMaster
+    ) {
+      targetUser.badge = "Card Master";
+    } else if (
+      differenceInDays(currentDate, creationDate) >=
+      BadgeUpdateIntervals.scholar
+    ) {
+      targetUser.badge = "Scholar";
+    } else if (
+      differenceInDays(currentDate, creationDate) >=
+      BadgeUpdateIntervals.improving
+    ) {
+      targetUser.badge = "Improving";
+    }
+
+    try {
+      await em.persistAndFlush(targetUser);
+    } catch (err) {
+      console.log(err);
+    }
+
+    return true;
   }
 
   @Mutation(() => Boolean)
@@ -236,22 +285,28 @@ export class UserResolver {
     @Ctx() { em }: MyContext,
     @Arg("targetUsername", () => String) targetUsername: string
   ): Promise<UserResponse> {
-    const targetUser = await em.findOne(User, {username: targetUsername}, { populate: ["followers"] });
-    console.log('here')
-    if (!targetUser){
-      console.log('error')
+    console.log("find");
+    const targetUser = await em.findOne(
+      User,
+      { username: targetUsername },
+      { populate: true }
+    );
+    console.log( targetUser?.followers.getItems());
+
+    if (!targetUser) {
+      console.log("error");
       return {
         errors: [
           {
-            message: "Find User: Cannot find user with this Id"
-          }
-        ]
-      }
+            message: "Find User: Cannot find user with this Id",
+          },
+        ],
+      };
     }
-    console.log('good')
+    console.log("good");
     return {
       user: targetUser,
-    }
+    };
   }
 
   @Mutation(() => UserResponse)

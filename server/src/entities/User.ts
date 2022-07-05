@@ -1,10 +1,8 @@
 import {
-  Cascade,
   Collection,
   Entity,
   ManyToMany,
   OneToMany,
-  OneToOne,
   OptionalProps,
   PrimaryKey,
   Property,
@@ -12,7 +10,8 @@ import {
 import { Field, Int, ObjectType } from "type-graphql";
 import { CardProgress } from "./CardProgress";
 import { Deck } from "./Deck";
-import { Follower } from "./Follower";
+
+export type BadgeType = "New" | "Improving" | "Scholar" | "Card Master";
 
 @ObjectType()
 @Entity()
@@ -22,8 +21,13 @@ export class User {
     | "updatedAt"
     | "password"
     | "image"
-    | "cardProgress";
-    
+    | "cardProgress"
+    | "badge"
+    | "dayStreak"
+    | "cardsStudied"
+    | "followers"
+    | "following";
+
   @Field(() => Int)
   @PrimaryKey()
   _id!: Number;
@@ -41,7 +45,9 @@ export class User {
   username!: string;
 
   @Field(() => [CardProgress], { nullable: true })
-  @OneToMany(() => CardProgress, (progress) => progress.user, { orphanRemoval: true }, )
+  @OneToMany(() => CardProgress, (progress) => progress.user, {
+    orphanRemoval: true,
+  })
   cardProgresses = new Collection<CardProgress>(this);
 
   @Property({ type: "text" })
@@ -59,8 +65,25 @@ export class User {
   @Property({ type: "date", onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
-
-  @Field(() => [User], {nullable: true})
-  @ManyToMany({ entity: () => User, pivotEntity: () => Follower, nullable: true})
+  @Field(() => [User])
+  @ManyToMany({ entity: () => User, pivotTable: "follow", joinColumn: "followed_user__id" })
   followers = new Collection<User>(this);
+
+
+  @Field(() => [User])
+  @ManyToMany(() => User, (u) => u.followers)
+  following = new Collection<User>(this);
+
+  
+  @Field(() => String)
+  @Property({ type: "text" })
+  badge?: BadgeType = "New";
+
+  @Field(() => Int)
+  @Property({})
+  dayStreak?: number = 0;
+
+  @Field(() => Int)
+  @Property({})
+  cardStudied?: number = 0;
 }

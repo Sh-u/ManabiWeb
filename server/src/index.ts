@@ -1,4 +1,5 @@
 import { MikroORM } from "@mikro-orm/core";
+import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import { ApolloServer } from "apollo-server-express";
 import connectRedis from "connect-redis";
@@ -31,16 +32,15 @@ const corsOptions = {
 };
 
 const main = async () => {
+  // @ts-ignore
   const orm = await MikroORM.init(mikroOrmConfig);
 
   // await orm.em.nativeDelete(DeckSubscriber, {});
   // await orm.em.nativeDelete(Card, {});
   // await orm.em.nativeDelete(Deck, {});
 
-
-
   
-  await orm.getMigrator().up();
+  
 
   const app = express();
 

@@ -15,6 +15,7 @@ const Learn = () => {
 
   const { data, loading } = useMeQuery();
 
+
   useEffect(() => {
     if (!loading && !data?.me) {
       router.push("/");

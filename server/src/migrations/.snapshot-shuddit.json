@@ -70,6 +70,33 @@
           "nullable": false,
           "length": 6,
           "mappedType": "datetime"
+        },
+        "badge": {
+          "name": "badge",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "day_streak": {
+          "name": "day_streak",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "card_studied": {
+          "name": "card_studied",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
         }
       },
       "name": "user",
@@ -294,8 +321,8 @@
     },
     {
       "columns": {
-        "user_1__id": {
-          "name": "user_1__id",
+        "followed_user__id": {
+          "name": "followed_user__id",
           "type": "int",
           "unsigned": false,
           "autoincrement": false,
@@ -303,8 +330,8 @@
           "nullable": false,
           "mappedType": "integer"
         },
-        "user_2__id": {
-          "name": "user_2__id",
+        "user__id": {
+          "name": "user__id",
           "type": "int",
           "unsigned": false,
           "autoincrement": false,
@@ -313,14 +340,14 @@
           "mappedType": "integer"
         }
       },
-      "name": "user_followers",
+      "name": "follow",
       "schema": "public",
       "indexes": [
         {
-          "keyName": "user_followers_pkey",
+          "keyName": "follow_pkey",
           "columnNames": [
-            "user_1__id",
-            "user_2__id"
+            "followed_user__id",
+            "user__id"
           ],
           "composite": true,
           "primary": true,
@@ -329,12 +356,12 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "user_followers_user_1__id_foreign": {
-          "constraintName": "user_followers_user_1__id_foreign",
+        "follow_followed_user__id_foreign": {
+          "constraintName": "follow_followed_user__id_foreign",
           "columnNames": [
-            "user_1__id"
+            "followed_user__id"
           ],
-          "localTableName": "public.user_followers",
+          "localTableName": "public.follow",
           "referencedColumnNames": [
             "_id"
           ],
@@ -342,12 +369,12 @@
           "deleteRule": "cascade",
           "updateRule": "cascade"
         },
-        "user_followers_user_2__id_foreign": {
-          "constraintName": "user_followers_user_2__id_foreign",
+        "follow_user__id_foreign": {
+          "constraintName": "follow_user__id_foreign",
           "columnNames": [
-            "user_2__id"
+            "user__id"
           ],
-          "localTableName": "public.user_followers",
+          "localTableName": "public.follow",
           "referencedColumnNames": [
             "_id"
           ],

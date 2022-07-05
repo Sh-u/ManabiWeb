@@ -15,7 +15,6 @@ const core_1 = require("@mikro-orm/core");
 const type_graphql_1 = require("type-graphql");
 const CardProgress_1 = require("./CardProgress");
 const Deck_1 = require("./Deck");
-const Follower_1 = require("./Follower");
 let User = User_1 = class User {
     constructor() {
         this.decks = new core_1.Collection(this);
@@ -23,6 +22,10 @@ let User = User_1 = class User {
         this.createdAt = new Date();
         this.updatedAt = new Date();
         this.followers = new core_1.Collection(this);
+        this.following = new core_1.Collection(this);
+        this.badge = "New";
+        this.dayStreak = 0;
+        this.cardStudied = 0;
     }
 };
 __decorate([
@@ -47,7 +50,9 @@ __decorate([
 ], User.prototype, "username", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => [CardProgress_1.CardProgress], { nullable: true }),
-    (0, core_1.OneToMany)(() => CardProgress_1.CardProgress, (progress) => progress.user, { orphanRemoval: true }),
+    (0, core_1.OneToMany)(() => CardProgress_1.CardProgress, (progress) => progress.user, {
+        orphanRemoval: true,
+    }),
     __metadata("design:type", Object)
 ], User.prototype, "cardProgresses", void 0);
 __decorate([
@@ -70,10 +75,30 @@ __decorate([
     __metadata("design:type", Date)
 ], User.prototype, "updatedAt", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => [User_1], { nullable: true }),
-    (0, core_1.ManyToMany)({ entity: () => User_1, pivotEntity: () => Follower_1.Follower, nullable: true }),
+    (0, type_graphql_1.Field)(() => [User_1]),
+    (0, core_1.ManyToMany)({ entity: () => User_1, pivotTable: "follow", joinColumn: "followed_user__id" }),
     __metadata("design:type", Object)
 ], User.prototype, "followers", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => [User_1]),
+    (0, core_1.ManyToMany)(() => User_1, (u) => u.followers),
+    __metadata("design:type", Object)
+], User.prototype, "following", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => String),
+    (0, core_1.Property)({ type: "text" }),
+    __metadata("design:type", String)
+], User.prototype, "badge", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => type_graphql_1.Int),
+    (0, core_1.Property)({}),
+    __metadata("design:type", Number)
+], User.prototype, "dayStreak", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => type_graphql_1.Int),
+    (0, core_1.Property)({}),
+    __metadata("design:type", Number)
+], User.prototype, "cardStudied", void 0);
 User = User_1 = __decorate([
     (0, type_graphql_1.ObjectType)(),
     (0, core_1.Entity)()

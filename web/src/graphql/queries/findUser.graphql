@@ -9,6 +9,9 @@ query FindUser($targetUsername: String!) {
       username
       image
       createdAt
+      badge
+      dayStreak
+      cardStudied
       followers {
         _id
         username

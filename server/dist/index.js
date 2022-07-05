@@ -31,7 +31,6 @@ const corsOptions = {
 };
 const main = async () => {
     const orm = await core_1.MikroORM.init(mikro_orm_config_1.default);
-    await orm.getMigrator().up();
     const app = (0, express_1.default)();
     app.set("trust proxy", process.env.NODE_ENV !== "production");
     app.set("Access-Control-Allow-Origin", "https://studio.apollographql.com");
