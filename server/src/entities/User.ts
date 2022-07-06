@@ -66,7 +66,7 @@ export class User {
   updatedAt: Date = new Date();
 
   @Field(() => [User])
-  @ManyToMany({ entity: () => User, pivotTable: "follow", joinColumn: "followed_user__id" })
+  @ManyToMany({ entity: () => User, pivotTable: "follow", joinColumn: "followed_user__id"})
   followers = new Collection<User>(this);
 
 

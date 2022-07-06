@@ -347,7 +347,7 @@ export class CardResolver {
         kanaResponse
       ) {
         for (let i = 0; i < moraResponse.length; i++) {
-          const part = await em.create(PitchAccent, {
+          const part = await em.create(PitchAccent, {   
             descriptive: descriptiveResponse[i],
             word: wordsToParse[i],
             kana: kanaResponse[i],
