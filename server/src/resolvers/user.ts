@@ -280,6 +280,36 @@ export class UserResolver {
     return users;
   }
 
+  @Query(() => [User], { nullable: true })
+  async getFriends(
+    @Ctx() { em }: MyContext,
+    @Arg("targetUserId", () => Int) targetUserId: number
+  ): Promise<Array<User> | null> {
+    const targetUser = await em.findOne(
+      User,
+      { _id: targetUserId },
+      { populate: true }
+    );
+    console.log(targetUser?.followers.getItems());
+
+    if (!targetUser) {
+      console.log("getFriends error");
+      return null;
+    }
+
+    const friends = await em.find(User, {
+      following: targetUser,
+      followers: targetUser,
+    });
+
+    if (!friends) {
+      console.log("no friends");
+      return null;
+    }
+
+    return friends;
+  }
+
   @Query(() => UserResponse)
   async findUser(
     @Ctx() { em }: MyContext,
@@ -291,7 +321,7 @@ export class UserResolver {
       { username: targetUsername },
       { populate: true }
     );
-    console.log( targetUser?.followers.getItems());
+    console.log(targetUser?.followers.getItems());
 
     if (!targetUser) {
       console.log("error");

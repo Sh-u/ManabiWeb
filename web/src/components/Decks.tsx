@@ -13,6 +13,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Center,
   ModalOverlay,
   Spinner,
   useDisclosure,
@@ -47,10 +48,9 @@ const Decks = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const initialRef = React.useRef();
 
-  console.log('decks')
+  console.log("decks");
 
-
-  console.log(decksData?.getMyDecks)
+  console.log(decksData?.getMyDecks);
 
   const handleDeckCreation = () => {
     if (!meQuery.data?.me) {
@@ -77,14 +77,21 @@ const Decks = () => {
     orderedDecks = [...decks]?.sort((a, b) => (a._id > b._id ? 1 : -1));
   }
   const handleModalClose = () => {
-
     refetch();
     onClose();
+  };
+
+  if (loading) {
+    return (
+      <Center mt='20'>
+        <Spinner color="red.800" size="xl" />
+      </Center>
+    );
   }
 
   return (
     <Box>
-      {decks ? (
+      {decks?.length ? (
         <Box>
           {orderedDecks?.map((deck) => (
             <DeckButton
@@ -97,7 +104,7 @@ const Decks = () => {
         </Box>
       ) : (
         <Box textAlign={"center"} fontSize="2xl" mt="10">
-          {loading ? <Spinner size="lg" color="red.800" /> : decksErrors}
+          Create Deck To Get Started!
         </Box>
       )}
       <Flex
@@ -133,7 +140,7 @@ const Decks = () => {
                     const response = await createDeck({
                       variables: values,
                       update(cache, { data }) {
-                        console.log(data)
+                        console.log(data);
                         if (data.createDeck.errors) {
                           console.log(`2`, data.createDeck.errors);
                           return;

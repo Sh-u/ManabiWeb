@@ -649,39 +649,39 @@
         },
         "descriptive": {
           "name": "descriptive",
-          "type": "jsonb",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "mappedType": "json"
+          "mappedType": "text"
         },
         "mora": {
           "name": "mora",
-          "type": "jsonb",
+          "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "mappedType": "json"
+          "mappedType": "integer"
         },
-        "part": {
-          "name": "part",
-          "type": "jsonb",
+        "word": {
+          "name": "word",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
-          "mappedType": "json"
+          "nullable": true,
+          "mappedType": "text"
         },
-        "high": {
-          "name": "high",
-          "type": "jsonb",
+        "kana": {
+          "name": "kana",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
-          "mappedType": "json"
+          "nullable": true,
+          "mappedType": "text"
         },
         "card__id": {
           "name": "card__id",

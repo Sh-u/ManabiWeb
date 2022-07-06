@@ -1,0 +1,7 @@
+query GetFriends($targetUserId: Int!) {
+  getFriends(targetUserId: $targetUserId) {
+    _id
+    username
+    image
+  }
+}

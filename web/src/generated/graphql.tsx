@@ -257,6 +257,7 @@ export type Query = {
   getAllDecks: Array<Deck>;
   getCardProgresses?: Maybe<Array<CardProgress>>;
   getCards: Array<Card>;
+  getFriends?: Maybe<Array<User>>;
   getLearnAndReviewCards: LearnAndReviewResponse;
   getMyDecks: DeckResponse;
   getRevisionTime: RevisionTimeResponse;
@@ -275,6 +276,11 @@ export type QueryFindDeckArgs = {
 
 export type QueryFindUserArgs = {
   targetUsername: Scalars['String'];
+};
+
+
+export type QueryGetFriendsArgs = {
+  targetUserId: Scalars['Int'];
 };
 
 
@@ -314,7 +320,8 @@ export type User = {
   dayStreak: Scalars['Int'];
   decks: Array<Deck>;
   email: Scalars['String'];
-  followers?: Maybe<Array<User>>;
+  followers: Array<User>;
+  following: Array<User>;
   image?: Maybe<Scalars['String']>;
   updatedAt: Scalars['DateTime'];
   username: Scalars['String'];
@@ -405,7 +412,7 @@ export type FollowUserMutationVariables = Exact<{
 }>;
 
 
-export type FollowUserMutation = { __typename?: 'Mutation', followUser?: { __typename?: 'FollowResponse', message?: string | null, user?: { __typename?: 'User', _id: number, username: string, followers?: Array<{ __typename?: 'User', _id: number, username: string }> | null } | null } | null };
+export type FollowUserMutation = { __typename?: 'Mutation', followUser?: { __typename?: 'FollowResponse', message?: string | null, user?: { __typename?: 'User', _id: number, username: string, followers: Array<{ __typename?: 'User', _id: number, username: string }> } | null } | null };
 
 export type ForgotPasswordMutationVariables = Exact<{
   username: Scalars['String'];
@@ -481,7 +488,7 @@ export type FindUserQueryVariables = Exact<{
 }>;
 
 
-export type FindUserQuery = { __typename?: 'Query', findUser: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field?: string | null, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string, image?: string | null, createdAt: any, badge: string, dayStreak: number, cardStudied: number, followers?: Array<{ __typename?: 'User', _id: number, username: string }> | null } | null } };
+export type FindUserQuery = { __typename?: 'Query', findUser: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field?: string | null, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string, image?: string | null, createdAt: any, badge: string, dayStreak: number, cardStudied: number, following: Array<{ __typename?: 'User', _id: number, username: string }>, followers: Array<{ __typename?: 'User', _id: number, username: string }> } | null } };
 
 export type GetAllDecksQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -492,6 +499,13 @@ export type GetCardsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetCardsQuery = { __typename?: 'Query', getCards: Array<{ __typename?: 'Card', _id: number, sentence: string, word: string, createdAt: string, updatedAt: string }> };
+
+export type GetFriendsQueryVariables = Exact<{
+  targetUserId: Scalars['Int'];
+}>;
+
+
+export type GetFriendsQuery = { __typename?: 'Query', getFriends?: Array<{ __typename?: 'User', _id: number, username: string, image?: string | null }> | null };
 
 export type GetLearnAndReviewCardsQueryVariables = Exact<{
   deckId: Scalars['Int'];
@@ -520,7 +534,7 @@ export type GetStudyCardQuery = { __typename?: 'Query', getStudyCard?: { __typen
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, followers?: Array<{ __typename?: 'User', _id: number }> | null, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> }> };
+export type GetUsersQuery = { __typename?: 'Query', getUsers: Array<{ __typename?: 'User', createdAt: any, image?: string | null, email: string, _id: number, username: string, followers: Array<{ __typename?: 'User', _id: number }>, decks: Array<{ __typename?: 'Deck', _id: number, title: string, createdAt: string }> }> };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1325,6 +1339,10 @@ export const FindUserDocument = gql`
       badge
       dayStreak
       cardStudied
+      following {
+        _id
+        username
+      }
       followers {
         _id
         username
@@ -1439,6 +1457,43 @@ export function useGetCardsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<G
 export type GetCardsQueryHookResult = ReturnType<typeof useGetCardsQuery>;
 export type GetCardsLazyQueryHookResult = ReturnType<typeof useGetCardsLazyQuery>;
 export type GetCardsQueryResult = Apollo.QueryResult<GetCardsQuery, GetCardsQueryVariables>;
+export const GetFriendsDocument = gql`
+    query GetFriends($targetUserId: Int!) {
+  getFriends(targetUserId: $targetUserId) {
+    _id
+    username
+    image
+  }
+}
+    `;
+
+/**
+ * __useGetFriendsQuery__
+ *
+ * To run a query within a React component, call `useGetFriendsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetFriendsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetFriendsQuery({
+ *   variables: {
+ *      targetUserId: // value for 'targetUserId'
+ *   },
+ * });
+ */
+export function useGetFriendsQuery(baseOptions: Apollo.QueryHookOptions<GetFriendsQuery, GetFriendsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetFriendsQuery, GetFriendsQueryVariables>(GetFriendsDocument, options);
+      }
+export function useGetFriendsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetFriendsQuery, GetFriendsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetFriendsQuery, GetFriendsQueryVariables>(GetFriendsDocument, options);
+        }
+export type GetFriendsQueryHookResult = ReturnType<typeof useGetFriendsQuery>;
+export type GetFriendsLazyQueryHookResult = ReturnType<typeof useGetFriendsLazyQuery>;
+export type GetFriendsQueryResult = Apollo.QueryResult<GetFriendsQuery, GetFriendsQueryVariables>;
 export const GetLearnAndReviewCardsDocument = gql`
     query getLearnAndReviewCards($deckId: Int!) {
   getLearnAndReviewCards(deckId: $deckId) {
@@ -1734,6 +1789,7 @@ export const namedOperations = {
     FindUser: 'FindUser',
     GetAllDecks: 'GetAllDecks',
     GetCards: 'GetCards',
+    GetFriends: 'GetFriends',
     getLearnAndReviewCards: 'getLearnAndReviewCards',
     GetMyDecks: 'GetMyDecks',
     getRevisionTime: 'getRevisionTime',

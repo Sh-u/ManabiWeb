@@ -242,6 +242,23 @@ let UserResolver = class UserResolver {
         const users = await em.find(User_1.User, {}, { populate: ["followers"] });
         return users;
     }
+    async getFriends({ em }, targetUserId) {
+        const targetUser = await em.findOne(User_1.User, { _id: targetUserId }, { populate: true });
+        console.log(targetUser === null || targetUser === void 0 ? void 0 : targetUser.followers.getItems());
+        if (!targetUser) {
+            console.log("getFriends error");
+            return null;
+        }
+        const friends = await em.find(User_1.User, {
+            following: targetUser,
+            followers: targetUser,
+        });
+        if (!friends) {
+            console.log("no friends");
+            return null;
+        }
+        return friends;
+    }
     async findUser({ em }, targetUsername) {
         console.log("find");
         const targetUser = await em.findOne(User_1.User, { username: targetUsername }, { populate: true });
@@ -598,6 +615,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "getUsers", null);
+__decorate([
+    (0, type_graphql_1.Query)(() => [User_1.User], { nullable: true }),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)("targetUserId", () => type_graphql_1.Int)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Number]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "getFriends", null);
 __decorate([
     (0, type_graphql_1.Query)(() => UserResponse),
     __param(0, (0, type_graphql_1.Ctx)()),

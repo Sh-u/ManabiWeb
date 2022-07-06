@@ -20,6 +20,7 @@ import {
   FindUserDocument,
   FindUserQuery,
   useFollowUserMutation,
+  useGetFriendsQuery,
   useMeQuery,
 } from "../../generated/graphql";
 import useColors from "../../hooks/useColors";
@@ -35,6 +36,11 @@ interface FoundUser {
     badge: string;
     dayStreak: number;
     cardStudied: number;
+    following?: {
+      __typename?: "User";
+      _id: number;
+      username: string;
+    }[];
     followers?: {
       __typename?: "User";
       _id: number;
@@ -48,16 +54,14 @@ const UserPage = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { getColor } = useColors();
   const router = useRouter();
-  
+
   let createdAt = foundUser?.createdAt?.toString();
   createdAt = createdAt.substring(0, createdAt.indexOf("T"));
-
-  const meQuery = useMeQuery();
 
   const [followUser] = useFollowUserMutation();
 
   const handleFollow = async () => {
-    if (!meQuery.data?.me) {
+    if (!loggedUserData?.me) {
       router.push("/login");
       return;
     }
@@ -73,11 +77,20 @@ const UserPage = ({
     }
 
     console.log("success", response?.data?.followUser);
+    refetchFriends();
     router.replace(router.asPath);
   };
 
-  console.log(foundUser?.followers);
-  const { data: loggedUser, loading } = useMeQuery();
+  console.log(foundUser);
+
+  const { data: loggedUserData, loading: loadingLoggedUserInfo } = useMeQuery();
+
+  const { data: getFriendsData,loading: loadingFriends, refetch: refetchFriends } = useGetFriendsQuery({
+    variables: {
+      targetUserId: foundUser?._id,
+    },
+  });
+
   const image = foundUser?.image;
 
   const getBadgeColor = (badge: string) => {
@@ -96,19 +109,19 @@ const UserPage = ({
     }
   };
 
-  if (loading) {
+  if (loadingLoggedUserInfo) {
     return <Spinner color="red.800" />;
   }
   const FollowButtonCheck = (
     <Button variant={"outline"} onClick={() => handleFollow()}>
-      {foundUser?.followers.find((user) => user._id === loggedUser?.me?._id)
+      {foundUser?.followers.find((user) => user._id === loggedUserData?.me?._id)
         ? "Unfollow"
         : "Follow"}
     </Button>
   );
 
   const EditButtonCheck =
-    loggedUser?.me?._id === foundUser?._id ? (
+    loggedUserData?.me?._id === foundUser?._id ? (
       <NextLink href="/settings/account">
         <Link style={{ textDecoration: "none" }}>
           <Button
@@ -163,7 +176,7 @@ const UserPage = ({
         p="3"
       >
         <Flex align="center" justify={"space-around"} w="full">
-          <Flex align="center" justify={"center"}>
+          <Flex align="center" justify={"center"} w="full">
             <Avatar
               src={image ? "/" + image : null}
               name={foundUser?.username}
@@ -185,7 +198,8 @@ const UserPage = ({
               <Flex fontSize={"sm"} align="center" justify={"center"}>
                 <Icon as={HiUserGroup} />{" "}
                 <Text ml="2">
-                  Followers: {foundUser?.followers?.length} / Following: 0
+                  Followers: {foundUser?.followers?.length} / Following:{" "}
+                  {foundUser?.following?.length}
                 </Text>
               </Flex>
               <Image
@@ -196,13 +210,17 @@ const UserPage = ({
               />
             </Flex>
           </Flex>
-          <Box opacity={0}>empty</Box>
-          {EditButtonCheck}
+          <Box opacity={0} w="full">
+            empty
+          </Box>
+          <Flex w="full" justify={"center"}>
+            {EditButtonCheck}
+          </Flex>
         </Flex>
 
         <Divider mt="10" />
 
-        <Flex align="center" justify={"space-around"} w="full">
+        <Flex align="start" justify={"space-around"} w="full" h="full">
           <Flex
             align="start"
             justify="center"
@@ -262,24 +280,62 @@ const UserPage = ({
               </Flex>
             </Box>
           </Flex>
-          <Box opacity={0}>empty</Box>
+          <Box opacity={0} w="full">
+            empty
+          </Box>
+
           <Flex
             align="start"
             justify="center"
             flexDir={"column"}
             px="12"
             mt="5"
+            h="full"
+            w="full"
           >
-            <Text fontSize={"2xl"} fontWeight="semibold" mt="5">
-              Friends
-            </Text>
-            <Text fontSize={"lg"}>Seems like no one is here 😭</Text>
-            {loggedUser?.me?._id === foundUser?._id ? (
-              <Button variant={"outline"} mt="5">
-                <Icon as={HiSearch} />
-                <Text ml="2">Find friends</Text>
-              </Button>
-            ) : null}
+            {loadingFriends ? (
+              <Spinner color="red.800" size='lg'/>
+            ) : (
+              <>
+                <Text fontSize={"2xl"} fontWeight="semibold">
+                  Friends
+                </Text>
+                {getFriendsData?.getFriends.length ? (
+                  <Flex>
+                    {getFriendsData?.getFriends.map((friend, index) => (
+                      <Flex key={index}>
+                        <NextLink href={`${friend.username}`}>
+                          <Link
+                            style={{ textDecoration: "none" }}
+                            display="inline-flex"
+                          >
+                            <Avatar
+                              bg="red.400"
+                              name={friend?.username}
+                              size="xs"
+                              src=""
+                            />
+
+                            <Text ml="2" fontSize="lg">
+                              {friend.username}
+                            </Text>
+                          </Link>
+                        </NextLink>
+                      </Flex>
+                    ))}
+                  </Flex>
+                ) : (
+                  <Text fontSize={"lg"}>Seems like no one is here 😭</Text>
+                )}
+
+                {loggedUserData?.me?._id === foundUser?._id ? (
+                  <Button variant={"outline"} mt="5">
+                    <Icon as={HiSearch} />
+                    <Text ml="2">Find friends</Text>
+                  </Button>
+                ) : null}
+              </>
+            )}
           </Flex>
         </Flex>
       </Flex>

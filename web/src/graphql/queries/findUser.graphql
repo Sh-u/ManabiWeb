@@ -12,6 +12,10 @@ query FindUser($targetUsername: String!) {
       badge
       dayStreak
       cardStudied
+      following {
+        _id
+        username
+      }
       followers {
         _id
         username

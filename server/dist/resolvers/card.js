@@ -75,6 +75,32 @@ let CardResolver = class CardResolver {
     async getCards({ em }) {
         return em.find(Card_1.Card, {});
     }
+    async segmentTest(words) {
+        const kotuSegmentResponse = await fetch("https://kotu.io/api/dictionary/segment", {
+            method: "POST",
+            body: words,
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        });
+        if (!kotuSegmentResponse) {
+            return false;
+        }
+        const parsed = await kotuSegmentResponse.json();
+        const values = ["d", "a"];
+        const kotuParseResponse = await fetch("https://kotu.io/api/dictionary/parse", {
+            method: "POST",
+            body: words,
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        });
+        const parsed2 = await kotuParseResponse.json();
+        console.log(parsed2[0].accentPhrases.map((obj) => obj.components[0].pitchAccents[0].descriptive));
+        return true;
+    }
     async getLearnAndReviewCards(deckId, { em }) {
         const currentDeck = await em.findOne(Deck_1.Deck, { _id: deckId }, { populate: ["cards"] });
         if (!currentDeck) {
@@ -110,7 +136,7 @@ let CardResolver = class CardResolver {
         if (!currentUser) {
             return null;
         }
-        const myProgressess = await em.find(CardProgress_1.CardProgress, { user: currentUser }, { populate: ['card.pitchAccent'] });
+        const myProgressess = await em.find(CardProgress_1.CardProgress, { user: currentUser }, { populate: ["card.pitchAccent"] });
         const currentDate = new Date();
         const readyProgresses = myProgressess.filter((progress) => progress.nextRevision < currentDate);
         if (!readyProgresses || readyProgresses.length === 0) {
@@ -140,6 +166,8 @@ let CardResolver = class CardResolver {
         let scrapedFurigana = null;
         let descriptiveResponse = null;
         let moraResponse = null;
+        let wordsToParse = null;
+        let kanaResponse = null;
         if (currentDeck.japaneseTemplate && isInputJPchar) {
             const reqWordBody = {
                 query: options.word,
@@ -162,19 +190,29 @@ let CardResolver = class CardResolver {
                     Accept: "application/json",
                 },
             });
+            if (kotuSegmentResponse) {
+                const parsed = await kotuSegmentResponse.json();
+                wordsToParse = parsed[0]
+                    .filter((obj) => obj.partOfSpeech !== "助詞")
+                    .map((obj) => { var _a; return (_a = obj.surface) !== null && _a !== void 0 ? _a : null; });
+                console.log("wordsToParse", wordsToParse);
+            }
             const kotuParseResponse = await fetch("https://kotu.io/api/dictionary/parse", {
                 method: "POST",
-                body: "",
+                body: wordsToParse === null || wordsToParse === void 0 ? void 0 : wordsToParse.join(''),
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
                 },
             });
-            if (kotuSegmentResponse) {
-                const parsed = await kotuSegmentResponse.json();
-            }
             if (kotuParseResponse) {
                 const parsed = await kotuParseResponse.json();
+                moraResponse = parsed[0].accentPhrases.map((obj) => obj.components[0].pitchAccents[0].mora);
+                console.log("moraResponse", moraResponse);
+                descriptiveResponse = parsed[0].accentPhrases.map((obj) => obj.components[0].pitchAccents[0].descriptive);
+                console.log("descriptiveResponse", descriptiveResponse);
+                kanaResponse = parsed[0].accentPhrases.map((obj) => obj.components[0].kana);
+                console.log("kanaResponse", kanaResponse);
             }
             if (jotobaResponse) {
                 const parsed = await jotobaResponse.json();
@@ -188,7 +226,6 @@ let CardResolver = class CardResolver {
                 scrapedWordMeaning = meaning;
                 scrapedPitchAccent = pitch;
                 scrapedFurigana = furigana;
-                console.log("all", scrapedPitchAccent);
             }
         }
         await em.begin();
@@ -199,17 +236,23 @@ let CardResolver = class CardResolver {
                 deck: currentDeck,
                 dictionaryAudio: scrapedWordAudio,
                 dictionaryMeaning: scrapedWordMeaning,
-                furigana: scrapedFurigana
+                furigana: scrapedFurigana,
             });
-            if (scrapedPitchAccent) {
-                const part = await em.create(PitchAccent_1.PitchAccent, {
-                    part: scrapedPitchAccent.map((obj) => obj.part),
-                    high: scrapedPitchAccent.map((obj) => obj.high),
-                    descriptive: descriptiveResponse,
-                    mora: moraResponse,
-                    card: card,
-                });
-                await em.persist(part);
+            if (scrapedPitchAccent &&
+                moraResponse &&
+                descriptiveResponse &&
+                wordsToParse &&
+                kanaResponse) {
+                for (let i = 0; i < moraResponse.length; i++) {
+                    const part = await em.create(PitchAccent_1.PitchAccent, {
+                        descriptive: descriptiveResponse[i],
+                        word: wordsToParse[i],
+                        kana: kanaResponse[i],
+                        mora: moraResponse[i],
+                        card: card,
+                    });
+                    await em.persist(part);
+                }
             }
             const progress = await em.create(CardProgress_1.CardProgress, {
                 card: card,
@@ -223,11 +266,9 @@ let CardResolver = class CardResolver {
                 console.log(err);
             }
             if (image) {
-                console.log("mime", image.mimetype);
                 image.filename = `image-${card._id}`;
             }
             if (audio) {
-                console.log("mime", audio.mimetype);
                 audio.filename = `audio-${card._id}`;
             }
             const basePath = path_1.default.join(`userFiles/user-${currentDeck.user._id}/deck-${currentDeck._id}/card-${card._id}/`);
@@ -398,6 +439,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], CardResolver.prototype, "getCards", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Boolean, { nullable: true }),
+    __param(0, (0, type_graphql_1.Arg)("words", () => String)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CardResolver.prototype, "segmentTest", null);
 __decorate([
     (0, type_graphql_1.Query)(() => LearnAndReviewResponse),
     __param(0, (0, type_graphql_1.Arg)("deckId", () => type_graphql_1.Int)),
