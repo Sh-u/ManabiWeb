@@ -167,6 +167,7 @@ let CardResolver = class CardResolver {
         let descriptiveResponse = null;
         let moraResponse = null;
         let wordsToParse = null;
+        let sentenceArray = null;
         let kanaResponse = null;
         if (currentDeck.japaneseTemplate && isInputJPchar) {
             const reqWordBody = {
@@ -195,11 +196,12 @@ let CardResolver = class CardResolver {
                 wordsToParse = parsed[0]
                     .filter((obj) => obj.partOfSpeech !== "助詞")
                     .map((obj) => { var _a; return (_a = obj.surface) !== null && _a !== void 0 ? _a : null; });
+                sentenceArray = parsed[0].map((obj) => obj.surface);
                 console.log("wordsToParse", wordsToParse);
             }
             const kotuParseResponse = await fetch("https://kotu.io/api/dictionary/parse", {
                 method: "POST",
-                body: wordsToParse === null || wordsToParse === void 0 ? void 0 : wordsToParse.join(''),
+                body: wordsToParse === null || wordsToParse === void 0 ? void 0 : wordsToParse.join(""),
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
@@ -232,6 +234,7 @@ let CardResolver = class CardResolver {
         try {
             const card = await em.create(Card_1.Card, {
                 sentence: options.sentence,
+                sentenceArr: sentenceArray,
                 word: options.word,
                 deck: currentDeck,
                 dictionaryAudio: scrapedWordAudio,

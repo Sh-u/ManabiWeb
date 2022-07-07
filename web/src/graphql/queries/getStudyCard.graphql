@@ -6,9 +6,12 @@ query getStudyCard {
     furigana
     dictionaryAudio
     dictionaryMeaning
+    sentenceArr
     pitchAccent{
-      part
-      high
+      descriptive
+      mora
+      word
+      kana
     }
     userAudio
     image

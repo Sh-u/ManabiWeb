@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20220705183148 extends Migration {
+export class Migration20220707183948 extends Migration {
 
   async up(): Promise<void> {
     this.addSql('create table "user" ("_id" serial primary key, "image" text null, "username" text not null, "password" text not null, "email" text not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "badge" text not null, "day_streak" int not null, "card_studied" int not null);');
@@ -11,21 +11,21 @@ export class Migration20220705183148 extends Migration {
 
     this.addSql('create table "deck_subscriber" ("_id" serial primary key, "user__id" int not null, "deck__id" int not null);');
 
-    this.addSql('create table "follow" ("follower__id" int not null, "user__id" int not null);');
-    this.addSql('alter table "follow" add constraint "follow_pkey" primary key ("follower__id", "user__id");');
+    this.addSql('create table "follow" ("followed_user__id" int not null, "user__id" int not null);');
+    this.addSql('alter table "follow" add constraint "follow_pkey" primary key ("followed_user__id", "user__id");');
 
-    this.addSql('create table "card" ("_id" serial primary key, "sentence" text not null, "word" text not null, "furigana" text null, "image" text null, "dictionary_meaning" text[] null, "dictionary_audio" text null, "user_audio" text null, "deck__id" int not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null);');
+    this.addSql('create table "card" ("_id" serial primary key, "sentence" text not null, "sentence_arr" text[] null, "word" text not null, "furigana" text null, "image" text null, "dictionary_meaning" text[] null, "dictionary_audio" text null, "user_audio" text null, "deck__id" int not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null);');
 
     this.addSql('create table "card_progress" ("_id" serial primary key, "user__id" int not null, "card__id" int not null, "state" varchar(255) not null, "steps" int not null, "next_revision" timestamptz(0) not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null);');
 
-    this.addSql('create table "pitch_accent" ("_id" serial primary key, "descriptive" jsonb null, "mora" jsonb null, "part" jsonb not null, "high" jsonb not null, "card__id" int not null);');
+    this.addSql('create table "pitch_accent" ("_id" serial primary key, "descriptive" text null, "mora" int null, "word" text null, "kana" text null, "card__id" int not null);');
 
     this.addSql('alter table "deck" add constraint "deck_user__id_foreign" foreign key ("user__id") references "user" ("_id") on update cascade;');
 
     this.addSql('alter table "deck_subscriber" add constraint "deck_subscriber_user__id_foreign" foreign key ("user__id") references "user" ("_id") on update cascade;');
     this.addSql('alter table "deck_subscriber" add constraint "deck_subscriber_deck__id_foreign" foreign key ("deck__id") references "deck" ("_id") on update cascade;');
 
-    this.addSql('alter table "follow" add constraint "follow_follower__id_foreign" foreign key ("follower__id") references "user" ("_id") on update cascade on delete cascade;');
+    this.addSql('alter table "follow" add constraint "follow_followed_user__id_foreign" foreign key ("followed_user__id") references "user" ("_id") on update cascade on delete cascade;');
     this.addSql('alter table "follow" add constraint "follow_user__id_foreign" foreign key ("user__id") references "user" ("_id") on update cascade on delete cascade;');
 
     this.addSql('alter table "card" add constraint "card_deck__id_foreign" foreign key ("deck__id") references "deck" ("_id") on update cascade;');
@@ -34,6 +34,8 @@ export class Migration20220705183148 extends Migration {
     this.addSql('alter table "card_progress" add constraint "card_progress_card__id_foreign" foreign key ("card__id") references "card" ("_id") on update cascade;');
 
     this.addSql('alter table "pitch_accent" add constraint "pitch_accent_card__id_foreign" foreign key ("card__id") references "card" ("_id") on update cascade;');
+
+    this.addSql('drop table if exists "folow" cascade;');
   }
 
   async down(): Promise<void> {
@@ -41,7 +43,7 @@ export class Migration20220705183148 extends Migration {
 
     this.addSql('alter table "deck_subscriber" drop constraint "deck_subscriber_user__id_foreign";');
 
-    this.addSql('alter table "follow" drop constraint "follow_follower__id_foreign";');
+    this.addSql('alter table "follow" drop constraint "follow_followed_user__id_foreign";');
 
     this.addSql('alter table "follow" drop constraint "follow_user__id_foreign";');
 
@@ -54,6 +56,9 @@ export class Migration20220705183148 extends Migration {
     this.addSql('alter table "card_progress" drop constraint "card_progress_card__id_foreign";');
 
     this.addSql('alter table "pitch_accent" drop constraint "pitch_accent_card__id_foreign";');
+
+    this.addSql('create table "folow" ("_id" int4 not null default null, "followed" int4 null default null, "follower" int4 null default null);');
+    this.addSql('alter table "folow" add constraint "folow_pkey" primary key ("_id");');
 
     this.addSql('drop table if exists "user" cascade;');
 

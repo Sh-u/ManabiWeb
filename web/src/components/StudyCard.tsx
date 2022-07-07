@@ -24,11 +24,6 @@ import { client } from "../pages/client";
 import EditCardModal from "./EditCardModal";
 import Player from "./Player";
 
-type PitchAccentColorType = {
-  color: "red" | "blue" | "orange" | "green";
-  type: "atamadaka" | "heiban" | "nakamadaka" | "odaka";
-};
-
 export type CardStateEnum = "STUDY" | "ANSWER" | "EDIT";
 
 interface StudyCardProps {
@@ -39,29 +34,18 @@ interface StudyCardProps {
 const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
   const { getColor } = useColors();
 
-  const checkPitchColor = (high: Array<boolean>): PitchAccentColorType => {
-    if (high[0]) {
-      return {
-        color: "red",
-        type: "atamadaka",
-      };
-    }
-    if (high.slice(1).every((h) => h === true)) {
-      return {
-        color: "blue",
-        type: "heiban",
-      };
-    }
-    if (!high[0] && high[1] && high[2]) {
-      return {
-        color: "orange",
-        type: "nakamadaka",
-      };
-    } else {
-      return {
-        color: "green",
-        type: "odaka",
-      };
+  const checkPitchColor = (pitch: string): string => {
+    switch (pitch) {
+      case "atamadaka":
+        return "red.500";
+      case "nakadaka":
+        return "orange.500";
+      case "odaka":
+        return "green.500";
+      case "kihuku":
+        return "pink.500";
+      case "heiban":
+        return "blue.500";
     }
   };
 
@@ -70,7 +54,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
     GOOD: null,
   });
   const [cardState, setCardState] = useState<CardStateEnum>("STUDY");
-  console.log("study card");
+  // console.log("study card");
   const {
     data: studyCardQuery,
     loading: studyCardloading,
@@ -81,7 +65,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
       console.log(`err, `, error);
     },
   });
-  console.log("study card");
+  // console.log("study card");
   const foundCard = studyCardQuery?.getStudyCard;
 
   useEffect(() => {
@@ -118,19 +102,38 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
     );
   }
 
-  console.log(`data`, studyCardQuery?.getStudyCard);
+  // console.log(`data`, studyCardQuery?.getStudyCard);
 
   const sentence = foundCard?.sentence;
   const word = foundCard?.word;
   const furigana = foundCard?.furigana;
-  const pitchAccent = foundCard?.pitchAccent;
+  const pitchAccentArray = foundCard?.pitchAccent;
   const image = foundCard?.image;
   const dictionaryAudio = foundCard?.dictionaryAudio;
   const dictionaryMeaning = foundCard?.dictionaryMeaning;
   const userAudio = foundCard?.userAudio;
   const cardId = foundCard?._id;
 
-  console.log("accent", pitchAccent[0]?.high);
+  const pitchAccentWord = pitchAccentArray?.find((o) => o.word === word);
+
+  const coloredSentence =
+    cardState === "ANSWER"
+      ? foundCard?.sentenceArr.map((word, index) => (
+          <Text
+            color={checkPitchColor(
+              pitchAccentArray?.find((o) => o.word === word)?.descriptive
+            )}
+            key={index}
+          >
+            {word}
+          </Text>
+        ))
+      : sentence;
+
+  console.log(coloredSentence);
+  // console.log("accent", pitchAccentArray);
+
+  // console.log("sentence arr", foundCard?.sentenceArr);
   const editProps = {
     cardState: cardState,
     cardId: cardId,
@@ -153,36 +156,35 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
         p="5"
         h="full"
       >
-        <Text fontSize={"3xl"}>{sentence}</Text>
+        <Flex fontSize={"3xl"}>{coloredSentence}</Flex>
         {cardState === "ANSWER" ? (
           <>
             <Tooltip
               placement="right"
-              label={checkPitchColor(pitchAccent[0]?.high).type}
+              label={pitchAccentWord?.descriptive}
               top="0"
             >
-              <Flex fontSize={"5xl"}
-           
-              flexDir='column'
+              <Flex
+                fontSize={"5xl"}
+                flexDir="column"
                 justify="center"
                 align="center"
                 mt="5"
                 color={
-                  pitchAccent
-                    ? checkPitchColor(pitchAccent[0]?.high).color
+                  pitchAccentArray
+                    ? checkPitchColor(pitchAccentWord?.descriptive)
                     : null
                 }
               >
-                <Text fontWeight={'bold'} >「{word}」</Text>
-                <Text fontWeight={'semibold'} fontSize={"2xl"}>
+                <Text fontWeight={"bold"}>「{word}」</Text>
+                <Text fontWeight={"semibold"} fontSize={"2xl"}>
                   {furigana}
                 </Text>
               </Flex>
             </Tooltip>
-            <Text fontSize="9xl">{pitchAccent[0]?.high[0]}</Text>
 
             <Text fontSize={"xl"} mt="5">
-              {dictionaryMeaning.toString().replaceAll(",", ", ") ?? null}
+              {dictionaryMeaning?.join(", ") ?? null}
             </Text>
             {image ? <Image src={image} w="auto" maxH={"64"} /> : null}
             <Flex justify={"center"} align="center" mt="5">

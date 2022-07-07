@@ -226,7 +226,7 @@ export class CardResolver {
 
     let moraResponse = null;
     let wordsToParse: string[] | null = null;
-
+    let sentenceArray: string[] | null = null;
     let kanaResponse: string[] | null = null;
 
     if (currentDeck.japaneseTemplate && isInputJPchar) {
@@ -264,16 +264,15 @@ export class CardResolver {
           .filter((obj) => obj.partOfSpeech !== "助詞")
           .map((obj) => obj.surface ?? null);
 
+        sentenceArray = parsed[0].map((obj) => obj.surface);
         console.log("wordsToParse", wordsToParse);
       }
-
-
 
       const kotuParseResponse = await fetch(
         "https://kotu.io/api/dictionary/parse",
         {
           method: "POST",
-          body: wordsToParse?.join( ''),
+          body: wordsToParse?.join(""),
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -283,7 +282,6 @@ export class CardResolver {
 
       if (kotuParseResponse) {
         const parsed: KotuParseResponse = await kotuParseResponse.json();
-
 
         moraResponse = parsed[0].accentPhrases.map(
           (obj) => obj.components[0].pitchAccents[0].mora
@@ -332,6 +330,7 @@ export class CardResolver {
     try {
       const card = await em.create(Card, {
         sentence: options.sentence,
+        sentenceArr: sentenceArray,
         word: options.word,
         deck: currentDeck,
         dictionaryAudio: scrapedWordAudio,
@@ -347,7 +346,7 @@ export class CardResolver {
         kanaResponse
       ) {
         for (let i = 0; i < moraResponse.length; i++) {
-          const part = await em.create(PitchAccent, {   
+          const part = await em.create(PitchAccent, {
             descriptive: descriptiveResponse[i],
             word: wordsToParse[i],
             kana: kanaResponse[i],

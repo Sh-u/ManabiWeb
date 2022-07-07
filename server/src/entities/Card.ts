@@ -15,7 +15,6 @@ import { Deck } from "./Deck";
 import { CardProgress } from "./CardProgress";
 import { PitchAccent } from "./PitchAccent";
 
-
 @ObjectType()
 @Entity()
 export class Card {
@@ -27,8 +26,7 @@ export class Card {
     | "dictionaryMeaning"
     | "userAudio"
     | "pitchAccent"
-    | "furigana"
-
+    | "furigana";
 
   @Field(() => Int)
   @PrimaryKey()
@@ -38,6 +36,10 @@ export class Card {
   @Property({ type: "text" })
   sentence!: string;
 
+  @Field(() => [String], { nullable: true })
+  @Property({ nullable: true })
+  sentenceArr: string[];
+
   @Field(() => String)
   @Property({ type: "text" })
   word!: string;
@@ -45,7 +47,6 @@ export class Card {
   @Field(() => String, { nullable: true })
   @Property({ type: "text", nullable: true })
   furigana?: string;
-
 
   @Field(() => [CardProgress])
   @OneToMany(() => CardProgress, (cardProgress) => cardProgress.card)
@@ -64,7 +65,7 @@ export class Card {
   dictionaryAudio?: string;
 
   @Field(() => [PitchAccent], { nullable: true })
-  @OneToMany(() => PitchAccent, accent => accent.card, {nullable: true})
+  @OneToMany(() => PitchAccent, (accent) => accent.card, { nullable: true })
   pitchAccent? = new Collection<PitchAccent>(this);
 
   @Field(() => String, { nullable: true })

@@ -34,6 +34,11 @@ __decorate([
     __metadata("design:type", String)
 ], Card.prototype, "sentence", void 0);
 __decorate([
+    (0, type_graphql_1.Field)(() => [String], { nullable: true }),
+    (0, core_1.Property)({ nullable: true }),
+    __metadata("design:type", Array)
+], Card.prototype, "sentenceArr", void 0);
+__decorate([
     (0, type_graphql_1.Field)(() => String),
     (0, core_1.Property)({ type: "text" }),
     __metadata("design:type", String)
@@ -65,7 +70,7 @@ __decorate([
 ], Card.prototype, "dictionaryAudio", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => [PitchAccent_1.PitchAccent], { nullable: true }),
-    (0, core_1.OneToMany)(() => PitchAccent_1.PitchAccent, accent => accent.card, { nullable: true }),
+    (0, core_1.OneToMany)(() => PitchAccent_1.PitchAccent, (accent) => accent.card, { nullable: true }),
     __metadata("design:type", Object)
 ], Card.prototype, "pitchAccent", void 0);
 __decorate([
