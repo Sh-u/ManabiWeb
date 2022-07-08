@@ -7,7 +7,9 @@ query getStudyCard {
     dictionaryAudio
     dictionaryMeaning
     sentenceArr
-    pitchAccent{
+
+    pitchAccent {
+      showKana
       descriptive
       mora
       word

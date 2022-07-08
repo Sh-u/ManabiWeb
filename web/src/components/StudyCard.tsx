@@ -39,13 +39,13 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
       case "atamadaka":
         return "red.500";
       case "nakadaka":
-        return "orange.500";
+        return "orange.400";
       case "odaka":
-        return "green.500";
+        return "green.400";
       case "kihuku":
-        return "pink.500";
+        return "purple.400";
       case "heiban":
-        return "blue.500";
+        return "blue.400";
     }
   };
 
@@ -118,22 +118,61 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
 
   const coloredSentence =
     cardState === "ANSWER"
-      ? foundCard?.sentenceArr.map((word, index) => (
-          <Text
-            color={checkPitchColor(
-              pitchAccentArray?.find((o) => o.word === word)?.descriptive
-            )}
-            key={index}
-          >
-            {word}
-          </Text>
-        ))
+      ? foundCard?.sentenceArr.map((word, index) => {
+          const getMatchingWord = pitchAccentArray?.find(
+            (o) => o.word === word
+          );
+
+          const getPitchBorder = (mora: number, letter: string) => {
+            console.log(mora, letter);
+            if (mora === 0) {
+              
+              return (
+                <Text
+                  display={"inline-flex"}
+                  borderBottom="1px"
+                  borderRight="1px"
+                >
+                  {letter}
+                </Text>
+              );
+            } else {
+              return (
+                <Text display={"inline-flex"} borderTop="1px" borderLeft="1px">
+                  {letter}
+                </Text>
+              );
+            }
+          };
+
+          return (
+            <Box
+              display={"inline-flex"}
+              position="relative"
+              color={checkPitchColor(getMatchingWord?.descriptive)}
+              key={index}
+            >
+              {word}
+              <Text fontSize={"xs"} position="absolute" top="-3">
+                {getMatchingWord?.showKana
+                  ? getMatchingWord?.kana.split("").map((letter, index) => {
+                      console.log("index", index);
+                      if (index === getMatchingWord?.mora) {
+                        getPitchBorder(getMatchingWord?.mora, letter);
+                      } else {
+                        return <Text display={"inline-flex"}>{letter}</Text>;
+                      }
+                    })
+                  : null}
+              </Text>
+            </Box>
+          );
+        })
       : sentence;
 
-  console.log(coloredSentence);
-  // console.log("accent", pitchAccentArray);
+  // console.log("sentence", foundCard?.sentenceArr);
+  // console.log(pitchAccentArray);
 
-  // console.log("sentence arr", foundCard?.sentenceArr);
   const editProps = {
     cardState: cardState,
     cardId: cardId,
@@ -156,7 +195,9 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
         p="5"
         h="full"
       >
-        <Flex fontSize={"3xl"}>{coloredSentence}</Flex>
+        <Flex flexWrap={"wrap"} fontSize={"3xl"}>
+          {coloredSentence}
+        </Flex>
         {cardState === "ANSWER" ? (
           <>
             <Tooltip

@@ -254,6 +254,7 @@ export type PitchAccent = {
   descriptive?: Maybe<Scalars['String']>;
   kana?: Maybe<Scalars['String']>;
   mora?: Maybe<Scalars['Int']>;
+  showKana?: Maybe<Scalars['Boolean']>;
   word?: Maybe<Scalars['String']>;
 };
 
@@ -536,7 +537,7 @@ export type GetRevisionTimeQuery = { __typename?: 'Query', getRevisionTime: { __
 export type GetStudyCardQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetStudyCardQuery = { __typename?: 'Query', getStudyCard?: { __typename?: 'Card', _id: number, sentence: string, word: string, furigana?: string | null, dictionaryAudio?: string | null, dictionaryMeaning?: Array<string> | null, sentenceArr?: Array<string> | null, userAudio?: string | null, image?: string | null, pitchAccent?: Array<{ __typename?: 'PitchAccent', descriptive?: string | null, mora?: number | null, word?: string | null, kana?: string | null }> | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, nextRevision: any, steps: number, state: string }> } | null };
+export type GetStudyCardQuery = { __typename?: 'Query', getStudyCard?: { __typename?: 'Card', _id: number, sentence: string, word: string, furigana?: string | null, dictionaryAudio?: string | null, dictionaryMeaning?: Array<string> | null, sentenceArr?: Array<string> | null, userAudio?: string | null, image?: string | null, pitchAccent?: Array<{ __typename?: 'PitchAccent', showKana?: boolean | null, descriptive?: string | null, mora?: number | null, word?: string | null, kana?: string | null }> | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, nextRevision: any, steps: number, state: string }> } | null };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1639,6 +1640,7 @@ export const GetStudyCardDocument = gql`
     dictionaryMeaning
     sentenceArr
     pitchAccent {
+      showKana
       descriptive
       mora
       word
