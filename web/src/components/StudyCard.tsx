@@ -123,47 +123,15 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
             (o) => o.word === word
           );
 
-          const getPitchBorder = (mora: number, letter: string) => {
-            console.log(mora, letter);
-            if (mora === 0) {
-              
-              return (
-                <Text
-                  display={"inline-flex"}
-                  borderBottom="1px"
-                  borderRight="1px"
-                >
-                  {letter}
-                </Text>
-              );
-            } else {
-              return (
-                <Text display={"inline-flex"} borderTop="1px" borderLeft="1px">
-                  {letter}
-                </Text>
-              );
-            }
-          };
-
           return (
             <Box
-              display={"inline-flex"}
               position="relative"
               color={checkPitchColor(getMatchingWord?.descriptive)}
               key={index}
             >
               {word}
               <Text fontSize={"xs"} position="absolute" top="-3">
-                {getMatchingWord?.showKana
-                  ? getMatchingWord?.kana.split("").map((letter, index) => {
-                      console.log("index", index);
-                      if (index === getMatchingWord?.mora) {
-                        getPitchBorder(getMatchingWord?.mora, letter);
-                      } else {
-                        return <Text display={"inline-flex"}>{letter}</Text>;
-                      }
-                    })
-                  : null}
+                {getMatchingWord?.showKana ? getMatchingWord?.kana : null}
               </Text>
             </Box>
           );
@@ -172,6 +140,24 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
 
   // console.log("sentence", foundCard?.sentenceArr);
   // console.log(pitchAccentArray);
+  const getPitchBorder = (mora: number, letter: string) => {
+    console.log("mora", mora, "letter", letter);
+    if (mora === 0) {
+      return (
+        <Text display={"inline-flex"} borderBottom="1px" borderRight="1px">
+          {letter}
+        </Text>
+      );
+    } else if (mora > 0) {
+      return (
+        <Text display={"inline-flex"} borderTop="1px" borderLeft="1px">
+          {letter}
+        </Text>
+      );
+    } else {
+      return <Text display={"inline-flex"}>{letter}</Text>;
+    }
+  };
 
   const editProps = {
     cardState: cardState,
@@ -218,9 +204,21 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
                 }
               >
                 <Text fontWeight={"bold"}>「{word}」</Text>
-                <Text fontWeight={"semibold"} fontSize={"2xl"}>
-                  {furigana}
-                </Text>
+                <Flex fontWeight={"semibold"} fontSize={"2xl"}>
+                  {pitchAccentWord?.part.map((letter, index) => {
+
+                    let keepHigh = true;
+
+                    if (index === 0 && !pitchAccentWord?.high[index]) {
+
+                      return <Text borderBottom={'1px solid'} borderRight='1px solid' pr='4px'>{letter}</Text>;
+                    } else if (index === 0 && pitchAccentWord?.high[index]) {
+                      return <Text borderTop={'1px solid'}>{letter}</Text>;
+                    } else {
+                      return <Text display={"inline-flex"} px='3' borderTop={keepHigh ? '1px solid' : null}>{letter}</Text>;
+                    }
+                  })}
+                </Flex>
               </Flex>
             </Tooltip>
 
