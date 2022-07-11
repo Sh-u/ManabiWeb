@@ -121,6 +121,7 @@ export type Mutation = {
   createCard: CardResponse;
   createDeck: DeckResponse;
   deleteCard: Scalars['Boolean'];
+  deleteCards?: Maybe<Scalars['Boolean']>;
   deleteDeck: Scalars['Boolean'];
   editCard: CardResponse;
   followUser?: Maybe<FollowResponse>;
@@ -176,6 +177,11 @@ export type MutationCreateDeckArgs = {
 
 export type MutationDeleteCardArgs = {
   targetId: Scalars['Int'];
+};
+
+
+export type MutationDeleteCardsArgs = {
+  cardId: Scalars['Int'];
 };
 
 
@@ -252,7 +258,7 @@ export type PitchAccent = {
   _id: Scalars['Int'];
   card: Card;
   descriptive?: Maybe<Scalars['String']>;
-  high?: Maybe<Array<Scalars['Boolean']>>;
+  high?: Maybe<Scalars['String']>;
   kana?: Maybe<Scalars['String']>;
   mora?: Maybe<Scalars['Int']>;
   part?: Maybe<Array<Scalars['String']>>;
@@ -539,7 +545,7 @@ export type GetRevisionTimeQuery = { __typename?: 'Query', getRevisionTime: { __
 export type GetStudyCardQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetStudyCardQuery = { __typename?: 'Query', getStudyCard?: { __typename?: 'Card', _id: number, sentence: string, word: string, furigana?: string | null, dictionaryAudio?: string | null, dictionaryMeaning?: Array<string> | null, sentenceArr?: Array<string> | null, userAudio?: string | null, image?: string | null, pitchAccent?: Array<{ __typename?: 'PitchAccent', showKana?: boolean | null, descriptive?: string | null, mora?: number | null, word?: string | null, kana?: string | null, part?: Array<string> | null, high?: Array<boolean> | null }> | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, nextRevision: any, steps: number, state: string }> } | null };
+export type GetStudyCardQuery = { __typename?: 'Query', getStudyCard?: { __typename?: 'Card', _id: number, sentence: string, word: string, furigana?: string | null, dictionaryAudio?: string | null, dictionaryMeaning?: Array<string> | null, sentenceArr?: Array<string> | null, userAudio?: string | null, image?: string | null, pitchAccent?: Array<{ __typename?: 'PitchAccent', showKana?: boolean | null, descriptive?: string | null, mora?: number | null, word?: string | null, kana?: string | null, part?: Array<string> | null, high?: string | null }> | null, cardProgresses: Array<{ __typename?: 'CardProgress', _id: number, nextRevision: any, steps: number, state: string }> } | null };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 

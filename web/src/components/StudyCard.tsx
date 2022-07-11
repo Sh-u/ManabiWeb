@@ -96,8 +96,8 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
 
   if (!studyCardQuery?.getStudyCard) {
     return (
-      <Center mt="20">
-        <Spinner color="red.800" />
+      <Center mt="40%">
+        <Spinner color="red.800" size="xl" />
       </Center>
     );
   }
@@ -115,10 +115,11 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
   const cardId = foundCard?._id;
 
   const pitchAccentWord = pitchAccentArray?.find((o) => o.word === word);
+  const wordHigh = pitchAccentWord?.high ? JSON.parse(pitchAccentWord?.high) : null;
 
   const coloredSentence =
     cardState === "ANSWER"
-      ? foundCard?.sentenceArr.map((word, index) => {
+      ? foundCard?.sentenceArr?.map((word, index) => {
           const getMatchingWord = pitchAccentArray?.find(
             (o) => o.word === word
           );
@@ -130,7 +131,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
               key={index}
             >
               {word}
-              <Text fontSize={"xs"} position="absolute" top="-3">
+              <Text fontSize={"xs"} position="absolute" top="-3"  whiteSpace={'nowrap'}>
                 {getMatchingWord?.showKana ? getMatchingWord?.kana : null}
               </Text>
             </Box>
@@ -138,26 +139,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
         })
       : sentence;
 
-  // console.log("sentence", foundCard?.sentenceArr);
-  // console.log(pitchAccentArray);
-  const getPitchBorder = (mora: number, letter: string) => {
-    console.log("mora", mora, "letter", letter);
-    if (mora === 0) {
-      return (
-        <Text display={"inline-flex"} borderBottom="1px" borderRight="1px">
-          {letter}
-        </Text>
-      );
-    } else if (mora > 0) {
-      return (
-        <Text display={"inline-flex"} borderTop="1px" borderLeft="1px">
-          {letter}
-        </Text>
-      );
-    } else {
-      return <Text display={"inline-flex"}>{letter}</Text>;
-    }
-  };
+  console.log(" high", pitchAccentArray[0]?.high);
 
   const editProps = {
     cardState: cardState,
@@ -169,6 +151,29 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
     userAudio: userAudio,
     setCardState: setCardState,
     refetchCard: refetch,
+  };
+
+  const drawPitchBorders = () => {
+    return pitchAccentWord?.part?.map((mora, i, parts) => {
+      const currentHigh = wordHigh[i];
+      const nextHigh = wordHigh[i + 1];
+
+      const styles: any = { pr: "4px" ,pl: "4px"};
+      if (currentHigh) {
+        styles.borderTop = "1px solid";
+
+        if (nextHigh === false) {
+          styles.borderRight = "1px solid";
+        }
+      } else {
+        styles.borderBottom = "1px solid";
+        if (nextHigh === true) {
+          styles.borderRight = "1px solid";
+        }
+      }
+
+      return <Text {...styles} key={i}>{mora}</Text>;
+    });
   };
 
   return (
@@ -205,19 +210,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
               >
                 <Text fontWeight={"bold"}>「{word}」</Text>
                 <Flex fontWeight={"semibold"} fontSize={"2xl"}>
-                  {pitchAccentWord?.part.map((letter, index) => {
-
-                    let keepHigh = true;
-
-                    if (index === 0 && !pitchAccentWord?.high[index]) {
-
-                      return <Text borderBottom={'1px solid'} borderRight='1px solid' pr='4px'>{letter}</Text>;
-                    } else if (index === 0 && pitchAccentWord?.high[index]) {
-                      return <Text borderTop={'1px solid'}>{letter}</Text>;
-                    } else {
-                      return <Text display={"inline-flex"} px='3' borderTop={keepHigh ? '1px solid' : null}>{letter}</Text>;
-                    }
-                  })}
+                  {drawPitchBorders()}
                 </Flex>
               </Flex>
             </Tooltip>
