@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20220707183948 extends Migration {
+export class Migration20220710164705 extends Migration {
 
   async up(): Promise<void> {
     this.addSql('create table "user" ("_id" serial primary key, "image" text null, "username" text not null, "password" text not null, "email" text not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "badge" text not null, "day_streak" int not null, "card_studied" int not null);');
@@ -18,7 +18,7 @@ export class Migration20220707183948 extends Migration {
 
     this.addSql('create table "card_progress" ("_id" serial primary key, "user__id" int not null, "card__id" int not null, "state" varchar(255) not null, "steps" int not null, "next_revision" timestamptz(0) not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null);');
 
-    this.addSql('create table "pitch_accent" ("_id" serial primary key, "descriptive" text null, "mora" int null, "word" text null, "kana" text null, "card__id" int not null);');
+    this.addSql('create table "pitch_accent" ("_id" serial primary key, "descriptive" text null, "mora" int null, "word" text null, "kana" text null, "show_kana" boolean null, "part" text[] null, "high" text[] null, "card__id" int not null);');
 
     this.addSql('alter table "deck" add constraint "deck_user__id_foreign" foreign key ("user__id") references "user" ("_id") on update cascade;');
 
@@ -34,8 +34,6 @@ export class Migration20220707183948 extends Migration {
     this.addSql('alter table "card_progress" add constraint "card_progress_card__id_foreign" foreign key ("card__id") references "card" ("_id") on update cascade;');
 
     this.addSql('alter table "pitch_accent" add constraint "pitch_accent_card__id_foreign" foreign key ("card__id") references "card" ("_id") on update cascade;');
-
-    this.addSql('drop table if exists "folow" cascade;');
   }
 
   async down(): Promise<void> {
@@ -56,9 +54,6 @@ export class Migration20220707183948 extends Migration {
     this.addSql('alter table "card_progress" drop constraint "card_progress_card__id_foreign";');
 
     this.addSql('alter table "pitch_accent" drop constraint "pitch_accent_card__id_foreign";');
-
-    this.addSql('create table "folow" ("_id" int4 not null default null, "followed" int4 null default null, "follower" int4 null default null);');
-    this.addSql('alter table "folow" add constraint "folow_pkey" primary key ("_id");');
 
     this.addSql('drop table if exists "user" cascade;');
 

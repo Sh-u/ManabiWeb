@@ -50,7 +50,7 @@ __decorate([
 ], Card.prototype, "furigana", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => [CardProgress_1.CardProgress]),
-    (0, core_1.OneToMany)(() => CardProgress_1.CardProgress, (cardProgress) => cardProgress.card),
+    (0, core_1.OneToMany)(() => CardProgress_1.CardProgress, (cardProgress) => cardProgress.card, { orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Card.prototype, "cardProgresses", void 0);
 __decorate([
@@ -70,7 +70,7 @@ __decorate([
 ], Card.prototype, "dictionaryAudio", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => [PitchAccent_1.PitchAccent], { nullable: true }),
-    (0, core_1.OneToMany)(() => PitchAccent_1.PitchAccent, (accent) => accent.card, { nullable: true }),
+    (0, core_1.OneToMany)(() => PitchAccent_1.PitchAccent, (accent) => accent.card, { nullable: true, orphanRemoval: true }),
     __metadata("design:type", Object)
 ], Card.prototype, "pitchAccent", void 0);
 __decorate([

@@ -5,6 +5,8 @@ import {
   PrimaryKey,
   OneToOne,
   OptionalProps,
+  ArrayType,
+  types,
 } from "@mikro-orm/core";
 import { parseType } from "graphql";
 import { PitchTypes } from "../types";
@@ -14,8 +16,6 @@ import { Card } from "./Card";
 @ObjectType()
 @Entity()
 export class PitchAccent {
-  [OptionalProps]?: "part" | "high";
-
   @Field(() => String, { nullable: true })
   @Property({ type: "text", nullable: true })
   descriptive: PitchTypes | null = null;
@@ -36,13 +36,20 @@ export class PitchAccent {
   @Property({ type: "text", nullable: true })
   kana?: string | null;
 
-  // @Field(() => [String], { nullable: true })
-  // @Property({ nullable: true })
-  // part? = [];
+  @Field(() => Boolean, { nullable: true })
+  @Property({ nullable: true })
+  showKana?: boolean;
 
-  // @Field(() => [Boolean], { nullable: true })
-  // @Property({ nullable: true })
-  // high? = [];
+  @Field(() => [String], { nullable: true })
+  @Property({ nullable: true })
+  part: string[];
+
+  @Field(() => String, { nullable: true })
+  @Property({
+    type: "jsonb",
+    nullable: true,
+  })
+  high: string;
 
   @Field(() => Card)
   @ManyToOne(() => Card)

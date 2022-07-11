@@ -45,6 +45,24 @@ __decorate([
     __metadata("design:type", Object)
 ], PitchAccent.prototype, "kana", void 0);
 __decorate([
+    (0, type_graphql_1.Field)(() => Boolean, { nullable: true }),
+    (0, core_1.Property)({ nullable: true }),
+    __metadata("design:type", Boolean)
+], PitchAccent.prototype, "showKana", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => [String], { nullable: true }),
+    (0, core_1.Property)({ nullable: true }),
+    __metadata("design:type", Array)
+], PitchAccent.prototype, "part", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    (0, core_1.Property)({
+        type: "jsonb",
+        nullable: true,
+    }),
+    __metadata("design:type", String)
+], PitchAccent.prototype, "high", void 0);
+__decorate([
     (0, type_graphql_1.Field)(() => Card_1.Card),
     (0, core_1.ManyToOne)(() => Card_1.Card),
     __metadata("design:type", Card_1.Card)

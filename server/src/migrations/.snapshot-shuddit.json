@@ -692,6 +692,33 @@
           "nullable": true,
           "mappedType": "text"
         },
+        "show_kana": {
+          "name": "show_kana",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "boolean"
+        },
+        "part": {
+          "name": "part",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "array"
+        },
+        "high": {
+          "name": "high",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "json"
+        },
         "card__id": {
           "name": "card__id",
           "type": "int",

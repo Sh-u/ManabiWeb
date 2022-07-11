@@ -49,7 +49,7 @@ export class Card {
   furigana?: string;
 
   @Field(() => [CardProgress])
-  @OneToMany(() => CardProgress, (cardProgress) => cardProgress.card)
+  @OneToMany(() => CardProgress, (cardProgress) => cardProgress.card, {orphanRemoval: true})
   cardProgresses = new Collection<CardProgress>(this);
 
   @Field(() => String, { nullable: true })
@@ -65,7 +65,7 @@ export class Card {
   dictionaryAudio?: string;
 
   @Field(() => [PitchAccent], { nullable: true })
-  @OneToMany(() => PitchAccent, (accent) => accent.card, { nullable: true })
+  @OneToMany(() => PitchAccent, (accent) => accent.card, { nullable: true, orphanRemoval: true })
   pitchAccent? = new Collection<PitchAccent>(this);
 
   @Field(() => String, { nullable: true })

@@ -1,5 +1,10 @@
 import { Card } from "../entities/Card";
-import { KotuParseResponse, KotuSegmentResponse, MyContext } from "../types";
+import {
+  JotobaResponse,
+  KotuParseResponse,
+  KotuSegmentResponse,
+  MyContext,
+} from "../types";
 import {
   Arg,
   Ctx,
@@ -23,6 +28,7 @@ import { AsyncLocalStorage } from "async_hooks";
 import { User } from "../entities/User";
 import { PitchAccent } from "../entities/PitchAccent";
 import { PitchTypes } from "../types";
+import { jpRegex } from "../utility/jpRegex";
 
 @InputType()
 class CardInput {
@@ -64,6 +70,28 @@ export class CardResolver {
   }
 
   @Mutation(() => Boolean, { nullable: true })
+  async deleteCards(
+    @Arg("cardId", () => Int) cardId: number,
+    @Ctx() { em }: MyContext
+  ): Promise<boolean> {
+    const card = await em.findOne(Card, { _id: cardId }, { populate: true });
+    if (!card) {
+      return false;
+    }
+
+    try {
+      card.pitchAccent?.removeAll();
+      card.cardProgresses?.removeAll();
+
+      await em.removeAndFlush(card);
+    } catch (err) {
+      console.log(err);
+    }
+
+    return true;
+  }
+
+  @Mutation(() => Boolean, { nullable: true })
   async segmentTest(
     @Arg("words", () => String) words: string
   ): Promise<boolean> {
@@ -101,11 +129,23 @@ export class CardResolver {
 
     const parsed2: KotuParseResponse = await kotuParseResponse.json();
 
-    console.log(
-      parsed2[0].accentPhrases.map(
-        (obj) => obj.components[0].pitchAccents[0].descriptive
-      )
+    const sdsd = [-1];
+
+    const kotuMora = parsed2[0].accentPhrases.map((obj) => {
+      return obj.components[0].pitchAccents[0];
+    });
+
+    const kotuKana = parsed2[0].accentPhrases.map(
+      (obj) => obj.components[0].kana
     );
+
+    const kotuWord = parsed2[0].accentPhrases.map(
+      (obj) => obj.components[0].surface
+    );
+
+    console.log("kotuMora", kotuMora);
+    console.log("kotuKana", kotuKana);
+    console.log("kotuWord", kotuWord);
 
     return true;
   }
@@ -186,7 +226,9 @@ export class CardResolver {
       return null;
     }
 
-    console.log(myProgressess[0].card.pitchAccent?.toArray()[0]);
+    console.log(
+      readyProgresses[0].card.pitchAccent?.toArray().map((o) => o.high)
+    );
 
     return readyProgresses[0].card;
   }
@@ -195,11 +237,12 @@ export class CardResolver {
   async createCard(
     @Arg("options") options: CardInput,
     @Arg("deckId", () => Int) deckId: number,
-    // @Arg("audio", () =>GraphQLUpload ) audio: FileUpload,
     @Arg("image", () => GraphQLUpload, { nullable: true }) image: FileUpload,
     @Arg("audio", () => GraphQLUpload, { nullable: true }) audio: FileUpload,
     @Ctx() { em }: MyContext
   ): Promise<CardResponse> {
+
+
     if (options.sentence.length < 1 || options.word.length < 1) {
       return {
         error: "Input is too short",
@@ -213,24 +256,24 @@ export class CardResolver {
       };
     }
 
-    const jpRegex =
-      /[\u3000-\u303F]|[\u3040-\u309F]|[\u30A0-\u30FF]|[\uFF00-\uFFEF]|[\u4E00-\u9FAF]|[\u2605-\u2606]|[\u2190-\u2195]|\u203B/g;
+    console.log('options_________________________', options)
     const isInputJPchar: boolean = jpRegex.test(options.word);
 
-    let scrapedWordAudio: string | null = null;
-    let scrapedWordMeaning: string | null = null;
-    let scrapedPitchAccent = null;
-    let scrapedFurigana: string | null = null;
+    let jotobaWordAudio: string | null = null;
+    let jotobaWordMeaning: string[] | null = null;
+    let jotobaPitchAccent = null;
+    let jotobaFurigana: string | null = null;
 
-    let descriptiveResponse: Array<PitchTypes> | null = null;
+    let kotuDescriptive: Array<PitchTypes> | null = null;
+    let kotuMora = null;
+    let kotuKana: string[] | null = null;
+    let kotuWord: string[] | null = null;
 
-    let moraResponse = null;
     let wordsToParse: string[] | null = null;
-    let sentenceArray: string[] | null = null;
-    let kanaResponse: string[] | null = null;
+    let showKanaResponse: boolean[] | null = null;
 
     if (currentDeck.japaneseTemplate && isInputJPchar) {
-      const reqWordBody = {
+      const requestJotobaWord = {
         query: options.word,
         language: "English",
         no_english: false,
@@ -238,7 +281,7 @@ export class CardResolver {
 
       const jotobaResponse = await fetch("https://jotoba.de/api/search/words", {
         method: "POST",
-        body: JSON.stringify(reqWordBody),
+        body: JSON.stringify(requestJotobaWord),
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -260,11 +303,8 @@ export class CardResolver {
       if (kotuSegmentResponse) {
         const parsed: KotuSegmentResponse = await kotuSegmentResponse.json();
 
-        wordsToParse = parsed[0]
-          .filter((obj) => obj.partOfSpeech !== "助詞")
-          .map((obj) => obj.surface ?? null);
-
-        sentenceArray = parsed[0].map((obj) => obj.surface);
+        wordsToParse = parsed[0].filter(obj => obj.partOfSpeech !== "補助記号").map((obj) => obj.surface ?? null);
+        
         console.log("wordsToParse", wordsToParse);
       }
 
@@ -283,45 +323,63 @@ export class CardResolver {
       if (kotuParseResponse) {
         const parsed: KotuParseResponse = await kotuParseResponse.json();
 
-        moraResponse = parsed[0].accentPhrases.map(
+        kotuMora = parsed[0].accentPhrases.map(
           (obj) => obj.components[0].pitchAccents[0].mora
         );
 
-        console.log("moraResponse", moraResponse);
+        console.log("moraResponse", kotuMora);
 
-        descriptiveResponse = parsed[0].accentPhrases.map(
+        kotuDescriptive = parsed[0].accentPhrases.map(
           (obj) => obj.components[0].pitchAccents[0].descriptive
         );
 
-        console.log("descriptiveResponse", descriptiveResponse);
+        console.log("descriptiveResponse", kotuDescriptive);
 
-        kanaResponse = parsed[0].accentPhrases.map(
-          (obj) => obj.components[0].kana
+        kotuKana = parsed[0].accentPhrases.map((obj) => obj.components[0].kana);
+
+        console.log("kanaResponse", kotuKana);
+
+        showKanaResponse = parsed[0].accentPhrases.map(
+          (obj) => obj.components[0].kana !== obj.components[0].surface
         );
 
-        console.log("kanaResponse", kanaResponse);
+        console.log("showKanaResponse", showKanaResponse);
+
+        kotuWord = parsed[0].accentPhrases.map(
+          (obj) => obj.components[0].surface
+        );
+
+        console.log("kotuWord", kotuWord);
       }
 
       if (jotobaResponse) {
-        const parsed = await jotobaResponse.json();
+        const parsed: JotobaResponse = await jotobaResponse.json();
 
         const firstObjectWithAudio = parsed.words.find((obj: any) => obj.audio);
-
+        const firstObjectNoAudio = parsed.words[0];
         const furigana =
           options.word.length === 1
             ? parsed.kanji[0].kunyomi[0]
             : parsed.words[0].reading.kana;
 
-        const meaning = firstObjectWithAudio?.senses[0]?.glosses;
+        const meaning = firstObjectWithAudio?.senses[0]?.glosses ?? firstObjectNoAudio.senses[0].glosses;
 
-        const pitch = firstObjectWithAudio?.pitch;
+        const pitch = firstObjectWithAudio?.pitch ?? firstObjectNoAudio.pitch;
 
-        scrapedWordAudio = `https://jotoba.de${firstObjectWithAudio?.audio}`;
-        scrapedWordMeaning = meaning;
-        scrapedPitchAccent = pitch;
-        scrapedFurigana = furigana;
+        jotobaWordAudio = firstObjectWithAudio?.audio
+          ? `https://jotoba.de${firstObjectWithAudio?.audio}`
+          : null;
+        jotobaWordMeaning = meaning ?? null;
+        jotobaPitchAccent = pitch;
+        jotobaFurigana = furigana;
 
-        // console.log("scrapedPitchAccent", scrapedPitchAccent);
+        console.log("meaning", meaning);
+
+        console.log("scrapedPitchAccent", jotobaPitchAccent);
+        console.log(
+          "mapping highs",
+         JSON.stringify(jotobaPitchAccent?.map((obj) => obj.high))
+        );
       }
     }
 
@@ -330,27 +388,27 @@ export class CardResolver {
     try {
       const card = await em.create(Card, {
         sentence: options.sentence,
-        sentenceArr: sentenceArray,
+        sentenceArr: wordsToParse,
         word: options.word,
         deck: currentDeck,
-        dictionaryAudio: scrapedWordAudio,
-        dictionaryMeaning: scrapedWordMeaning,
-        furigana: scrapedFurigana,
+        dictionaryAudio: jotobaWordAudio,
+        dictionaryMeaning: jotobaWordMeaning,
+        furigana: jotobaFurigana,
       });
 
-      if (
-        scrapedPitchAccent &&
-        moraResponse &&
-        descriptiveResponse &&
-        wordsToParse &&
-        kanaResponse
-      ) {
-        for (let i = 0; i < moraResponse.length; i++) {
+      if (kotuMora?.length && kotuMora[0] !== -1) {
+        for (let i = 0; i < kotuMora.length; i++) {
           const part = await em.create(PitchAccent, {
-            descriptive: descriptiveResponse[i],
-            word: wordsToParse[i],
-            kana: kanaResponse[i],
-            mora: moraResponse[i],
+            part:
+              jotobaPitchAccent && jotobaPitchAccent?.map((obj) => obj.part),
+            high:
+              jotobaPitchAccent &&
+              JSON.stringify(jotobaPitchAccent?.map((obj) => obj.high)),
+            showKana: showKanaResponse && showKanaResponse[i],
+            descriptive: kotuDescriptive && kotuDescriptive[i],
+            word: kotuWord && kotuWord[i],
+            kana: kotuKana && kotuKana[i],
+            mora: kotuMora && kotuMora[i],
             card: card,
           });
 
