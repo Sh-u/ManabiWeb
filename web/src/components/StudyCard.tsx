@@ -6,19 +6,14 @@ import {
   Image,
   Spinner,
   Text,
+  Tooltip,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import {
   ChooseCardDifficultyDocument,
-  FindDeckQuery,
   GetRevisionTimeDocument,
-  GetRevisionTimeQuery,
-  useGetLearnAndReviewCardsLazyQuery,
-  useGetLearnAndReviewCardsQuery,
-  useGetRevisionTimeQuery,
   useGetStudyCardQuery,
 } from "../generated/graphql";
-import { Tooltip } from "@chakra-ui/react";
 import useColors from "../hooks/useColors";
 import { client } from "../pages/client";
 import EditCardModal from "./EditCardModal";
@@ -31,10 +26,26 @@ interface StudyCardProps {
   setShowStudyCard: () => void;
 }
 
+const smallKanas = ["ゃ", "ゅ", "ょ"];
+
 const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
   const { getColor } = useColors();
 
-  const checkPitchColor = (pitch: string): string => {
+  const checkPitchColor = (pitch: string, high?: boolean[]): string => {
+    if (pitch === "unknown") {
+      const firstHigh = wordHigh[0];
+
+      if (firstHigh) {
+        pitch = "atamadaka";
+      } else {
+        if (high?.slice(1).every((value) => value === true)) {
+          pitch = "heiban";
+        } else {
+          pitch = "kihuku";
+        }
+      }
+    }
+
     switch (pitch) {
       case "atamadaka":
         return "red.500";
@@ -115,7 +126,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
   const cardId = foundCard?._id;
 
   const pitchAccentWord = pitchAccentArray?.find((o) => o.word === word);
-  const wordHigh = pitchAccentWord?.high ? JSON.parse(pitchAccentWord?.high) : null;
+  const wordHigh = pitchAccentWord?.high ? pitchAccentWord?.high : null;
 
   const coloredSentence =
     cardState === "ANSWER"
@@ -127,11 +138,19 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
           return (
             <Box
               position="relative"
-              color={checkPitchColor(getMatchingWord?.descriptive)}
+              color={checkPitchColor(
+                getMatchingWord?.descriptive,
+                pitchAccentWord?.high
+              )}
               key={index}
             >
               {word}
-              <Text fontSize={"xs"} position="absolute" top="-3"  whiteSpace={'nowrap'}>
+              <Text
+                fontSize={"xs"}
+                position="absolute"
+                top="-3"
+                whiteSpace={"nowrap"}
+              >
                 {getMatchingWord?.showKana ? getMatchingWord?.kana : null}
               </Text>
             </Box>
@@ -139,8 +158,35 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
         })
       : sentence;
 
-  console.log(" high", pitchAccentArray[0]?.high);
+  // console.log(" high", pitchAccentArray[0]?.high);
+  // console.log("part", pitchAccentWord?.part);
 
+  const smallHiragana = "ぁぃぅぇぉゃゅょゎ";
+  const smallKatakana =
+    "ァィゥェォヵㇰヶㇱㇲㇳㇴㇵㇶㇷㇷ゚ㇸㇹㇺャュョㇻㇼㇽㇾㇿヮ";
+  const smallKana = smallHiragana + smallKatakana;
+  const convertToMoras = (word: string): string[] => {
+    let result = [];
+    let mora = "";
+    for (const char of word) {
+      if (!smallKana.includes(char)) {
+        if (mora.length > 0) {
+          result.push(mora);
+        }
+
+        mora = "";
+      }
+
+      mora += char;
+    }
+
+    if (mora.length > 0) {
+      result.push(mora);
+    }
+    return result;
+  };
+
+  console.log("furigana mora?", convertToMoras(furigana));
   const editProps = {
     cardState: cardState,
     cardId: cardId,
@@ -155,10 +201,11 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
 
   const drawPitchBorders = () => {
     return pitchAccentWord?.part?.map((mora, i, parts) => {
+      console.log("draw", mora);
       const currentHigh = wordHigh[i];
       const nextHigh = wordHigh[i + 1];
 
-      const styles: any = { pr: "4px" ,pl: "4px"};
+      const styles: any = { pr: "4px", pl: "4px" };
       if (currentHigh) {
         styles.borderTop = "1px solid";
 
@@ -172,7 +219,30 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
         }
       }
 
-      return <Text {...styles} key={i}>{mora}</Text>;
+      return (
+        <Text {...styles} key={i}>
+          {mora}
+        </Text>
+      );
+    });
+  };
+
+  const drawPitchBordersByMora = (moraDrop: number) => {
+    return convertToMoras(pitchAccentWord?.kana).map((mora, i) => {
+      const styles: any = { pr: "4px", pl: "4px" };
+      if (moraDrop === 0) {
+        styles.borderBottom = "1px solid";
+        styles.borderRight = "1px solid";
+      } else if (i === moraDrop - 1) {
+        styles.borderTop = "1px solid";
+        styles.borderRight = "1px solid";
+      }
+
+      return (
+        <Text {...styles} key={i}>
+          {mora}
+        </Text>
+      );
     });
   };
 
@@ -204,13 +274,16 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
                 mt="5"
                 color={
                   pitchAccentArray
-                    ? checkPitchColor(pitchAccentWord?.descriptive)
+                    ? checkPitchColor(
+                        pitchAccentWord?.descriptive,
+                        pitchAccentWord?.high
+                      )
                     : null
                 }
               >
                 <Text fontWeight={"bold"}>「{word}」</Text>
                 <Flex fontWeight={"semibold"} fontSize={"2xl"}>
-                  {drawPitchBorders()}
+                  {pitchAccentWord?.high ? drawPitchBorders() : drawPitchBordersByMora(pitchAccentWord?.mora)}
                 </Flex>
               </Flex>
             </Tooltip>
@@ -260,7 +333,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
                       console.log("answer fail");
                     }
                     console.log(response?.data);
-
+                    setCardState("STUDY");
                     refetch();
                   }}
                 >
@@ -289,6 +362,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
                     }
                     console.log(response?.data);
                     console.log("x");
+                    setCardState("STUDY");
                     refetch();
                   }}
                 >

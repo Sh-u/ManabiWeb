@@ -187,7 +187,9 @@ export class CardResolver {
             .find((progress) => progress.nextRevision < currentDate)
         ) {
           if (
-            card.cardProgresses.toArray().find((progress) => progress.steps > 2)
+            card.cardProgresses
+              .toArray()
+              .find((progress) => progress?.steps > 2)
           ) {
             acc.review.push(card);
           } else {
@@ -226,9 +228,7 @@ export class CardResolver {
       return null;
     }
 
-    console.log(
-      readyProgresses[0].card.pitchAccent?.toArray().map((o) => o.high)
-    );
+    console.log(readyProgresses[0].card.pitchAccent?.toArray()[0]?.high);
 
     return readyProgresses[0].card;
   }
@@ -241,8 +241,6 @@ export class CardResolver {
     @Arg("audio", () => GraphQLUpload, { nullable: true }) audio: FileUpload,
     @Ctx() { em }: MyContext
   ): Promise<CardResponse> {
-
-
     if (options.sentence.length < 1 || options.word.length < 1) {
       return {
         error: "Input is too short",
@@ -256,13 +254,15 @@ export class CardResolver {
       };
     }
 
-    console.log('options_________________________', options)
+    console.log("options_________________________", options);
     const isInputJPchar: boolean = jpRegex.test(options.word);
 
     let jotobaWordAudio: string | null = null;
     let jotobaWordMeaning: string[] | null = null;
     let jotobaPitchAccent = null;
     let jotobaFurigana: string | null = null;
+    let jotobaPitchHighs: boolean[] | null = null;
+    let jotobaPitchParts: string[] | null = null;
 
     let kotuDescriptive: Array<PitchTypes> | null = null;
     let kotuMora = null;
@@ -303,8 +303,10 @@ export class CardResolver {
       if (kotuSegmentResponse) {
         const parsed: KotuSegmentResponse = await kotuSegmentResponse.json();
 
-        wordsToParse = parsed[0].filter(obj => obj.partOfSpeech !== "補助記号").map((obj) => obj.surface ?? null);
-        
+        wordsToParse = parsed[0]
+          .filter((obj) => obj.partOfSpeech !== "補助記号" && obj.partOfSpeech !== "空白")
+          .map((obj) => obj.surface ?? null);
+
         console.log("wordsToParse", wordsToParse);
       }
 
@@ -355,31 +357,42 @@ export class CardResolver {
       if (jotobaResponse) {
         const parsed: JotobaResponse = await jotobaResponse.json();
 
+        const firstObjectWithMatchingWord = parsed.words.find((obj: any) =>
+          kotuKana?.includes(obj.reading.kana)
+        );
+
+        console.log("firstObjectWithMatchingWord", firstObjectWithMatchingWord);
         const firstObjectWithAudio = parsed.words.find((obj: any) => obj.audio);
         const firstObjectNoAudio = parsed.words[0];
-        const furigana =
+
+        jotobaFurigana =
           options.word.length === 1
             ? parsed.kanji[0].kunyomi[0]
             : parsed.words[0].reading.kana;
 
-        const meaning = firstObjectWithAudio?.senses[0]?.glosses ?? firstObjectNoAudio.senses[0].glosses;
+        jotobaWordMeaning =
+          firstObjectWithMatchingWord?.senses[0].glosses ?? null
+          // ??
+          // firstObjectWithAudio?.senses[0].glosses ??
+          // firstObjectNoAudio.senses[0].glosses;
 
-        const pitch = firstObjectWithAudio?.pitch ?? firstObjectNoAudio.pitch;
+        const pitch =
+          firstObjectWithMatchingWord?.pitch 
+          // ??
+          // firstObjectWithAudio?.pitch ??
+          // firstObjectNoAudio?.pitch;
 
-        jotobaWordAudio = firstObjectWithAudio?.audio
-          ? `https://jotoba.de${firstObjectWithAudio?.audio}`
-          : null;
-        jotobaWordMeaning = meaning ?? null;
-        jotobaPitchAccent = pitch;
-        jotobaFurigana = furigana;
+        jotobaWordAudio = firstObjectWithMatchingWord?.audio ? `https://jotoba.de${firstObjectWithMatchingWord?.audio}` : null;
+        // ?? `https://jotoba.de${firstObjectWithAudio?.audio}`
+         
 
-        console.log("meaning", meaning);
+        jotobaPitchHighs = pitch?.map((obj) => obj.high) ?? null;
+        jotobaPitchParts = pitch?.map((obj) => obj.part) ?? null;
 
-        console.log("scrapedPitchAccent", jotobaPitchAccent);
-        console.log(
-          "mapping highs",
-         JSON.stringify(jotobaPitchAccent?.map((obj) => obj.high))
-        );
+        console.log("meaning", jotobaWordMeaning);
+
+        console.log("highs", jotobaPitchHighs);
+        console.log("parts", jotobaPitchParts);
       }
     }
 
@@ -396,14 +409,12 @@ export class CardResolver {
         furigana: jotobaFurigana,
       });
 
-      if (kotuMora?.length && kotuMora[0] !== -1) {
+      console.log("kotumora", kotuMora);
+      if (kotuMora?.length) {
         for (let i = 0; i < kotuMora.length; i++) {
           const part = await em.create(PitchAccent, {
-            part:
-              jotobaPitchAccent && jotobaPitchAccent?.map((obj) => obj.part),
-            high:
-              jotobaPitchAccent &&
-              JSON.stringify(jotobaPitchAccent?.map((obj) => obj.high)),
+            part: jotobaPitchParts && jotobaPitchParts,
+            high: jotobaPitchHighs && jotobaPitchHighs,
             showKana: showKanaResponse && showKanaResponse[i],
             descriptive: kotuDescriptive && kotuDescriptive[i],
             word: kotuWord && kotuWord[i],

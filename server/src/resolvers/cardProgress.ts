@@ -37,6 +37,7 @@ export class CardProgressResolver {
     const card = await em.findOne(Card, { _id: currentCardId });
 
     if (!card) {
+      console.log("revisionTime no card");
       return {
         AGAIN: null,
         GOOD: null,
@@ -48,6 +49,7 @@ export class CardProgressResolver {
     });
 
     if (!currentCardProgress) {
+      console.log("revisionTime no card progress");
       return {
         AGAIN: null,
         GOOD: null,
@@ -57,6 +59,14 @@ export class CardProgressResolver {
     const deckSteps = card.deck.steps;
     const ease = card.deck.startingEase;
     const cardSteps = card.cardProgresses[0].steps;
+
+    if (deckSteps === null || ease === null || cardSteps === null) {
+      console.log("revisionTime error", deckSteps, ease, cardSteps);
+      return {
+        AGAIN: null,
+        GOOD: null,
+      };
+    }
 
     let goodNumber = null;
     let againNumber = null;
@@ -88,7 +98,7 @@ export class CardProgressResolver {
     againNumber = deckSteps[0];
     againResult = `${againNumber} m`;
 
-    console.log(goodNumber)
+    console.log(goodNumber);
     return {
       GOOD: goodResult,
       AGAIN: againResult,
@@ -139,6 +149,9 @@ export class CardProgressResolver {
 
     let addMinutes;
     const deckStepsValues = currentCardDeck.steps;
+
+    console.log("deckStepsValues", deckStepsValues);
+    if (!deckStepsValues) return null;
 
     if (answerType === "GOOD") {
       currentCardProgress.steps++;

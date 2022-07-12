@@ -55,12 +55,12 @@ __decorate([
     __metadata("design:type", Array)
 ], PitchAccent.prototype, "part", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    (0, type_graphql_1.Field)(() => [Boolean], { nullable: true }),
     (0, core_1.Property)({
-        type: "jsonb",
+        type: core_1.JsonType,
         nullable: true,
     }),
-    __metadata("design:type", String)
+    __metadata("design:type", Array)
 ], PitchAccent.prototype, "high", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => Card_1.Card),

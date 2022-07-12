@@ -23,7 +23,7 @@ export type PitchTypes =
 export type KotuSegmentResponse = [
   [
     {
-      partOfSpeech: "名詞" | "助詞" | "動詞" | "形状詞" | "形容詞" | "助動詞" | "補助記号";
+      partOfSpeech: "名詞" | "助詞" | "動詞" | "形状詞" | "形容詞" | "助動詞" | "補助記号" | "接尾辞" | "空白";
       surface: string;
     }
   ]

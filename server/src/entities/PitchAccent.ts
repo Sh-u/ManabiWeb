@@ -7,6 +7,7 @@ import {
   OptionalProps,
   ArrayType,
   types,
+  JsonType,
 } from "@mikro-orm/core";
 import { parseType } from "graphql";
 import { PitchTypes } from "../types";
@@ -44,12 +45,12 @@ export class PitchAccent {
   @Property({ nullable: true })
   part: string[];
 
-  @Field(() => String, { nullable: true })
+  @Field(() => [Boolean], { nullable: true })
   @Property({
-    type: "jsonb",
+    type: JsonType,
     nullable: true,
   })
-  high: string;
+  high: [boolean, boolean];
 
   @Field(() => Card)
   @ManyToOne(() => Card)
