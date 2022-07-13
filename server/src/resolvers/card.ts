@@ -20,7 +20,17 @@ import { Deck } from "../entities/Deck";
 import { workerData } from "worker_threads";
 import { GraphQLUpload, FileUpload } from "graphql-upload";
 import path from "path";
-import { createWriteStream, mkdir, rm, access, existsSync } from "fs";
+import {
+  createWriteStream,
+  mkdir,
+  rm,
+  access,
+  existsSync,
+  fstat,
+  writeFile,
+  createReadStream,
+  writeFileSync,
+} from "fs";
 import { Length } from "class-validator";
 import { CardProgress } from "../entities/CardProgress";
 import { Loaded } from "@mikro-orm/core/typings";
@@ -29,6 +39,17 @@ import { User } from "../entities/User";
 import { PitchAccent } from "../entities/PitchAccent";
 import { PitchTypes } from "../types";
 import { jpRegex } from "../utility/jpRegex";
+import parse from "node-html-parser";
+import { Readable } from "stream";
+
+@ObjectType()
+class ScrappedAudioResponse {
+  @Field(() => String, { nullable: true })
+  error?: string;
+
+  @Field(() => Boolean)
+  success!: boolean;
+}
 
 @InputType()
 class CardInput {
@@ -67,6 +88,106 @@ export class CardResolver {
   @Query(() => [Card])
   async getCards(@Ctx() { em }: MyContext): Promise<Card[]> {
     return em.find(Card, {});
+  }
+
+  @Query(() => ScrappedAudioResponse)
+  async getScrapedAudio(
+    @Arg("word", () => String) word: string
+  ): Promise<ScrappedAudioResponse> {
+    const targetPath = path.resolve("userfiles", `${word}.ogg`);
+
+    if (existsSync(targetPath)) {
+      return {
+        error: "path already exists",
+        success: false,
+      };
+    }
+
+    const html = await fetch(
+      `https://www.japandict.com/${word}?lang=eng#entry-1263710`,
+      {
+        headers: { Accept: "text/html" },
+      }
+    );
+
+    if (!html.body)
+      return {
+        error: "Could not get html body",
+        success: false,
+      };
+
+    const root = parse(await html.text());
+
+    const [, text, jwt, vid]: Array<string> = JSON.parse(
+      root?.querySelector(".play-reading-btn")?.getAttribute("data-reading") ||
+        "[]"
+    );
+
+    // console.log(`text: `, text, `    jwt: `, jwt, `    vid: `, vid);
+
+    if (text === "[]" || jwt === "[]" || vid === "[]") {
+      return {
+        error: "Could not get request params",
+        success: false,
+      };
+    }
+
+    const params = {
+      text: text,
+      outputFormat: "ogg_vorbis",
+      jwt: jwt,
+      vid: vid,
+    };
+    const response = await fetch(
+      "https://www.japandict.com/voice/read?" + new URLSearchParams(params)
+    );
+
+    switch (response?.status) {
+      case 404: {
+        console.log("jpdict 404");
+        return {
+          error: "Server Responded with 404 error",
+          success: false,
+        };
+      }
+      case 401: {
+        console.log("jpdict 401 - invalid token");
+        return {
+          error: "Server Responded with 401 error",
+          success: false,
+        };
+      }
+      case 400: {
+        console.log("jpdict 400 - bad request");
+        return {
+          error: "Server Responded with 400 error",
+          success: false,
+        };
+      }
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+
+    const stream = Readable.from(Buffer.from(arrayBuffer));
+
+    
+
+    await new Promise((resolve, reject) => {
+      stream
+        .pipe(createWriteStream(targetPath))
+        .on("finish", () => {
+          console.log("finish");
+          resolve(true);
+        })
+        .on("error", (err) => {
+          console.log("error", err);
+          reject(false);
+        });
+    });
+
+    return {
+      success: true,
+    };
   }
 
   @Mutation(() => Boolean, { nullable: true })
@@ -304,7 +425,10 @@ export class CardResolver {
         const parsed: KotuSegmentResponse = await kotuSegmentResponse.json();
 
         wordsToParse = parsed[0]
-          .filter((obj) => obj.partOfSpeech !== "補助記号" && obj.partOfSpeech !== "空白")
+          .filter(
+            (obj) =>
+              obj.partOfSpeech !== "補助記号" && obj.partOfSpeech !== "空白"
+          )
           .map((obj) => obj.surface ?? null);
 
         console.log("wordsToParse", wordsToParse);
@@ -371,20 +495,20 @@ export class CardResolver {
             : parsed.words[0].reading.kana;
 
         jotobaWordMeaning =
-          firstObjectWithMatchingWord?.senses[0].glosses ?? null
-          // ??
-          // firstObjectWithAudio?.senses[0].glosses ??
-          // firstObjectNoAudio.senses[0].glosses;
+          firstObjectWithMatchingWord?.senses[0].glosses ?? null;
+        // ??
+        // firstObjectWithAudio?.senses[0].glosses ??
+        // firstObjectNoAudio.senses[0].glosses;
 
-        const pitch =
-          firstObjectWithMatchingWord?.pitch 
-          // ??
-          // firstObjectWithAudio?.pitch ??
-          // firstObjectNoAudio?.pitch;
+        const pitch = firstObjectWithMatchingWord?.pitch;
+        // ??
+        // firstObjectWithAudio?.pitch ??
+        // firstObjectNoAudio?.pitch;
 
-        jotobaWordAudio = firstObjectWithMatchingWord?.audio ? `https://jotoba.de${firstObjectWithMatchingWord?.audio}` : null;
+        jotobaWordAudio = firstObjectWithMatchingWord?.audio
+          ? `https://jotoba.de${firstObjectWithMatchingWord?.audio}`
+          : null;
         // ?? `https://jotoba.de${firstObjectWithAudio?.audio}`
-         
 
         jotobaPitchHighs = pitch?.map((obj) => obj.high) ?? null;
         jotobaPitchParts = pitch?.map((obj) => obj.part) ?? null;

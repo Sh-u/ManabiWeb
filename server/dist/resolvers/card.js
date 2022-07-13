@@ -27,6 +27,21 @@ const CardProgress_1 = require("../entities/CardProgress");
 const User_1 = require("../entities/User");
 const PitchAccent_1 = require("../entities/PitchAccent");
 const jpRegex_1 = require("../utility/jpRegex");
+const node_html_parser_1 = __importDefault(require("node-html-parser"));
+const stream_1 = require("stream");
+let ScrappedAudioResponse = class ScrappedAudioResponse {
+};
+__decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    __metadata("design:type", String)
+], ScrappedAudioResponse.prototype, "error", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => Boolean),
+    __metadata("design:type", Boolean)
+], ScrappedAudioResponse.prototype, "success", void 0);
+ScrappedAudioResponse = __decorate([
+    (0, type_graphql_1.ObjectType)()
+], ScrappedAudioResponse);
 let CardInput = class CardInput {
 };
 __decorate([
@@ -75,6 +90,80 @@ LearnAndReviewResponse = __decorate([
 let CardResolver = class CardResolver {
     async getCards({ em }) {
         return em.find(Card_1.Card, {});
+    }
+    async getScrapedAudio(word) {
+        var _a;
+        const targetPath = path_1.default.resolve("userfiles", `${word}.ogg`);
+        if ((0, fs_1.existsSync)(targetPath)) {
+            return {
+                error: "path already exists",
+                success: false,
+            };
+        }
+        const html = await fetch(`https://www.japandict.com/${word}?lang=eng#entry-1263710`, {
+            headers: { Accept: "text/html" },
+        });
+        if (!html.body)
+            return {
+                error: "Could not get html body",
+                success: false,
+            };
+        const root = (0, node_html_parser_1.default)(await html.text());
+        const [, text, jwt, vid] = JSON.parse(((_a = root === null || root === void 0 ? void 0 : root.querySelector(".play-reading-btn")) === null || _a === void 0 ? void 0 : _a.getAttribute("data-reading")) ||
+            "[]");
+        if (text === "[]" || jwt === "[]" || vid === "[]") {
+            return {
+                error: "Could not get request params",
+                success: false,
+            };
+        }
+        const params = {
+            text: text,
+            outputFormat: "ogg_vorbis",
+            jwt: jwt,
+            vid: vid,
+        };
+        const response = await fetch("https://www.japandict.com/voice/read?" + new URLSearchParams(params));
+        switch (response === null || response === void 0 ? void 0 : response.status) {
+            case 404: {
+                console.log("jpdict 404");
+                return {
+                    error: "Server Responded with 404 error",
+                    success: false,
+                };
+            }
+            case 401: {
+                console.log("jpdict 401 - invalid token");
+                return {
+                    error: "Server Responded with 401 error",
+                    success: false,
+                };
+            }
+            case 400: {
+                console.log("jpdict 400 - bad request");
+                return {
+                    error: "Server Responded with 400 error",
+                    success: false,
+                };
+            }
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        const stream = stream_1.Readable.from(Buffer.from(arrayBuffer));
+        await new Promise((resolve, reject) => {
+            stream
+                .pipe((0, fs_1.createWriteStream)(targetPath))
+                .on("finish", () => {
+                console.log("finish");
+                resolve(true);
+            })
+                .on("error", (err) => {
+                console.log("error", err);
+                reject(false);
+            });
+        });
+        return {
+            success: true,
+        };
     }
     async deleteCards(cardId, { em }) {
         var _a, _b;
@@ -262,7 +351,9 @@ let CardResolver = class CardResolver {
                 jotobaWordMeaning =
                     (_a = firstObjectWithMatchingWord === null || firstObjectWithMatchingWord === void 0 ? void 0 : firstObjectWithMatchingWord.senses[0].glosses) !== null && _a !== void 0 ? _a : null;
                 const pitch = firstObjectWithMatchingWord === null || firstObjectWithMatchingWord === void 0 ? void 0 : firstObjectWithMatchingWord.pitch;
-                jotobaWordAudio = (firstObjectWithMatchingWord === null || firstObjectWithMatchingWord === void 0 ? void 0 : firstObjectWithMatchingWord.audio) ? `https://jotoba.de${firstObjectWithMatchingWord === null || firstObjectWithMatchingWord === void 0 ? void 0 : firstObjectWithMatchingWord.audio}` : null;
+                jotobaWordAudio = (firstObjectWithMatchingWord === null || firstObjectWithMatchingWord === void 0 ? void 0 : firstObjectWithMatchingWord.audio)
+                    ? `https://jotoba.de${firstObjectWithMatchingWord === null || firstObjectWithMatchingWord === void 0 ? void 0 : firstObjectWithMatchingWord.audio}`
+                    : null;
                 jotobaPitchHighs = (_b = pitch === null || pitch === void 0 ? void 0 : pitch.map((obj) => obj.high)) !== null && _b !== void 0 ? _b : null;
                 jotobaPitchParts = (_c = pitch === null || pitch === void 0 ? void 0 : pitch.map((obj) => obj.part)) !== null && _c !== void 0 ? _c : null;
                 console.log("meaning", jotobaWordMeaning);
@@ -482,6 +573,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], CardResolver.prototype, "getCards", null);
+__decorate([
+    (0, type_graphql_1.Query)(() => ScrappedAudioResponse),
+    __param(0, (0, type_graphql_1.Arg)("word", () => String)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CardResolver.prototype, "getScrapedAudio", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean, { nullable: true }),
     __param(0, (0, type_graphql_1.Arg)("cardId", () => type_graphql_1.Int)),
