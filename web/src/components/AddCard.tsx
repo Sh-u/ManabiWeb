@@ -111,7 +111,7 @@ const AddCard = ({ currentDeckId }: { currentDeckId: number }) => {
                   return;
                 }
 
-                console.log("success ", response?.data?.createCard?.card);
+                console.log("success ", response?.data?.createCard);
                 setAudio(null);
                 setImage(null);
                 values.Sentence = "";

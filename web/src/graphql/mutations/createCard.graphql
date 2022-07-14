@@ -1,17 +1,24 @@
-mutation CreateCard($deckId: Int!, $options: CardInput!, $image: Upload, $audio: Upload) {
+mutation CreateCard(
+  $deckId: Int!
+  $options: CardInput!
+  $image: Upload
+  $audio: Upload
+) {
   createCard(deckId: $deckId, options: $options, image: $image, audio: $audio) {
-    error,
+    error
     card {
-      _id,
-      sentence,
-      word,
-      image,
-      dictionaryAudio,
-      userAudio,
-      createdAt,
+      _id
+      sentence
+      word
+      image
+      dictionaryAudio
+      userAudio
+      createdAt
       updatedAt
+    }
+    scrappedAudioResponse {
+      error
+      success
     }
   }
 }
-
-

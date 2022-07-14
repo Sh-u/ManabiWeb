@@ -58,6 +58,7 @@ export type CardResponse = {
   __typename?: 'CardResponse';
   card?: Maybe<Card>;
   error?: Maybe<Scalars['String']>;
+  scrappedAudioResponse?: Maybe<ScrappedAudioResponse>;
 };
 
 export type Deck = {
@@ -277,6 +278,7 @@ export type Query = {
   getLearnAndReviewCards: LearnAndReviewResponse;
   getMyDecks: DeckResponse;
   getRevisionTime: RevisionTimeResponse;
+  getScrapedAudio: ScrappedAudioResponse;
   getStudyCard?: Maybe<Card>;
   getUsers: Array<User>;
   hello: Scalars['String'];
@@ -310,6 +312,11 @@ export type QueryGetRevisionTimeArgs = {
 };
 
 
+export type QueryGetScrapedAudioArgs = {
+  word: Scalars['String'];
+};
+
+
 export type QuerySearchForDeckArgs = {
   input: Scalars['String'];
 };
@@ -324,6 +331,13 @@ export type RevisionTimeResponse = {
   __typename?: 'RevisionTimeResponse';
   AGAIN?: Maybe<Scalars['String']>;
   GOOD?: Maybe<Scalars['String']>;
+};
+
+export type ScrappedAudioResponse = {
+  __typename?: 'ScrappedAudioResponse';
+  error?: Maybe<Scalars['String']>;
+  path?: Maybe<Scalars['String']>;
+  success: Scalars['Boolean'];
 };
 
 export type User = {
@@ -389,7 +403,7 @@ export type CreateCardMutationVariables = Exact<{
 }>;
 
 
-export type CreateCardMutation = { __typename?: 'Mutation', createCard: { __typename?: 'CardResponse', error?: string | null, card?: { __typename?: 'Card', _id: number, sentence: string, word: string, image?: string | null, dictionaryAudio?: string | null, userAudio?: string | null, createdAt: string, updatedAt: string } | null } };
+export type CreateCardMutation = { __typename?: 'Mutation', createCard: { __typename?: 'CardResponse', error?: string | null, card?: { __typename?: 'Card', _id: number, sentence: string, word: string, image?: string | null, dictionaryAudio?: string | null, userAudio?: string | null, createdAt: string, updatedAt: string } | null, scrappedAudioResponse?: { __typename?: 'ScrappedAudioResponse', error?: string | null, success: boolean } | null } };
 
 export type CreateDeckMutationVariables = Exact<{
   title: Scalars['String'];
@@ -745,6 +759,10 @@ export const CreateCardDocument = gql`
       userAudio
       createdAt
       updatedAt
+    }
+    scrappedAudioResponse {
+      error
+      success
     }
   }
 }

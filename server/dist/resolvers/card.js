@@ -29,16 +29,97 @@ const PitchAccent_1 = require("../entities/PitchAccent");
 const jpRegex_1 = require("../utility/jpRegex");
 const node_html_parser_1 = __importDefault(require("node-html-parser"));
 const stream_1 = require("stream");
+const getWordAudio = async (word) => {
+    var _a;
+    const basePath = path_1.default.join("audio", `${word}.ogg`);
+    const targetPath = path_1.default.resolve("..", "web", "public", basePath);
+    if ((0, fs_1.existsSync)(targetPath)) {
+        return {
+            error: "path already exists",
+            success: false,
+            path: basePath,
+        };
+    }
+    const html = await fetch(`https://www.japandict.com/${word}?lang=eng#entry-1263710`, {
+        headers: { Accept: "text/html" },
+    });
+    if (!html.body)
+        return {
+            error: "Could not get html body",
+            success: false,
+        };
+    const root = (0, node_html_parser_1.default)(await html.text());
+    const [, text, jwt, vid] = JSON.parse(((_a = root === null || root === void 0 ? void 0 : root.querySelector(".play-reading-btn")) === null || _a === void 0 ? void 0 : _a.getAttribute("data-reading")) ||
+        "[]");
+    if (text === "[]" || jwt === "[]" || vid === "[]") {
+        return {
+            error: "Could not get request params",
+            success: false,
+        };
+    }
+    const params = {
+        text: text,
+        outputFormat: "ogg_vorbis",
+        jwt: jwt,
+        vid: vid,
+    };
+    const response = await fetch("https://www.japandict.com/voice/read?" + new URLSearchParams(params));
+    switch (response === null || response === void 0 ? void 0 : response.status) {
+        case 404: {
+            console.log("jpdict 404");
+            return {
+                error: "Server Responded with 404 error",
+                success: false,
+            };
+        }
+        case 401: {
+            console.log("jpdict 401 - invalid token");
+            return {
+                error: "Server Responded with 401 error",
+                success: false,
+            };
+        }
+        case 400: {
+            console.log("jpdict 400 - bad request");
+            return {
+                error: "Server Responded with 400 error",
+                success: false,
+            };
+        }
+    }
+    const arrayBuffer = await response.arrayBuffer();
+    const stream = stream_1.Readable.from(Buffer.from(arrayBuffer));
+    await new Promise((resolve, reject) => {
+        stream
+            .pipe((0, fs_1.createWriteStream)(targetPath))
+            .on("finish", () => {
+            console.log("finish");
+            resolve(true);
+        })
+            .on("error", (err) => {
+            console.log("error", err);
+            reject(false);
+        });
+    });
+    return {
+        success: true,
+        path: basePath,
+    };
+};
 let ScrappedAudioResponse = class ScrappedAudioResponse {
 };
 __decorate([
     (0, type_graphql_1.Field)(() => String, { nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], ScrappedAudioResponse.prototype, "error", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => Boolean),
     __metadata("design:type", Boolean)
 ], ScrappedAudioResponse.prototype, "success", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    __metadata("design:type", String)
+], ScrappedAudioResponse.prototype, "path", void 0);
 ScrappedAudioResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], ScrappedAudioResponse);
@@ -67,6 +148,10 @@ __decorate([
     (0, type_graphql_1.Field)(() => Card_1.Card, { nullable: true }),
     __metadata("design:type", Card_1.Card)
 ], CardResponse.prototype, "card", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(() => ScrappedAudioResponse, { nullable: true }),
+    __metadata("design:type", ScrappedAudioResponse)
+], CardResponse.prototype, "scrappedAudioResponse", void 0);
 CardResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], CardResponse);
@@ -92,78 +177,7 @@ let CardResolver = class CardResolver {
         return em.find(Card_1.Card, {});
     }
     async getScrapedAudio(word) {
-        var _a;
-        const targetPath = path_1.default.resolve("userfiles", `${word}.ogg`);
-        if ((0, fs_1.existsSync)(targetPath)) {
-            return {
-                error: "path already exists",
-                success: false,
-            };
-        }
-        const html = await fetch(`https://www.japandict.com/${word}?lang=eng#entry-1263710`, {
-            headers: { Accept: "text/html" },
-        });
-        if (!html.body)
-            return {
-                error: "Could not get html body",
-                success: false,
-            };
-        const root = (0, node_html_parser_1.default)(await html.text());
-        const [, text, jwt, vid] = JSON.parse(((_a = root === null || root === void 0 ? void 0 : root.querySelector(".play-reading-btn")) === null || _a === void 0 ? void 0 : _a.getAttribute("data-reading")) ||
-            "[]");
-        if (text === "[]" || jwt === "[]" || vid === "[]") {
-            return {
-                error: "Could not get request params",
-                success: false,
-            };
-        }
-        const params = {
-            text: text,
-            outputFormat: "ogg_vorbis",
-            jwt: jwt,
-            vid: vid,
-        };
-        const response = await fetch("https://www.japandict.com/voice/read?" + new URLSearchParams(params));
-        switch (response === null || response === void 0 ? void 0 : response.status) {
-            case 404: {
-                console.log("jpdict 404");
-                return {
-                    error: "Server Responded with 404 error",
-                    success: false,
-                };
-            }
-            case 401: {
-                console.log("jpdict 401 - invalid token");
-                return {
-                    error: "Server Responded with 401 error",
-                    success: false,
-                };
-            }
-            case 400: {
-                console.log("jpdict 400 - bad request");
-                return {
-                    error: "Server Responded with 400 error",
-                    success: false,
-                };
-            }
-        }
-        const arrayBuffer = await response.arrayBuffer();
-        const stream = stream_1.Readable.from(Buffer.from(arrayBuffer));
-        await new Promise((resolve, reject) => {
-            stream
-                .pipe((0, fs_1.createWriteStream)(targetPath))
-                .on("finish", () => {
-                console.log("finish");
-                resolve(true);
-            })
-                .on("error", (err) => {
-                console.log("error", err);
-                reject(false);
-            });
-        });
-        return {
-            success: true,
-        };
+        return await getWordAudio(word);
     }
     async deleteCards(cardId, { em }) {
         var _a, _b;
@@ -274,6 +288,9 @@ let CardResolver = class CardResolver {
                 error: "Couldn't find a current deck in Card/Resolver",
             };
         }
+        const audioResponse = {
+            success: false,
+        };
         console.log("options_________________________", options);
         const isInputJPchar = jpRegex_1.jpRegex.test(options.word);
         let jotobaWordAudio = null;
@@ -360,6 +377,13 @@ let CardResolver = class CardResolver {
                 console.log("highs", jotobaPitchHighs);
                 console.log("parts", jotobaPitchParts);
             }
+        }
+        if (!jotobaWordAudio) {
+            const { error, success, path } = await getWordAudio(options.word);
+            jotobaWordAudio = path !== null && path !== void 0 ? path : null;
+            console.log(jotobaWordAudio);
+            audioResponse.error = error !== null && error !== void 0 ? error : null;
+            audioResponse.success = success;
         }
         await em.begin();
         try {
@@ -450,6 +474,7 @@ let CardResolver = class CardResolver {
             }
             await em.commit();
             return {
+                scrappedAudioResponse: audioResponse,
                 card: card,
             };
         }

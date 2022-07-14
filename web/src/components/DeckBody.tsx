@@ -40,9 +40,9 @@ const DeckBody = () => {
   }, [showStudyCard])
  
 
-  const handleStudyNowButton = () => {
+  const handleStudyNowButton = useCallback(() => {
     setShowStudyCard(!showStudyCard);
-  };
+  },[])
 
   const handleSetShowDeckBody = useCallback(() => {
     setShowDeckBody(!showDeckBody)
@@ -62,12 +62,6 @@ const DeckBody = () => {
     <Flex
       mt="5"
       bg={getColor("gray.400", "gray.800")}
-      // bgGradient={getColor(
-      //   "linear(to-b, gray.50, white)",
-      //   "linear(to-b, gray.800, gray.700)"
-      // )}
-      // border="1px solid"
-      // borderColor={getColor("gray.100", "gray.700")}
       width={"auto"}
       h="lg"
       rounded="2xl"

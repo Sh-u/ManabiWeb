@@ -166,6 +166,8 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
     "ァィゥェォヵㇰヶㇱㇲㇳㇴㇵㇶㇷㇷ゚ㇸㇹㇺャュョㇻㇼㇽㇾㇿヮ";
   const smallKana = smallHiragana + smallKatakana;
   const convertToMoras = (word: string): string[] => {
+    if (!word) return;
+
     let result = [];
     let mora = "";
     for (const char of word) {
@@ -228,7 +230,7 @@ const StudyCard = ({ deckId, setShowStudyCard }: StudyCardProps) => {
   };
 
   const drawPitchBordersByMora = (moraDrop: number) => {
-    return convertToMoras(pitchAccentWord?.kana).map((mora, i) => {
+    return convertToMoras(pitchAccentWord?.kana)?.map((mora, i) => {
       const styles: any = { pr: "4px", pl: "4px" };
       if (moraDrop === 0) {
         styles.borderBottom = "1px solid";
